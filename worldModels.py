@@ -7,9 +7,19 @@ class Agent():
     def __init__(self):
         self.outcome_history = []
         self.choice_history = []
+        self.Rewards1side_history = []
+        self.Rewards0side_history = []
         
     def find_efficiency(self):
         return sum(self.outcome_history) / len(self.outcome_history)
+
+    def find_prob(self):
+        '''
+        Find the instantaneous probability of the agent for all trials
+        '''
+        p0 = np.array(self.Rewards0side_history)
+        p1 = np.array(self.Rewards1side_history)
+        return p1 / (p0 + p1)
 
 # A world object
 class RandomWorld():
@@ -113,15 +123,28 @@ class PersistentWorld():
             
                     
         return reward
+
+
+    def find_prob(self):
+        '''
+        Returns array of rates for trial-1 side
+        '''
+        rateArr = np.array(self.rate_history)
+        return rateArr[:,1]
             
     
 class MatchingAgent(Agent):
     '''
     Simulate an agent that matches perfectly (perfect integration of past rewards)
     '''
-    def __init__(self):
+    def __init__(self, eps):
+        '''
+        eps: rate is limited to the range [eps, 1-eps]
+        '''
+        assert(0 <= eps <= 0.5)
         self.Rewards1side = 1 # Start with 1 so that the agent does not get 'stuck'
         self.Rewards0side = 1
+        self.eps = eps
         self.choice_history = []
         self.Rewards1side_history = []
         self.Rewards0side_history = []
@@ -145,6 +168,8 @@ class MatchingAgent(Agent):
         '''
         
         p = self.Rewards1side / (self.Rewards1side + self.Rewards0side)
+        p = min(p, 1 - self.eps)
+        p = max(p, self.eps)
         choice = np.random.rand() < p
         self.choice_history.append(choice)
         return choice
@@ -240,8 +265,14 @@ class LocalMatchingAgent(Agent):
     '''
     Simulate an agent that matches with a leaky integrator
     '''
-    def __init__(self, tau):
+    def __init__(self, tau, eps):
+        """
+        tau: time constant of matching agent (integration kernel)
+        eps: rate is limited to the range [eps, 1-eps]
+        """
+        assert(0 <= eps <= 0.5)
         self.tau = tau
+        self.eps = eps
         self.Rewards1side = 1 # Start with 1 so that the agent does not get 'stuck'
         self.Rewards0side = 1
         self.choice_history = []
@@ -273,6 +304,8 @@ class LocalMatchingAgent(Agent):
         '''
         
         p = self.Rewards1side / (self.Rewards1side + self.Rewards0side)
+        p = min(p, 1 - self.eps)
+        p = max(p, self.eps)
         choice = np.random.rand() < p
         self.choice_history.append(choice)
         return choice
