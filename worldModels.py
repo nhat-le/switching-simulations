@@ -21,8 +21,51 @@ class Agent():
         p1 = np.array(self.Rewards1side_history)
         return p1 / (p0 + p1)
 
+    def get_running_choice_fraction(self, window):
+        '''
+        Get the running mean of choice fraction
+        window: int, window for averaging
+        '''
+        choice_arr = np.array(self.choice_history)
+        kernel = np.ones(window) / window
+        return np.convolve(choice_arr, kernel, 'same')
+
+
+    def get_running_reward_fraction(self, window):
+        '''
+        Get the running mean of reward fraction
+        window: int, window for averaging
+        '''
+        rewards0side = np.array(self.Rewards0side_history)
+        rewards1side = np.array(self.Rewards1side_history)
+        kernel = np.ones(window) / window
+
+        running_0sidefrac = np.convolve(rewards0side, kernel, 'same')
+        running_1sidefrac = np.convolve(rewards1side, kernel, 'same')
+
+        return running_1sidefrac / (running_0sidefrac + running_1sidefrac)
+
+class World():
+    '''
+    A general class for worlds
+    '''
+    def __init__(self):
+        self.history = []
+        self.rate_history = []
+
+    def find_prob(self):
+        '''
+        Returns array of rates for trial-1 side
+        '''
+        rateArr = np.array(self.rate_history)
+        return rateArr[:,1]
+
+    def get_rate_history(self):
+        return np.array(self.rate_history)
+
+
 # A world object
-class RandomWorld():
+class RandomWorld(World):
     '''
     A probablistic world that alternates between blocks of constant probability
     '''
@@ -67,7 +110,7 @@ class RandomWorld():
     
 
 # A world object
-class PersistentWorld():
+class PersistentWorld(World):
     '''
     A probablistic world that alternates between blocks of constant probability
     '''
@@ -94,8 +137,8 @@ class PersistentWorld():
         Update the world based on agent choice
         '''
         agent_choice = int(agent_choice)
-        self.rate_history.append(self.curr_rates)
-        self.side_history.append(self.active_sites)
+        self.rate_history.append(self.curr_rates.copy())
+        self.side_history.append(self.active_sites.copy())
         
         # Is there reward at current choice side?
         reward = self.active_sites[agent_choice]
@@ -114,23 +157,86 @@ class PersistentWorld():
         if self.active_sites[0] == 0 or agent_choice == 0:
 #             print('updated site 0')
             self.active_sites[0] = np.random.rand() < self.curr_rates[0]
-            
+
         if self.active_sites[1] == 0 or agent_choice == 1:
 #             print('updated site 1', self.curr_rates[1])
             self.active_sites[1] = np.random.rand() < self.curr_rates[1]
-            
+
 #         print('current active sites: ', self.active_sites)
             
                     
         return reward
 
 
-    def find_prob(self):
+class PersistentWorldWithCheck(World):
+    '''
+    A probablistic world that alternates between blocks of constant probability,
+    only switching after performance crosses a threshold
+    '''
+
+    def __init__(self, rates, ntrials, threshold):
         '''
-        Returns array of rates for trial-1 side
+        rates: a nblocks x 2 array, representing rates for 0- and 1-sides
+        ntrials: a list, number of trials in each block
         '''
-        rateArr = np.array(self.rate_history)
-        return rateArr[:,1]
+        self.rates = rates
+        self.threshold = threshold
+        self.currperf = -1 # Current performance in the block
+
+        self.currCorrect = 0
+        self.currIncorr = 0
+
+        self.ntrials = ntrials
+        self.curr_block = 0
+        self.side_history = []
+        self.rate_history = []
+
+        self.curr_rates = np.array(self.rates[0, :])
+        self.active_sites = np.random.rand(2) < rates[0, :]
+
+    def update(self, agent_choice):
+        '''
+        Update the world based on agent choice
+        '''
+        agent_choice = int(agent_choice)
+        self.rate_history.append(self.curr_rates.copy())
+        self.side_history.append(self.active_sites.copy())
+
+        # Is there reward at current choice side?
+        reward = self.active_sites[agent_choice]
+
+        if reward > 0:
+            self.currCorrect += 1
+        else:
+            self.currIncorr += 1
+
+        self.currperf = self.currCorrect / (self.currCorrect + self.currIncorr)
+        #print(self.currperf)
+
+
+        # Are we switching blocks?
+        if self.currCorrect + self.currIncorr > self.ntrials[self.curr_block] and \
+            self.currperf > self.threshold:
+            #print('Block switching!')
+            self.curr_block += 1
+            self.curr_rates = self.rates[self.curr_block, :]
+            self.currCorrect = 0
+            self.currIncorr = 0
+            self.currperf = -1
+
+        # Update active_sites
+        if self.active_sites[0] == 0 or agent_choice == 0:
+            #             print('updated site 0')
+            self.active_sites[0] = np.random.rand() < self.curr_rates[0]
+
+        if self.active_sites[1] == 0 or agent_choice == 1:
+            #             print('updated site 1', self.curr_rates[1])
+            self.active_sites[1] = np.random.rand() < self.curr_rates[1]
+
+        #         print('current active sites: ', self.active_sites)
+
+        return reward
+
             
     
 class MatchingAgent(Agent):
@@ -173,6 +279,79 @@ class MatchingAgent(Agent):
         choice = np.random.rand() < p
         self.choice_history.append(choice)
         return choice
+
+
+class QLearningAgent(Agent):
+    '''
+    Simulate an agent that uses Q-learning, and chooses action probabilistically
+    based on the ratio of the q-values
+    '''
+
+    def __init__(self, gamma, type='random'):
+        '''
+        eps: rate is limited to the range [eps, 1-eps]
+        type: 'random' for a random Q-learning agent, 'max' for an agent that chooses the
+        option with the higher Q-value
+        '''
+        self.q0 = 0.5
+        self.q1 = 0.5
+        self.type = type
+        self.gamma = gamma
+        self.choice_history = []
+        self.q0_history = []
+        self.q1_history = []
+        self.outcome_history = []
+        self.Rewards0side_history = []
+        self.Rewards1side_history = []
+
+    def outcome_received(self, outcome):
+        if self.choice_history[-1] == 1:
+            self.q1 = self.q1 + self.gamma * (outcome - self.q1)
+        else:
+            self.q0 = self.q0 + self.gamma * (outcome - self.q0)
+
+        self.outcome_history.append(outcome)
+        self.q0_history.append(self.q0)
+        self.q1_history.append(self.q1)
+
+        # Update reward history on each side
+        if outcome == 1:
+            if self.choice_history[-1] == 1:
+                self.Rewards1side_history.append(1)
+                self.Rewards0side_history.append(0)
+            else:
+                self.Rewards1side_history.append(0)
+                self.Rewards0side_history.append(1)
+
+    def make_choice(self):
+        '''
+        Make a choice, probabilistically sample from the ratios of the q values
+        '''
+        if self.type == 'random':
+            if self.q1 + self.q0 == 0:
+                p = 0.5
+            else:
+                p = self.q1 / (self.q1 + self.q0)
+            choice = np.random.rand() < p
+        elif self.type == 'max':
+            if self.q1 > self.q0:
+                choice = 1
+            elif self.q1 < self.q0:
+                choice = 0
+            else:
+                choice = np.random.rand() < 0.5
+        else:
+            ValueError('Q-learning type not supported')
+        self.choice_history.append(choice)
+        return choice
+
+    def find_prob(self):
+        '''
+        Find the instantaneous probability of the agent for all trials
+        '''
+        p0 = np.array(self.q0_history)
+        p1 = np.array(self.q1_history)
+        return p1 / (p0 + p1)
         
     
 # A Matching agent object
@@ -230,7 +409,92 @@ class PiecewiseConstantProbAgent(Agent):
         
         self.choice_history.append(choice)
         return choice    
-    
+
+class InferenceBasedAgent(Agent):
+    def __init__(self, prew, pswitch, type='random'):
+        '''
+        An inference-based agent
+        :param prew: probability of reward of high-state
+        :param pswitch: probability of switch
+        '''
+        self.prew = prew
+        self.pswitch = pswitch
+        self.choice_history = []
+        self.p0_history = []
+        self.p1_history = []
+        self.outcome_history = []
+        self.Rewards0side_history = []
+        self.Rewards1side_history = []
+        self.type = type
+        self.p0 = 0.5
+        self.p1 = 0.5
+
+    def outcome_received(self, outcome):
+        self.p0, self.p1 = self.update_prob(self.choice_history[-1], outcome)
+
+        self.outcome_history.append(outcome)
+        self.p0_history.append(self.p0)
+        self.p1_history.append(self.p1)
+
+        # Update reward history on each side
+        if outcome == 1:
+            if self.choice_history[-1] == 1:
+                self.Rewards1side_history.append(1)
+                self.Rewards0side_history.append(0)
+            else:
+                self.Rewards0side_history.append(1)
+                self.Rewards1side_history.append(0)
+
+
+    def update_prob(self, choice, outcome):
+        '''
+        Returns the updated probability (p0, p1)
+        :param choice: previous choice, 0 or 1
+        :param outcome: previous outcome, 0 or 1
+        :return: updated probability (p0, p1)
+        '''
+        prew = self.prew
+        pswitch = self.pswitch
+
+        if choice == 1 and outcome == 1:  # chose right, rew
+            LLHrtGiven0 = 1 - prew
+            LLHrtGiven1 = prew
+        elif choice == 0 and outcome == 1:  # chose left, rew
+            LLHrtGiven0 = prew
+            LLHrtGiven1 = 1 - prew
+        elif choice == 1 and outcome == 0:  # chose right, no rew
+            LLHrtGiven0 = prew
+            LLHrtGiven1 = 1 - prew
+        else:  # chose left, no rew
+            LLHrtGiven0 = 1 - prew
+            LLHrtGiven1 = prew
+
+        p1prev = self.p1
+        p0prev = self.p0
+        p0new = (1 - pswitch) * LLHrtGiven0 * p0prev + \
+            pswitch * LLHrtGiven1 * p1prev
+        p1new = pswitch * LLHrtGiven0 * p0prev + \
+            (1 - pswitch) * LLHrtGiven1 * p1prev
+
+        p0 = p0new / (p0new + p1new)
+        p1 = p1new / (p0new + p1new)
+
+        return p0, p1
+
+    def make_choice(self):
+        if self.type == 'random':
+            choice = np.random.rand() < self.p1
+        elif self.type == 'max':
+            if self.p1 > self.p0:
+                choice = 1
+            elif self.p1 < self.p0:
+                choice = 0
+            else:
+                choice = np.random.rand() < 0.5
+        else:
+            ValueError('Policy type not supported')
+        self.choice_history.append(choice)
+        return choice
         
     
 class Experiment():
@@ -258,6 +522,8 @@ class Experiment():
             rewards.append(reward)
             
         return choices, rewards
+
+
 
     
 
