@@ -281,22 +281,21 @@ class MatchingAgent(Agent):
         return choice
 
 
-class QLearningAgent(Agent):
+class EGreedyQLearningAgent(Agent):
     '''
     Simulate an agent that uses Q-learning, and chooses action probabilistically
     based on the ratio of the q-values
     '''
 
-    def __init__(self, gamma, type='random'):
+    def __init__(self, gamma, eps=0):
         '''
-        eps: rate is limited to the range [eps, 1-eps]
-        type: 'random' for a random Q-learning agent, 'max' for an agent that chooses the
-        option with the higher Q-value
+        gamma: learning rate for q-value updates
+        eps: used for epsilon-greedy strategy, eps = 0 means a greedy agent
         '''
         self.q0 = 0.5
         self.q1 = 0.5
-        self.type = type
         self.gamma = gamma
+        self.eps = eps
         self.choice_history = []
         self.q0_history = []
         self.q1_history = []
@@ -325,23 +324,20 @@ class QLearningAgent(Agent):
 
     def make_choice(self):
         '''
-        Make a choice, probabilistically sample from the ratios of the q values
+        Make a choice using the epsilon-greedy strategy
         '''
-        if self.type == 'random':
-            if self.q1 + self.q0 == 0:
-                p = 0.5
-            else:
-                p = self.q1 / (self.q1 + self.q0)
-            choice = np.random.rand() < p
-        elif self.type == 'max':
+        # Flip a coin to decide if explore or exploit
+        explore = np.random.rand() < self.eps
+        if explore: #choose actions randomly
+            choice = np.random.rand() < 0.5
+        else:
             if self.q1 > self.q0:
                 choice = 1
             elif self.q1 < self.q0:
                 choice = 0
             else:
                 choice = np.random.rand() < 0.5
-        else:
-            ValueError('Q-learning type not supported')
+
         self.choice_history.append(choice)
         return choice
 
@@ -410,18 +406,20 @@ class PiecewiseConstantProbAgent(Agent):
         self.choice_history.append(choice)
         return choice    
 
-class InferenceBasedAgent(Agent):
-    def __init__(self, prew, pswitch, type='random'):
+class EGreedyInferenceBasedAgent(Agent):
+    def __init__(self, prew, pswitch, eps=0):
         '''
         An inference-based agent
         :param prew: probability of reward of high-state
         :param pswitch: probability of switch
+        :param eps: value used for epsilon-greedy strategy
         '''
         self.prew = prew
         self.pswitch = pswitch
         self.choice_history = []
         self.p0_history = []
         self.p1_history = []
+        self.eps = eps
         self.outcome_history = []
         self.Rewards0side_history = []
         self.Rewards1side_history = []
@@ -482,17 +480,20 @@ class InferenceBasedAgent(Agent):
         return p0, p1
 
     def make_choice(self):
-        if self.type == 'random':
-            choice = np.random.rand() < self.p1
-        elif self.type == 'max':
+        explore = np.random.rand() < self.eps
+        if explore:
+            choice = np.random.rand() < 0.5
+        else:
+            # Optimal agent picks the action with higher prob
             if self.p1 > self.p0:
                 choice = 1
             elif self.p1 < self.p0:
                 choice = 0
             else:
-                choice = np.random.rand() < 0.5
-        else:
-            ValueError('Policy type not supported')
+                choice = np.random.rand() > 0.5
+
+            # Old code for random agent
+            # choice = np.random.rand() > self.p0 / (self.p0 + self.p1)
         self.choice_history.append(choice)
         return choice
         
