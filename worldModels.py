@@ -109,10 +109,12 @@ class RandomWorld(World):
         return reward
     
 
-# A world object
+# A persistent world object
 class PersistentWorld(World):
     '''
     A probablistic world that alternates between blocks of constant probability
+    At each trial, rewards are chosen based on the underlying rate at each site
+    If a site becomes active, it stays active until the agent selects it
     '''
     def __init__(self, rates, ntrials):
         '''
@@ -120,6 +122,7 @@ class PersistentWorld(World):
         ntrials: a list, number of trials in each block
         '''
         self.rates = rates
+        self.ntrialblocks = ntrials
         self.ntrials = ntrials
         self.curr_block = 0
         self.side_history = []
@@ -147,7 +150,7 @@ class PersistentWorld(World):
         
         
         # Are we switching blocks?
-        if len(self.rate_history) > sum(self.ntrials[:self.curr_block + 1]):
+        if len(self.rate_history) > sum(self.ntrialblocks[:self.curr_block + 1]):
             self.curr_block += 1
             self.curr_rates = self.rates[self.curr_block,:]
 #             print('world switching! curr rates = ', self.curr_rates, 'trials so far =', len(self.side_history))
@@ -237,8 +240,77 @@ class PersistentWorldWithCheck(World):
 
         return reward
 
-            
-    
+
+# A foraging world object
+class ForagingWorld(World):
+    '''
+    A probablistic world that alternates between blocks of constant probability
+    In each block, there is a designated 'active site', which becomes active
+    with some probability prew. The non-active site is always non-active
+    Each trial at an active site causes a switch with probability psw
+    '''
+
+    def __init__(self, prew, psw, ntrials):
+        '''
+        rates: a nblocks x 2 array, representing rates for 0- and 1-sides
+        ntrials: a list, number of trials in each block
+        maxtrials: number of trials to simulate
+        '''
+        self.prew = prew
+        self.psw = psw
+        self.curr_block = 0
+        self.side_history = []
+        self.ntrialblocks = [0]
+        self.currside_history = []
+        self.ntrials = [ntrials]
+        self.rate_history = []
+
+        self.curr_side = int(np.random.rand() < 0.5)
+        # self.active_sites = np.array([False, False])
+        # self.active_sites[self.curr_side] = np.random.rand() < prew
+
+    #         print('curr active sites:', self.active_sites)
+
+    # print('curr side=  ', int(self.curr_side))
+
+    def update(self, agent_choice):
+        '''
+        Update the world based on agent choice
+        '''
+        self.ntrialblocks[-1] += 1
+        agent_choice = int(agent_choice)
+        # self.currside_history.append(self.curr_side.copy())
+        self.side_history.append(self.curr_side)
+        ratearr = [False, False]
+        ratearr[self.curr_side] = True
+        self.rate_history.append(ratearr)
+
+        # Is there reward at current choice side?
+        if agent_choice == self.curr_side:
+            reward = int(np.random.rand() < self.prew)
+        else:
+            reward = 0
+        #         print('choice = ', agent_choice, 'reward = ', reward)
+        #         print('n trials so far =', len(self.side_history))
+
+        # Are we switching blocks?
+        if agent_choice == self.curr_side and np.random.rand() < self.psw:
+            self.curr_block += 1
+            self.curr_side = 1 - self.curr_side
+            self.ntrialblocks.append(0)
+            # print('Block has switched!, current active site is', self.curr_side)
+            # self.curr_rates = self.rates[self.curr_block, :]
+        #             print('world switching! curr rates = ', self.curr_rates, 'trials so far =', len(self.side_history))
+
+        # Update active sites
+
+
+        return reward
+
+
+
+
+
 class MatchingAgent(Agent):
     '''
     Simulate an agent that matches perfectly (perfect integration of past rewards)
@@ -329,14 +401,14 @@ class EGreedyQLearningAgent(Agent):
         # Flip a coin to decide if explore or exploit
         explore = np.random.rand() < self.eps
         if explore: #choose actions randomly
-            choice = np.random.rand() < 0.5
+            choice = int(np.random.rand() < 0.5)
         else:
             if self.q1 > self.q0:
                 choice = 1
             elif self.q1 < self.q0:
                 choice = 0
             else:
-                choice = np.random.rand() < 0.5
+                choice = int(np.random.rand() < 0.5)
 
         self.choice_history.append(choice)
         return choice
@@ -482,7 +554,7 @@ class EGreedyInferenceBasedAgent(Agent):
     def make_choice(self):
         explore = np.random.rand() < self.eps
         if explore:
-            choice = np.random.rand() < 0.5
+            choice = int(np.random.rand() < 0.5)
         else:
             # Optimal agent picks the action with higher prob
             if self.p1 > self.p0:
@@ -490,7 +562,7 @@ class EGreedyInferenceBasedAgent(Agent):
             elif self.p1 < self.p0:
                 choice = 0
             else:
-                choice = np.random.rand() > 0.5
+                choice = int(np.random.rand() > 0.5)
 
             # Old code for random agent
             # choice = np.random.rand() > self.p0 / (self.p0 + self.p1)
@@ -513,7 +585,7 @@ class Experiment():
         '''
         choices = []
         rewards = []
-        for i in range(sum(self.world.ntrials) - 1):
+        for i in range(sum(self.world.ntrials)):
             choice = self.agent.make_choice()
             #print('choice = ', int(choice))
             choices.append(choice)
