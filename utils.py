@@ -53,10 +53,10 @@ def find_LR_transition_fit(world, agent, window):
     # Get the choices around the transition
     choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks, chop='min')
 
-    # if window is None:
-    #     window = choicelst.shape[1]
-    # choicelst = choicelst[:, :window]
-    # print(choicelst.shape)
+    if window is None:
+        window = choicelst.shape[1]
+    choicelst = choicelst[:, :window]
+    print(choicelst.shape)
 
 
     #     choicelst = []
@@ -102,12 +102,12 @@ def fit_sigmoidal(choicelst, first_side):
     # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', first_side)
     if first_side == 0:
         # print('left')
-        leftAverage = np.nanmean(choicelst[:, ::2], axis=0)
-        rightAverage = np.nanmean(choicelst[:, 1::2], axis=0)
+        leftAverage = np.nanmean(choicelst[::2, :], axis=0)
+        rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
     else:
         # print('right')
-        rightAverage = np.nanmean(choicelst[:, ::2], axis=0)
-        leftAverage = np.nanmean(choicelst[:, 1::2], axis=0)
+        rightAverage = np.nanmean(choicelst[::2, :], axis=0)
+        leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
 
     offsetsR = np.arange(len(rightAverage))
     offsetsL = np.arange(len(leftAverage))
@@ -121,6 +121,8 @@ def fit_sigmoidal(choicelst, first_side):
         paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 0])
         pRight = paramsRight.x
 
+    # print('done with right')
+    # Fit left transitions
     funL = lambda x: errorsigmoid(x, offsetsL, leftAverage)
     switchGuessL = find_transition_guess_binary(leftAverage)
     if switchGuessL == -1:  # No switch happened!
@@ -128,6 +130,7 @@ def fit_sigmoidal(choicelst, first_side):
     else:
         paramsLeft = scipy.optimize.minimize(funL, [-1, -switchGuessL, 0])
         pLeft = paramsLeft.x
+    # print('done with left')
 
     return pRight, pLeft
 
