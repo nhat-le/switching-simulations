@@ -250,17 +250,21 @@ class ForagingWorld(World):
     Each trial at an active site causes a switch with probability psw
     '''
 
-    def __init__(self, prew, psw, ntrials):
+    def __init__(self, prew, psw, pstruct, ntrials):
         '''
         rates: a nblocks x 2 array, representing rates for 0- and 1-sides
         ntrials: a list, number of trials in each block
         maxtrials: number of trials to simulate
+        pstruct: a tuple of (N1, N2) indicating the blocks for structure of transitions
+        from [0, N1), psw = 0, from [N1, N2), psw = psw, from [N2, inf), psw = 1
         '''
         self.prew = prew
         self.psw = psw
         self.curr_block = 0
         self.side_history = []
-        self.ntrialblocks = [0]
+        self.pstruct = pstruct
+        self.ntrialblocks = [0] #an array for keeping track of how many trials are there in the blocks
+        # note that ntrialblocks[-1] indicates the current count of the block
         self.currside_history = []
         self.ntrials = [ntrials]
         self.rate_history = []
@@ -278,6 +282,15 @@ class ForagingWorld(World):
         Update the world based on agent choice
         '''
         self.ntrialblocks[-1] += 1
+
+        # What is the psw at the moment?
+        if self.ntrialblocks[-1] < self.pstruct[0]:
+            psw_curr = 0
+        elif self.ntrialblocks[-1] < self.pstruct[1]:
+            psw_curr = self.psw
+        else:
+            psw_curr = 1
+
         agent_choice = int(agent_choice)
         # self.currside_history.append(self.curr_side.copy())
         self.side_history.append(self.curr_side)
@@ -294,7 +307,7 @@ class ForagingWorld(World):
         #         print('n trials so far =', len(self.side_history))
 
         # Are we switching blocks?
-        if agent_choice == self.curr_side and np.random.rand() < self.psw:
+        if agent_choice == self.curr_side and np.random.rand() < psw_curr:
             self.curr_block += 1
             self.curr_side = 1 - self.curr_side
             self.ntrialblocks.append(0)

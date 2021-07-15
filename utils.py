@@ -51,7 +51,14 @@ def find_LR_transition_fit(world, agent, window):
     blocktrans = np.where(np.diff(side_history) != 0)[0][:-1]
 
     # Get the choices around the transition
-    choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks, chop='max')
+    choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks, chop='min')
+
+    # if window is None:
+    #     window = choicelst.shape[1]
+    # choicelst = choicelst[:, :window]
+    # print(choicelst.shape)
+
+
     #     choicelst = []
     #     for i in range(window):
     #         choicelst.append(np.array(agent.choice_history)[blocktrans + i])
@@ -60,8 +67,10 @@ def find_LR_transition_fit(world, agent, window):
 
     # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', world.side_history[0][0])
     if np.ndim(np.array(world.side_history)) == 1:
+        # print('here, first side = ', )
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0])
     else:
+        # print('here 2, first side = ', world.side_history[0][0])
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0][0])
     return (pRight, pLeft)
 
@@ -88,21 +97,23 @@ def fit_sigmoidal(choicelst, first_side):
     '''
     Fit a sigmoidal to the average choice data
     first_side: first side that is rewarded, i.e. world.side_history[0][0]
+    returns: pright, pleft, where each is a tuple (slope, offset, lapse)
     '''
     # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', first_side)
     if first_side == 0:
         # print('left')
-        leftAverage = np.mean(choicelst[:, ::2], axis=1)
-        rightAverage = np.mean(choicelst[:, 1::2], axis=1)
+        leftAverage = np.nanmean(choicelst[:, ::2], axis=0)
+        rightAverage = np.nanmean(choicelst[:, 1::2], axis=0)
     else:
         # print('right')
-        rightAverage = np.mean(choicelst[:, ::2], axis=1)
-        leftAverage = np.mean(choicelst[:, 1::2], axis=1)
+        rightAverage = np.nanmean(choicelst[:, ::2], axis=0)
+        leftAverage = np.nanmean(choicelst[:, 1::2], axis=0)
 
-    offsets = np.arange(len(leftAverage))
+    offsetsR = np.arange(len(rightAverage))
+    offsetsL = np.arange(len(leftAverage))
 
     # Fit right transitions
-    funR = lambda x: errorsigmoid(x, offsets, rightAverage)
+    funR = lambda x: errorsigmoid(x, offsetsR, rightAverage)
     switchGuessR = find_transition_guess_binary(rightAverage)  # offset that crosses 0.5
     if switchGuessR == -1:  # No switch happened!
         pRight = [0, -np.inf, 0]
@@ -110,7 +121,7 @@ def fit_sigmoidal(choicelst, first_side):
         paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 0])
         pRight = paramsRight.x
 
-    funL = lambda x: errorsigmoid(x, offsets, leftAverage)
+    funL = lambda x: errorsigmoid(x, offsetsL, leftAverage)
     switchGuessL = find_transition_guess_binary(leftAverage)
     if switchGuessL == -1:  # No switch happened!
         pLeft = [0, -np.inf, 0]
