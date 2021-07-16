@@ -47,16 +47,19 @@ def find_LR_transition_fit(world, agent, window):
     window: how many trials after the transition do we want to keep for fitting?
     '''
     # Find where the block transitions happen
-    side_history = np.array(world.rate_history)[:, 0]
-    blocktrans = np.where(np.diff(side_history) != 0)[0][:-1]
+    # side_history = np.array(world.rate_history)[:, 0]
+    # blocktrans = np.where(np.diff(side_history) != 0)[0][:-1]
 
     # Get the choices around the transition
-    choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks, chop='min')
+    if world.ntrialblocks[-1] == 0:
+        choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks[:-1], chop='min')
+    else:
+        choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks, chop='min')
 
     if window is None:
         window = choicelst.shape[1]
     choicelst = choicelst[:, :window]
-    print(choicelst.shape)
+    # print(choicelst.shape)
 
 
     #     choicelst = []
@@ -102,34 +105,45 @@ def fit_sigmoidal(choicelst, first_side):
     # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', first_side)
     if first_side == 0:
         # print('left')
-        leftAverage = np.nanmean(choicelst[::2, :], axis=0)
-        rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
+        leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
+        rightAverage = np.nanmean(choicelst[::2, :], axis=0)
     else:
         # print('right')
-        rightAverage = np.nanmean(choicelst[::2, :], axis=0)
-        leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
+        rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
+        leftAverage = np.nanmean(choicelst[::2, :], axis=0)
 
     offsetsR = np.arange(len(rightAverage))
     offsetsL = np.arange(len(leftAverage))
 
     # Fit right transitions
+    # print(rightAverage)
     funR = lambda x: errorsigmoid(x, offsetsR, rightAverage)
     switchGuessR = find_transition_guess_binary(rightAverage)  # offset that crosses 0.5
     if switchGuessR == -1:  # No switch happened!
-        pRight = [0, -np.inf, 0]
+        # pRight = [0, -np.inf, 0]
+        paramsRight = scipy.optimize.minimize(funR, [1, -len(rightAverage), 0],
+                                              bounds=((None, 0), (None, 0), (0, 0.5)))
     else:
-        paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 0])
-        pRight = paramsRight.x
+        paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 0],
+                                              bounds=((None, 0), (None, 0), (0, 0.5)))
+    pRight = paramsRight.x
+    # print(pRight)
 
     # print('done with right')
     # Fit left transitions
+    # print(leftAverage)
     funL = lambda x: errorsigmoid(x, offsetsL, leftAverage)
     switchGuessL = find_transition_guess_binary(leftAverage)
     if switchGuessL == -1:  # No switch happened!
-        pLeft = [0, -np.inf, 0]
+        # pLeft = [0, -np.inf, 0]
+        paramsLeft = scipy.optimize.minimize(funL, [-1, -len(leftAverage), 0],
+                                             bounds=((0, None), (None, 0), (0, 0.5)))
     else:
-        paramsLeft = scipy.optimize.minimize(funL, [-1, -switchGuessL, 0])
-        pLeft = paramsLeft.x
+        # print('here')
+        paramsLeft = scipy.optimize.minimize(funL, [-1, -switchGuessL, 0],
+                                             bounds=((0, None), (None, 0), (0, 0.5)))
+    pLeft = paramsLeft.x
+    # print(pLeft)
     # print('done with left')
 
     return pRight, pLeft

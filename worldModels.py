@@ -123,6 +123,7 @@ class PersistentWorld(World):
         '''
         self.rates = rates
         self.ntrialblocks = ntrials
+        self.nblockmax = len(ntrials)
         self.ntrials = ntrials
         self.curr_block = 0
         self.side_history = []
@@ -250,7 +251,7 @@ class ForagingWorld(World):
     Each trial at an active site causes a switch with probability psw
     '''
 
-    def __init__(self, prew, psw, pstruct, ntrials):
+    def __init__(self, prew, psw, pstruct, nblockmax):
         '''
         rates: a nblocks x 2 array, representing rates for 0- and 1-sides
         ntrials: a list, number of trials in each block
@@ -263,10 +264,11 @@ class ForagingWorld(World):
         self.curr_block = 0
         self.side_history = []
         self.pstruct = pstruct
+        self.nblockmax = nblockmax
         self.ntrialblocks = [0] #an array for keeping track of how many trials are there in the blocks
         # note that ntrialblocks[-1] indicates the current count of the block
         self.currside_history = []
-        self.ntrials = [ntrials]
+        # self.ntrials = [ntrials]
         self.rate_history = []
 
         self.curr_side = int(np.random.rand() < 0.5)
@@ -598,7 +600,9 @@ class Experiment():
         '''
         choices = []
         rewards = []
-        for i in range(sum(self.world.ntrials)):
+
+        while len(self.world.ntrialblocks) <= self.world.nblockmax:
+        # for i in range(sum(self.world.ntrials)):
             choice = self.agent.make_choice()
             #print('choice = ', int(choice))
             choices.append(choice)
