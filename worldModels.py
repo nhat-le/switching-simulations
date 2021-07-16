@@ -122,7 +122,8 @@ class PersistentWorld(World):
         ntrials: a list, number of trials in each block
         '''
         self.rates = rates
-        self.ntrialblocks = ntrials
+        self.ntrialblocks = [0]
+        # self.ntrialblockseen = [0]
         self.nblockmax = len(ntrials)
         self.ntrials = ntrials
         self.curr_block = 0
@@ -135,7 +136,12 @@ class PersistentWorld(World):
 #         print('curr active sites:', self.active_sites)
         
         #print('curr side=  ', int(self.curr_side))
-        
+
+
+    def reset(self):
+        #TODO
+        return None
+
     def update(self, agent_choice):
         '''
         Update the world based on agent choice
@@ -146,14 +152,19 @@ class PersistentWorld(World):
         
         # Is there reward at current choice side?
         reward = self.active_sites[agent_choice]
+        self.ntrialblocks[-1] = self.ntrialblocks[-1] + 1
 #         print('choice = ', agent_choice, 'reward = ', reward)
 #         print('n trials so far =', len(self.side_history))
         
         
         # Are we switching blocks?
-        if len(self.rate_history) > sum(self.ntrialblocks[:self.curr_block + 1]):
+        if self.curr_block < len(self.ntrials) and len(self.rate_history) > sum(self.ntrials[:self.curr_block + 1]):
             self.curr_block += 1
-            self.curr_rates = self.rates[self.curr_block,:]
+
+            # If we are at the end, don't need to update curr_rates
+            if self.curr_block < len(self.ntrials):
+                self.curr_rates = self.rates[self.curr_block,:]
+            self.ntrialblocks.append(0)
 #             print('world switching! curr rates = ', self.curr_rates, 'trials so far =', len(self.side_history))
         
         
@@ -278,6 +289,10 @@ class ForagingWorld(World):
     #         print('curr active sites:', self.active_sites)
 
     # print('curr side=  ', int(self.curr_side))
+
+    def reset(self):
+        #TODO
+        return None
 
     def update(self, agent_choice):
         '''
@@ -601,7 +616,11 @@ class Experiment():
         choices = []
         rewards = []
 
+        # counter = 0
+        # print()
         while len(self.world.ntrialblocks) <= self.world.nblockmax:
+            # print(counter)
+            # counter += 1
         # for i in range(sum(self.world.ntrials)):
             choice = self.agent.make_choice()
             #print('choice = ', int(choice))

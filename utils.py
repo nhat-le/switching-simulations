@@ -74,7 +74,8 @@ def find_LR_transition_fit(world, agent, window):
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0])
     else:
         # print('here 2, first side = ', world.side_history[0][0])
-        pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0][0])
+        # pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0][0])
+        pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.rate_history[0][0] < 0.5)
     return (pRight, pLeft)
 
 
