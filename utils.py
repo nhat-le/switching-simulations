@@ -1,9 +1,18 @@
 import numpy as np
 from worldModels import *
+# from agents import *
 import scipy.optimize
 
-def logistic(x):
-    return 1 / (1 + np.exp(-x))
+# import autograd.numpy as np
+# import autograd.numpy.random as npr
+# npr.seed(0)
+
+import ssm
+from ssm.util import find_permutation
+from ssm.plots import gradient_cmap, white_to_color_cmap
+
+def logistic(x, beta=1):
+    return 1 / (1 + np.exp(-beta * x))
 
 
 def make_switching_world(rlow, rhigh, nblocks, ntrialsLow, ntrialsHigh):
@@ -158,6 +167,9 @@ def split_by_trials(seq, ntrials, chop='none'):
     chop: if none, no chopping, if min, chop to the shortest length (min(ntrials)),
     if max, pad to the longest length (min(ntrials)),
     '''
+    if ntrials[-1] == 0:
+        ntrials = ntrials[:-1]
+
     minN = min(ntrials)
     maxN = max(ntrials)
     if len(seq) != sum(ntrials):
@@ -181,3 +193,119 @@ def split_by_trials(seq, ntrials, chop='none'):
         return result
     else:
         raise ValueError('invalide chop type')
+
+
+def get_zstates(agent, num_states=2, obs_dim=1, N_iters=50):
+    '''
+    Fit HMM to the choice sequence of the agent
+    Returns: the sequence of the most likely z-states
+    '''
+    # Fit HMM to choice sequence
+    data = np.array(agent.choice_history)[:, None]
+
+    ## testing the constrained transitions class
+    hmm = ssm.HMM(num_states, obs_dim, observations="bernoulli")
+    hmm_lls = hmm.fit(data, method="em", num_iters=N_iters, init_method="kmeans", verbose=0)
+
+    if hmm.observations.logit_ps[0] > 0:
+        return 1 - hmm.most_likely_states(data)
+    else:
+        return hmm.most_likely_states(data)
+
+
+def get_switch_times(world, agent):
+    '''
+    Returns an array of switching times (in trials),
+    based on the HMM model fits
+    '''
+    z_states = get_zstates(agent)
+    splits = split_by_trials(z_states, world.ntrialblocks, chop='min')
+    # Identify where the switch happens
+    if np.ndim(np.array(world.side_history)) == 1:
+        first_side = world.side_history[0]
+    else:
+        first_side = world.side_history[0][0]
+
+    switchlst = []
+    for i in range(len(splits)):
+        arr = splits[i]
+        #         print(i, first_side, arr)
+        # Skip trials that start on the wrong side
+        if arr[0] == (first_side + i) % 2:
+            switch = -1
+            print('skipping')
+        else:
+            # Find the first element that is the opposite state
+            target = (i + first_side) % 2
+            if i % 2 == 0:
+                cands = np.where(arr == target)[0]
+                if len(cands) == 0:
+                    switch = world.ntrialblocks[i]
+                else:
+                    switch = cands[0]
+
+        switchlst.append(switch)
+
+    return np.array(switchlst)
+
+
+def get_num_errors_leading_block(world, agent):
+    '''
+    Returns an array of switching times (in trials),
+    switch times based on the first time animal switches
+    '''
+    choicelst = split_by_trials(agent.choice_history, world.ntrialblocks, chop='none')
+
+    if np.ndim(np.array(world.side_history)) == 1:
+        first_side = world.side_history[0]
+    else:
+        first_side = world.side_history[0][0]
+
+    switchlst = []
+    for i in range(len(world.ntrialblocks) - 1):
+        blockchoice = choicelst[i]
+        target = (first_side + i) % 2
+        if blockchoice[0] == target:
+            switch = -1
+        else:
+            switch = np.where(blockchoice == target)[0][0]
+
+        switchlst.append(switch)
+
+    return np.array(switchlst)
+
+
+def get_num_rewards_trailing_block(world, agent):
+    '''
+    Returns an array of consec rewards at the end of the block
+    switch times based on the first time animal switches
+    '''
+    choicelst = split_by_trials(agent.choice_history, world.ntrialblocks, chop='none')
+
+    if np.ndim(np.array(world.side_history)) == 1:
+        first_side = world.side_history[0]
+    else:
+        first_side = world.side_history[0][0]
+
+    nrewlst = []
+    for i in range(len(world.ntrialblocks) - 1):
+        blockchoice = choicelst[i]
+        blockchoiceflip = np.flip(blockchoice)
+        target = (first_side + i) % 2
+        #         print('array is ', blockchoice)
+        if blockchoiceflip[0] != target:
+            nrew = -1
+        #             print('skipping')
+        else:
+            nrew = np.where(blockchoiceflip != target)[0]
+            #             print(nrew)
+            if len(nrew) == 0:
+                nrew = len(blockchoiceflip)
+            else:
+                nrew = nrew[0]
+        #             print(target)
+        #             print(nrew)
+
+        nrewlst.append(nrew)
+
+    return np.array(nrewlst)
