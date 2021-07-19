@@ -219,7 +219,7 @@ def get_switch_times(world, agent):
     based on the HMM model fits
     '''
     z_states = get_zstates(agent)
-    splits = split_by_trials(z_states, world.ntrialblocks, chop='min')
+    splits = split_by_trials(z_states, world.ntrialblocks, chop='none')
     # Identify where the switch happens
     if np.ndim(np.array(world.side_history)) == 1:
         first_side = world.side_history[0]
@@ -229,21 +229,21 @@ def get_switch_times(world, agent):
     switchlst = []
     for i in range(len(splits)):
         arr = splits[i]
+        # print(arr)
         #         print(i, first_side, arr)
         # Skip trials that start on the wrong side
         if arr[0] == (first_side + i) % 2:
             switch = -1
-            print('skipping')
+            # print('skipping')
         else:
             # Find the first element that is the opposite state
             target = (i + first_side) % 2
-            if i % 2 == 0:
-                cands = np.where(arr == target)[0]
-                if len(cands) == 0:
-                    switch = world.ntrialblocks[i]
-                else:
-                    switch = cands[0]
-
+            cands = np.where(arr == target)[0]
+            if len(cands) == 0:
+                switch = world.ntrialblocks[i]
+            else:
+                switch = cands[0]
+        # print('switch =', switch)
         switchlst.append(switch)
 
     return np.array(switchlst)

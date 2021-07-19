@@ -1,56 +1,64 @@
 from utils import *
 from worldModels import *
+from agents import *
 import numpy as np
 import ssm
-from ssm.util import find_permutation
-from ssm.plots import gradient_cmap, white_to_color_cmap
 
 
-def run_inf_based(params):
+def run_multiple_agents(params):
     '''
     params: dictionary of parameters
     '''
     np.random.seed(params['seed'])
-    pswitchlst = params['pswitchlst'] #np.linspace(0.01, 0.45, 10)
-    prewlst = params['prewlst'] #np.linspace(0.55, 0.99, 10)
-    eps = params['eps']
 
-    T11lst = np.zeros((len(pswitchlst), len(prewlst)))
-    T22lst = np.zeros((len(pswitchlst), len(prewlst)))
-    E1lst = np.zeros((len(pswitchlst), len(prewlst)))
-    E2lst = np.zeros((len(pswitchlst), len(prewlst)))
-    efflist = np.zeros((len(pswitchlst), len(prewlst)))
-    PRslopelist = np.zeros((len(pswitchlst), len(prewlst)))
-    PLslopelist = np.zeros((len(pswitchlst), len(prewlst)))
-    PRoffsetlist = np.zeros((len(pswitchlst), len(prewlst)))
-    PLoffsetlist = np.zeros((len(pswitchlst), len(prewlst)))
-    LapseL = np.zeros((len(pswitchlst), len(prewlst)))
-    LapseR = np.zeros((len(pswitchlst), len(prewlst)))
+    if params['type']== 'inf-based':
+        pswitchlst = params['pswitchlst'] #np.linspace(0.01, 0.45, 10)
+        prewlst = params['prewlst'] #np.linspace(0.55, 0.99, 10)
+        xlst = pswitchlst
+        ylst = prewlst
+    elif params['type'] == 'qlearning':
+        gammalst = params['gammalst']  # np.linspace(0.01, 0.45, 10)
+        epslst = params['epslst']  # np.linspace(0.55, 0.99, 10)
+        xlst = gammalst #TODO: CHECK X/Y VALIDITY
+        ylst = epslst
 
-    for idsw, psw in enumerate(pswitchlst):
-        print('* pswitch = ', psw)
-        for idrew, prew in enumerate(prewlst):
-            print('     prew = ', prew)
-            agent, world, pR, pL, hmm = run_single_inf_based_agent(prew, psw, eps, params)
+    T11lst = np.zeros((len(xlst), len(ylst)))
+    T22lst = np.zeros((len(xlst), len(ylst)))
+    E1lst = np.zeros((len(xlst), len(ylst)))
+    E2lst = np.zeros((len(xlst), len(ylst)))
+    efflist = np.zeros((len(xlst), len(ylst)))
+    PRslopelist = np.zeros((len(xlst), len(ylst)))
+    PLslopelist = np.zeros((len(xlst), len(ylst)))
+    PRoffsetlist = np.zeros((len(xlst), len(ylst)))
+    PLoffsetlist = np.zeros((len(xlst), len(ylst)))
+    LapseL = np.zeros((len(xlst), len(ylst)))
+    LapseR = np.zeros((len(xlst), len(ylst)))
 
-            efflist[idsw][idrew] = agent.find_efficiency()
-            T11lst[idsw][idrew] = hmm.transitions.transition_matrix[0][0]
-            T22lst[idsw][idrew] = hmm.transitions.transition_matrix[1][1]
-            E1lst[idsw][idrew] = logistic(hmm.observations.logit_ps)[0]
-            E2lst[idsw][idrew] = logistic(hmm.observations.logit_ps)[1]
-            PRslopelist[idsw][idrew] = pR[0]
-            PLslopelist[idsw][idrew] = pL[0]
-            PRoffsetlist[idsw][idrew] = pR[1]
-            PLoffsetlist[idsw][idrew] = pL[1]
-            LapseL[idsw][idrew] = pL[2]
-            LapseR[idsw][idrew] = pR[2]
+    for idx in range(len(xlst)):
+        print('* idx = ', idx)
+        for idy in range(len(ylst)):
+            print('     idy = ', idy)
 
-    return efflist, T11lst, T22lst, E1lst, PRslopelist, PLslopelist, \
+            agent, world, pR, pL, hmm = run_single_agent(idx, idy, params)
+
+            efflist[idx][idy] = agent.find_efficiency()
+            T11lst[idx][idy] = hmm.transitions.transition_matrix[0][0]
+            T22lst[idx][idy] = hmm.transitions.transition_matrix[1][1]
+            E1lst[idx][idy] = logistic(hmm.observations.logit_ps)[0]
+            E2lst[idx][idy] = logistic(hmm.observations.logit_ps)[1]
+            PRslopelist[idx][idy] = pR[0]
+            PLslopelist[idx][idy] = pL[0]
+            PRoffsetlist[idx][idy] = pR[1]
+            PLoffsetlist[idx][idy] = pL[1]
+            LapseL[idx][idy] = pL[2]
+            LapseR[idx][idy] = pR[2]
+
+    return efflist, T11lst, T22lst, E1lst, E2lst, PRslopelist, PLslopelist, \
            PRoffsetlist, PLoffsetlist, LapseL, LapseR
 
 
 
-def run_single_inf_based_agent(prew, psw, eps, params):
+def run_single_agent(idx, idy, params):
     '''
     For running a single set of parameters
     '''
@@ -63,7 +71,12 @@ def run_single_inf_based_agent(prew, psw, eps, params):
     N_iters = params['N_iters']
 
     world, _ = make_switching_world(rlow, rhigh, nblocks, ntrials_per_block[0], ntrials_per_block[1])
-    agent = EGreedyInferenceBasedAgent(prew=prew, pswitch=psw, eps=eps)
+
+    if params['type'] == 'inf-based':
+        agent = EGreedyInferenceBasedAgent(prew=params['prewlst'][idy], pswitch=params['pswitchlst'][idx], eps=params['eps'])
+    elif params['type'] == 'qlearning':
+        agent = EGreedyQLearningAgent(gamma=params['gammalst'][idx], eps=params['epslst'][idy])
+
     exp = Experiment(agent, world)
     exp.run()
 
@@ -77,3 +90,4 @@ def run_single_inf_based_agent(prew, psw, eps, params):
     # Sigmoidal fit for choice transitions
     pR, pL = find_LR_transition_fit(world, agent, window=15)
     return agent, world, pR, pL, hmm
+
