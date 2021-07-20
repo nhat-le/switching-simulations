@@ -114,7 +114,7 @@ class PersistentWorld(World):
         
         
         # Are we switching blocks?
-        if self.curr_block < len(self.ntrials) and len(self.rate_history) > sum(self.ntrials[:self.curr_block + 1]):
+        if self.curr_block < len(self.ntrials) and len(self.rate_history) >= sum(self.ntrials[:self.curr_block + 1]):
             self.curr_block += 1
 
             # If we are at the end, don't need to update curr_rates
