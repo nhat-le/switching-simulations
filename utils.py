@@ -229,12 +229,12 @@ def get_switch_times(world, agent):
     switchlst = []
     for i in range(len(splits)):
         arr = splits[i]
-        print(arr)
-        print(i, first_side)
+        # print(arr)
+        # print(i, first_side)
         # Skip trials that start on the wrong side
         if arr[0] == (first_side + i) % 2:
             switch = -1
-            print('skipping')
+            # print('skipping')
         else:
             # Find the first element that is the opposite state
             target = (i + first_side) % 2
@@ -323,12 +323,36 @@ def loss(params, x, y):
     return np.sum((pred - y) ** 2)
 
 
+def exp_fun2(x, params):
+    alpha = params[0]
+    C = params[1]
+    return C - C * np.exp(-alpha * x)
+
+
+def loss2(params, x, y):
+    pred = exp_fun2(x, params)
+    return np.sum((pred - y) ** 2)
+
+
+def fit_expfun2(params0, datax, datay):
+    # Filter out nan's in datax and datay
+    goody = datay[~np.isnan(datax)]
+    goodx = datax[~np.isnan(datax)]
+
+    result = scipy.optimize.minimize(loss2, params0, (goodx, goody),
+                                     bounds=((0, None), (0, None), (None, None)))
+    params = result.x
+    ypred = exp_fun2(datax, params)
+    return params, ypred
+
+
 def fit_expfun(params0, datax, datay):
     # Filter out nan's in datax and datay
     goody = datay[~np.isnan(datax)]
     goodx = datax[~np.isnan(datax)]
 
-    result = scipy.optimize.minimize(loss, params0, (goodx, goody))
+    result = scipy.optimize.minimize(loss, params0, (goodx, goody),
+                                     bounds=((0, None), (0, None), (None, None)))
     params = result.x
     ypred = exp_fun(datax, params)
     return params, ypred
@@ -338,7 +362,7 @@ def simulate_rew_error_correlations(world, agent):
     exp.run()
 
     lst = get_switch_times(world, agent).astype('float')
-    print(lst)
+    # print(lst)
     lst[lst == -1] = np.nan
     nafterswitch = world.ntrialblocks[:-1] - lst
 
@@ -359,8 +383,12 @@ def simulate_rew_error_correlations(world, agent):
     stds = []
     for elem in ysplit[1:]:
         # print(elem)
-        means.append(np.nanmean(elem))
-        stds.append(np.nanstd(elem) / np.sqrt(len(elem)))
+        if sum(~np.isnan(np.array(elem))) == 0: #everything is nan
+            means.append(np.nan)
+            stds.append(np.nan)
+        else:
+            means.append(np.nanmean(elem))
+            stds.append(np.nanstd(elem) / np.sqrt(len(elem)))
 
     return xvals[1:], means, stds, ysplit
 
