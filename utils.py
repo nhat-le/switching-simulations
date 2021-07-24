@@ -61,9 +61,9 @@ def find_LR_transition_fit(world, agent, window):
 
     # Get the choices around the transition
     if world.ntrialblocks[-1] == 0:
-        choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks[:-1], chop='min')
+        choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks[:-1], chop='max')
     else:
-        choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks, chop='min')
+        choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks, chop='max')
 
     if window is None:
         window = choicelst.shape[1]
@@ -85,7 +85,7 @@ def find_LR_transition_fit(world, agent, window):
         # print('here 2, first side = ', world.side_history[0][0])
         # pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0][0])
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.rate_history[0][0] < 0.5)
-    return (pRight, pLeft)
+    return pRight, pLeft, choicelst
 
 
 def find_transition_guess(sig):

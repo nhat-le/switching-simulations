@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class World():
@@ -328,6 +329,28 @@ class Experiment():
             rewards.append(reward)
             
         return choices, rewards
+
+
+    def visualize(self):
+        '''
+        Visualize the performance of the agent in the experiment
+        '''
+        agent = self.agent
+        world = self.world
+        plt.figure()
+        # plt.plot(agent.find_prob())
+        plt.plot(agent.q1_history, '.')
+        plt.plot(agent.q0_history, '.')
+        plt.plot(np.array(agent.choice_history) * 2 - 1, '.')
+
+        blockswitches = np.cumsum(world.ntrialblocks)
+        for i in range(len(world.ntrialblocks) - 1):
+            if i % 2:
+                plt.fill_between([blockswitches[i], blockswitches[i + 1]], [-1, -1], [1, 1], color='r', alpha=0.2)
+            else:
+                plt.fill_between([blockswitches[i], blockswitches[i + 1]], [-1, -1], [1, 1], color='b', alpha=0.2)
+
+        plt.xlim([0, 400])
 
 
 
