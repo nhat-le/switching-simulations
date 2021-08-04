@@ -17,9 +17,11 @@ load(filedir);
 % ylst = gammalst;
 
 % efflist2 = interp2(epsgrid,gammagrid,efflist,epsgridnew,gammagridnew);
+produce_heatmap(efflist, prewlst, pswitchlst, 'clim', [0.5,1], 'legendname', 'Efficiency', ...
+    'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4);
 
-produce_heatmap_inf_based(efflist, prewlst, pswitchlst, [0.5,1], 'Efficiency', ...
-    'xgridsize', 20, 'ygridsize', 25);
+% produce_heatmap(efflist, prewlst, pswitchlst, [0.5,1], 'Efficiency', ...
+%     'xgridsize', 20, 'ygridsize', 25);
 
 %%
 % eff_smallgamma = PLslopelist(gammalst < 1, :);
@@ -39,22 +41,28 @@ produce_heatmap_inf_based(efflist, prewlst, pswitchlst, [0.5,1], 'Efficiency', .
 
 
 %% Plotting the switch offset
-produce_heatmap_inf_based(-PLoffsetlist, prewlst, pswitchlst, [0 10], 'Offset', 20, 25);
+produce_heatmap(-PLoffsetlist, prewlst, pswitchlst, 'clim', [0, 10], ...
+    'legendname', 'Offset', ...
+    'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4);
 
 
 %% Plotting the switch slope
-produce_heatmap_inf_based(PLslopelist, prewlst, pswitchlst, [0, 15], 'Slope', 20, 25)
+produce_heatmap(PLslopelist, prewlst, pswitchlst, 'clim', [0, 15], 'legendname', 'Slope', ...
+    'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4);
 
 %% Plotting the lapse rate (exploration)
-produce_heatmap_inf_based(LapseR, prewlst, pswitchlst, [0, 0.5], 'Lapse', 20, 25);
+produce_heatmap(LapseR, prewlst, pswitchlst, 'clim', [0, 0.5], 'legendname', 'Lapse', ...
+    'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4);
 
 
 %% Correlations
-produce_heatmap_inf_based(ParamsA, prewlst, pswitchlst, [0,3], 'CorrA', 20, 25);
-produce_heatmap_inf_based(ParamsB, prewlst, pswitchlst, [0,10], 'CorrB', 20, 25);
+produce_heatmap(ParamsA, prewlst, pswitchlst, 'clim', [0,3], 'legendname', 'CorrA', ...
+    'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4);
+produce_heatmap(ParamsB, prewlst, pswitchlst, 'clim', [0,10], 'legendname', 'CorrB', ...
+    'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4);
 
 
 %% Theoretical eff
-theoryeff = 0.5 + (1 - LapseL) .* (0.5 + PLoffsetlist / 30);
-produce_heatmap(theoryeff, prewlst, pswitchlst, [0.5 1], 'Theory eff');
+% theoryeff = 0.5 + (1 - LapseL) .* (0.5 + PLoffsetlist / 30);
+% produce_heatmap(theoryeff, prewlst, pswitchlst, [0.5 1], 'Theory eff');
 
