@@ -26,6 +26,10 @@ if ~exist('clim', 'var')
     clim = [0, 1];
 end
 
+if ~exist('font_size', 'var')
+    font_size = 20;
+end
+
 
 
 
@@ -53,6 +57,12 @@ c.Label.String = legendname;
 if newfig
     set(c, 'Position', [0.847 0.3433 0.04 0.5805], 'FontSize', 12, 'FontAngle', 'italic');
 end
+
+% if exist('cbar_pos', 'var')
+%     set(c, 'Position', cbar_pos, 'FontSize', 12, 'FontAngle', 'italic');
+% end
+
+
 axis xy
 
 if ~isempty(clim)
@@ -68,7 +78,7 @@ set(gca, 'Visible', 'on')
 axis square
 
 mymakeaxis('x_label', x_label, 'y_label', y_label, 'interpreter', 'latex',...
-    'offsetRatio', 0, 'font_size', 20, 'yticks', ytickvalues)
+    'offsetRatio', 0, 'font_size', font_size, 'yticks', ytickvalues)
 yticks(0:0.2:1.6);
 yticklabels(0:0.2:1.6);
 
