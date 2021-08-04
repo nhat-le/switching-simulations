@@ -1,0 +1,110 @@
+%% Plotting the performance
+addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTools')
+
+
+filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/EGreedyInferenceBasedAgent-withCorr-prob0.00to1.00-072121.mat';
+load(filedir);
+
+% produce_heatmap(efflist, epslst, gammalst, [0.5,1], 'Efficiency');
+%2d interpolation
+% [epsgrid, gammagrid] = meshgrid(epslst, gammalst);
+% 
+% epslstnew = linspace(0.01, 0.5, 80);
+% gammalstnew = linspace(0.01, 1.4, 80);
+% [epsgridnew, gammagridnew] = meshgrid(epslstnew, gammalstnew);
+
+% xlst = epslst;
+% ylst = gammalst;
+
+% efflist2 = interp2(epsgrid,gammagrid,efflist,epsgridnew,gammagridnew);
+
+produce_heatmap(efflist, prewlst, pswitchlst, [0.5,1], 'Efficiency');
+
+%%
+% eff_smallgamma = PLslopelist(gammalst < 1, :);
+% [gammamax,epsmax] = find(eff_smallgamma == max(eff_smallgamma(:)));
+% gamma_maxval = gammalst(gammamax);
+% eps_maxval = epslst(epsmax);
+% plot(eps_maxval, gamma_maxval, 'w+', 'MarkerSize', 20)
+% imshow(efflist2, 'InitialMagnification', 'fit', 'XData', [min(xlst), max(xlst)],...
+%     'YData', [min(ylst), max(ylst)]);
+% colormap hot
+% set(gca, 'YDir', 'normal');
+% set(gca, 'XDir', 'normal');
+% set(gca, 'Visible', 'on')
+% axis square
+
+% What is the optimal value for gamma < 1?
+
+
+%% Plotting the switch offset
+produce_heatmap(-PLoffsetlist, prewlst, pswitchlst, [0 10], 'Offset');
+
+
+%% Plotting the switch slope
+produce_heatmap(PLslopelist, prewlst, pswitchlst, [0, 15], 'Slope')
+
+%% Plotting the lapse rate (exploration)
+produce_heatmap(LapseR, prewlst, pswitchlst, [0, 0.5], 'Lapse');
+
+
+%% Correlations
+produce_heatmap(ParamsA, prewlst, pswitchlst, [0,3], 'CorrA');
+produce_heatmap(ParamsB, prewlst, pswitchlst, [0,10], 'CorrB');
+
+
+%% Theoretical eff
+theoryeff = 0.5 + (1 - LapseL) .* (0.5 + PLoffsetlist / 30);
+produce_heatmap(theoryeff, prewlst, pswitchlst, [0.5 1], 'Theory eff');
+
+
+function im = produce_heatmap(arr, xlst, ylst, clim, plotname, varargin)
+
+%2d interpolation
+if length(varargin) == 2
+    [xgrid, ygrid] = meshgrid(xlst, ylst);
+
+    xlstnew = linspace(min(xlst), max(xlst), varargin{1});
+    ylstnew = linspace(min(xlst), max(xlst), varargin{2});
+    [xgridnew, ygridnew] = meshgrid(xlstnew, ylstnew);
+    efflst = interp2(epsgrid,gammagrid,efflist,epsgridnew,gammagridnew);
+
+end
+
+
+figure;
+im = imshow(arr, 'InitialMagnification', 'fit', 'XData', [min(xlst), max(xlst)],...
+    'YData', [min(ylst), max(ylst)]);
+
+% Make colorbar
+colormap hot
+
+c = colorbar;
+c.Label.String = plotname;
+set(c, 'Position', [0.847 0.3433 0.04 0.5805], 'FontSize', 12, 'FontAngle', 'italic');
+axis xy
+
+if ~isempty(clim)
+    caxis(clim)
+end
+% caxis([0.5, 1.0])
+%xlabel('$K$', 'interpreter', 'latex')
+%ylabel('$I$', 'interpreter', 'latex')
+
+set(gca, 'YDir', 'normal');
+set(gca, 'XDir', 'normal');
+set(gca, 'Visible', 'on')
+axis square
+
+mymakeaxis('x_label', '$\epsilon$', 'y_label', '$\gamma$', 'interpreter', 'latex',...
+    'offsetRatio', 0, 'font_size', 20, 'yticks', 0:0.5:1.5)
+yticks(0:0.2:1.6);
+yticklabels(0:0.2:1.6);
+
+% Resize the figure
+set(gcf, 'Position', [89 105 550 420]);
+set(gca, 'Position', [0 0.03 0.8 0.9]);
+set(c, 'Position', [0.8 0.2859 0.04 0.643], 'FontSize', 20);
+
+end
+
