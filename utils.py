@@ -39,12 +39,16 @@ def make_switching_world_withCheck(rlow, rhigh, nblocks, ntrialsLow, ntrialsHigh
     return world, ntrials
 
 
+def predict_sigmoid(p, x):
+    return p[2] + (1 - 2 * p[2]) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
+
 def errorsigmoid(p, x, y):
     '''
     Error function used for sigmoid fitting
     '''
-    lapse = p[2]
-    preds = lapse + (1 - 2 * lapse) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
+    # lapse = p[2]
+    # preds = lapse + (1 - 2 * lapse) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
+    preds = predict_sigmoid(p, x)
 
     return np.sum((preds - y) ** 2)
 
@@ -86,6 +90,35 @@ def find_LR_transition_fit(world, agent, window):
         # pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0][0])
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.rate_history[0][0] < 0.5)
     return pRight, pLeft, choicelst
+
+
+def find_experiment_metrics(data, window):
+    '''
+    Determine the parameter of the block switching in a given behavioral session
+    filename: string, name of behavior .mat file containing allchoices and alltargets
+    window: how many trials after the transition do we want to keep for fitting?
+    '''
+    # data = scipy.io.loadmat(filename)
+
+    blocktrans = np.where(np.diff(data['alltargets']))[1]
+    blocksizes = np.diff(blocktrans)
+    blocksizes = np.hstack([blocktrans[0] + 1, blocksizes])
+
+    choicelst = split_by_trials(data['allchoices'][0, :sum(blocksizes)], blocksizes, chop='max')
+
+    if window is None:
+        window = choicelst.shape[1]
+    choicelst = choicelst[:, :window]
+
+    choicelst = (choicelst + 1) / 2
+
+    pRight, pLeft = fit_sigmoidal(choicelst, first_side=1-data['alltargets'][0][0])
+
+    # Efficiency
+    feedback = (-data['allchoices']) == (data['alltargets'].astype('int') * 2 - 1)
+    eff = np.sum(feedback) / len(feedback[0])
+
+    return pRight, pLeft, choicelst, eff
 
 
 def find_transition_guess(sig):
@@ -167,6 +200,7 @@ def split_by_trials(seq, ntrials, chop='none'):
     chop: if none, no chopping, if min, chop to the shortest length (min(ntrials)),
     if max, pad to the longest length (min(ntrials)),
     '''
+    assert(len(seq) == sum(ntrials))
     if ntrials[-1] == 0:
         ntrials = ntrials[:-1]
 

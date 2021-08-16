@@ -3,6 +3,7 @@ from worldModels import *
 from agents import *
 import numpy as np
 import ssm
+import tqdm
 
 
 
@@ -13,6 +14,7 @@ def run_repeated_single_agent(params):
     np.random.seed(params['seed'])
 
     N_iters = params['N_iters']
+    verbose = 1 - params['verbose']
 
     T11lst = np.zeros(N_iters)
     T22lst = np.zeros(N_iters)
@@ -29,8 +31,10 @@ def run_repeated_single_agent(params):
     ParamsB = np.zeros(N_iters)
     ParamsC = np.zeros(N_iters)
 
-    for idx in range(N_iters):
-        print('Iteration = ', idx)
+
+    for idx in tqdm.tqdm(range(N_iters), disable=verbose):
+        # if idx % 10 == 0:
+        #     print('Iteration = ', idx)
 
         agent, world, pR, pL, hmm = run_single_agent(0, 0, params)
 
