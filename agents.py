@@ -197,7 +197,7 @@ class ValueAccumulationAgent(Agent):
 
     def make_choice(self):
         '''
-        Make a choice using the epsilon-greedy strategy
+        Make a choice using a probabilistic strategy based on current V
         '''
         prob = utils.logistic(self.V * self.beta)
 
