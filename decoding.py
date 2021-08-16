@@ -155,3 +155,31 @@ def normalize_and_average_all(lst):
     return [normalize_and_average(elem) for elem in lst]
 
 
+def find_Q_IB_distance(expmetrics, QIBmetrics):
+    # Normalize the metrics
+    expeff_norm = (expmetrics[0] - np.mean(QIBmetrics[0])) / np.std(QIBmetrics[0])
+    explapse_norm = (expmetrics[1][2] - np.mean(QIBmetrics[1])) / np.std(QIBmetrics[1])
+    expoffset_norm = (expmetrics[1][1] - np.mean(QIBmetrics[2])) / np.std(QIBmetrics[2])
+    expslope_norm = (expmetrics[1][0] - np.mean(QIBmetrics[3])) / np.std(QIBmetrics[3])
+
+    QIBnorm = normalize_and_average_all(QIBmetrics)
+
+    Qeff_norm = QIBnorm[0][:11, :]
+    Qlapse_norm = QIBnorm[1][:11, :]
+    Qslope_norm = QIBnorm[3][:11, :]
+    Qoffset_norm = QIBnorm[2][:11, :]
+    IBeff_norm = QIBnorm[0][11:, :]
+    IBlapse_norm = QIBnorm[1][11:, :]
+    IBslope_norm = QIBnorm[3][11:, :]
+    IBoffset_norm = QIBnorm[2][11:, :]
+
+    Qdistance = (Qeff_norm - expeff_norm) ** 2 + (Qlapse_norm - explapse_norm) ** 2 + \
+                (Qslope_norm - expslope_norm) ** 2 + (Qoffset_norm - expoffset_norm) ** 2
+    IBdistance = (IBeff_norm - expeff_norm) ** 2 + (IBlapse_norm - explapse_norm) ** 2 + \
+                 (IBslope_norm - expslope_norm) ** 2 + (IBoffset_norm - expoffset_norm) ** 2
+
+    return Qdistance, IBdistance
+
+
+
+
