@@ -1,5 +1,6 @@
 from run_simulations import *
 from sklearn import svm
+from utils import in_percentile
 
 
 
@@ -185,20 +186,27 @@ def find_Q_IB_ave_distance(expmetrics, QIBmetrics):
 
 
 
-def find_Q_IB_zdistance(expmetrics, QIBmetrics):
+def find_Q_IB_zdistance(expmetrics, QIBmetrics, method='z'):
     '''
     Find the distance by first z-scoring according to the distribution of
     each parameter combination
     expmetrics: (eff, [slope, offset, lapse]) tuple
     QIBmetrics: [eff, lapse, offset, slope] array
     '''
-    eff_norm = (expmetrics[0] - np.nanmean(QIBmetrics[0], axis=2)) / (np.nanstd(QIBmetrics[0], axis=2) + 1e-4)
-    lapse_norm = (expmetrics[1][2] - np.nanmean(QIBmetrics[1], axis=2)) / (np.nanstd(QIBmetrics[1], axis=2) + 1e-4)
-    offset_norm = (expmetrics[1][1] - np.nanmean(QIBmetrics[2], axis=2)) / (np.nanstd(QIBmetrics[2], axis=2) + 1e-4)
-    slope_norm = (expmetrics[1][0] - np.nanmean(QIBmetrics[3], axis=2)) / (np.nanstd(QIBmetrics[3], axis=2) + 1e-4)
+
+    if method == 'z': # z-score method
+        eff_norm = (expmetrics[0] - np.nanmean(QIBmetrics[0], axis=2)) / (np.nanstd(QIBmetrics[0], axis=2) + 1e-4)
+        lapse_norm = (expmetrics[1][2] - np.nanmean(QIBmetrics[1], axis=2)) / (np.nanstd(QIBmetrics[1], axis=2) + 1e-4)
+        offset_norm = (expmetrics[1][1] - np.nanmean(QIBmetrics[2], axis=2)) / (np.nanstd(QIBmetrics[2], axis=2) + 1e-4)
+        slope_norm = (expmetrics[1][0] - np.nanmean(QIBmetrics[3], axis=2)) / (np.nanstd(QIBmetrics[3], axis=2) + 1e-4)
+    elif method == 'percentile': # percentile method, aiming for '50 percentile'
+        eff_norm = in_percentile(QIBmetrics[0], expmetrics[0]) - 0.5
+        lapse_norm = in_percentile(QIBmetrics[1], expmetrics[1][2]) - 0.5
+        offset_norm = in_percentile(QIBmetrics[2], expmetrics[1][1]) - 0.5
+        slope_norm = in_percentile(QIBmetrics[3], expmetrics[1][0]) - 0.5
 
     distance = eff_norm**2 + lapse_norm**2 + offset_norm**2 + slope_norm**2
 
-    return distance[:11, :], distance[11:, :]
+    return distance[:11, :], distance[11:, :], eff_norm, lapse_norm, offset_norm, slope_norm
 
 

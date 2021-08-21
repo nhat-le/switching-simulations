@@ -91,6 +91,7 @@ def find_experiment_metrics(data, window, type='sigmoid'):
     blocktrans = np.where(np.diff(data['alltargets']))[1]
     blocksizes = np.diff(blocktrans)
     blocksizes = np.hstack([blocktrans[0] + 1, blocksizes])
+    # print(blocksizes)
 
     choicelst = split_by_trials(data['allchoices'][0, :sum(blocksizes)], blocksizes, chop='max')
 
@@ -322,7 +323,7 @@ def errordoublesigmoid(p, xR, yR, xL, yL):
     predL = predict_doublesigmoid(xL, [slopeL, offsetL, lapseR, lapseL])
     # print(predL, predR)
 
-    return np.sum((predL - yL) ** 2) + np.sum((predR - yR) ** 2)
+    return np.nansum((predL - yL) ** 2) + np.nansum((predR - yR) ** 2) + 0.01 * (slopeL**2 + slopeR**2)
 
 def exp_fun(x, params):
     alpha = params[0]
@@ -498,6 +499,16 @@ def simulate_rew_error_correlations(world, agent):
             stds.append(np.nanstd(elem) / np.sqrt(len(elem)))
 
     return xvals[1:], means, stds, ysplit
+
+
+def in_percentile(arr, val):
+    '''
+    Returns the percentile of data point 'val' in lst
+    '''
+    arr = np.array(arr)
+    l = arr.shape[-1]
+    return np.sum(arr <= val, axis=arr.ndim - 1) / l
+
 
 
 
