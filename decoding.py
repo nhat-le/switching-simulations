@@ -1,5 +1,6 @@
 from run_simulations import *
 from sklearn import svm
+from utils import in_percentile
 
 
 
@@ -147,23 +148,26 @@ def find_svm_perf(gamma, eps, psw, prew):
     return Qmetrics, IBmetrics, perf, coefs
 
 
-def normalize_and_average(arr):
-    normarr = (arr - np.mean(arr)) / np.std(arr)
-    return np.mean(normarr, axis=2)
+def normalize_and_average(arr, average=True):
+    normarr = (arr - np.median(arr)) / np.std(arr)
+    if average:
+        return np.mean(normarr, axis=2)
+    else:
+        return normarr
 
-def normalize_and_average_all(lst):
-    return [normalize_and_average(elem) for elem in lst]
+def normalize_and_average_all(lst, average=True):
+    return [normalize_and_average(elem, average) for elem in lst]
 
 
-def find_Q_IB_distance(expmetrics, QIBmetrics):
+def find_Q_IB_ave_distance(expmetrics, QIBmetrics):
     # Normalize the metrics
-    expeff_norm = (expmetrics[0] - np.mean(QIBmetrics[0])) / np.std(QIBmetrics[0])
-    explapse_norm = (expmetrics[1][2] - np.mean(QIBmetrics[1])) / np.std(QIBmetrics[1])
-    expoffset_norm = (expmetrics[1][1] - np.mean(QIBmetrics[2])) / np.std(QIBmetrics[2])
-    expslope_norm = (expmetrics[1][0] - np.mean(QIBmetrics[3])) / np.std(QIBmetrics[3])
+    expeff_norm = (expmetrics[0] - np.median(QIBmetrics[0])) / np.std(QIBmetrics[0])
+    explapse_norm = (expmetrics[1][2] - np.median(QIBmetrics[1])) / np.std(QIBmetrics[1])
+    expoffset_norm = (expmetrics[1][1] - np.median(QIBmetrics[2])) / np.std(QIBmetrics[2])
+    expslope_norm = (expmetrics[1][0] - np.median(QIBmetrics[3])) / np.std(QIBmetrics[3])
 
     QIBnorm = normalize_and_average_all(QIBmetrics)
-
+    print(QIBnorm[0].shape)
     Qeff_norm = QIBnorm[0][:11, :]
     Qlapse_norm = QIBnorm[1][:11, :]
     Qslope_norm = QIBnorm[3][:11, :]
@@ -178,8 +182,31 @@ def find_Q_IB_distance(expmetrics, QIBmetrics):
     IBdistance = (IBeff_norm - expeff_norm) ** 2 + (IBlapse_norm - explapse_norm) ** 2 + \
                  (IBslope_norm - expslope_norm) ** 2 + (IBoffset_norm - expoffset_norm) ** 2
 
-    return Qdistance, IBdistance
+    return Qdistance, IBdistance, expeff_norm, explapse_norm, expoffset_norm, expslope_norm
 
 
+
+def find_Q_IB_zdistance(expmetrics, QIBmetrics, method='z'):
+    '''
+    Find the distance by first z-scoring according to the distribution of
+    each parameter combination
+    expmetrics: (eff, [slope, offset, lapse]) tuple
+    QIBmetrics: [eff, lapse, offset, slope] array
+    '''
+
+    if method == 'z': # z-score method
+        eff_norm = (expmetrics[0] - np.nanmean(QIBmetrics[0], axis=2)) / (np.nanstd(QIBmetrics[0], axis=2) + 1e-4)
+        lapse_norm = (expmetrics[1][2] - np.nanmean(QIBmetrics[1], axis=2)) / (np.nanstd(QIBmetrics[1], axis=2) + 1e-4)
+        offset_norm = (expmetrics[1][1] - np.nanmean(QIBmetrics[2], axis=2)) / (np.nanstd(QIBmetrics[2], axis=2) + 1e-4)
+        slope_norm = (expmetrics[1][0] - np.nanmean(QIBmetrics[3], axis=2)) / (np.nanstd(QIBmetrics[3], axis=2) + 1e-4)
+    elif method == 'percentile': # percentile method, aiming for '50 percentile'
+        eff_norm = in_percentile(QIBmetrics[0], expmetrics[0]) - 0.5
+        lapse_norm = in_percentile(QIBmetrics[1], expmetrics[1][2]) - 0.5
+        offset_norm = in_percentile(QIBmetrics[2], expmetrics[1][1]) - 0.5
+        slope_norm = in_percentile(QIBmetrics[3], expmetrics[1][0]) - 0.5
+
+    distance = eff_norm**2 + lapse_norm**2 + offset_norm**2 + slope_norm**2
+
+    return distance[:11, :], distance[11:, :], eff_norm, lapse_norm, offset_norm, slope_norm
 
 

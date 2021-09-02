@@ -2,6 +2,10 @@
 % Generate behavior according to a sigmoidal with lapse
 xlst = -10:40;
 
+paperaesthetics;
+% redcol = [255 51 51]/255;%[178,24,43]/255; %[5,113,176]/255
+% bluecol = [33,102,172]/255; %[202,0,32]/255
+
 rng(125)
 lapse = 0.1;
 offset = -12;
@@ -19,10 +23,10 @@ corrtrials = choices == trialside;
 
 % Plot
 figure('Position', [440,317,695,481]);
-plot(xlst(corrtrials) - nblockstart, choices(corrtrials), 'o', 'Color', [5,113,176]/255,...
-    'MarkerFaceColor', [5,113,176]/255)
+plot(xlst(corrtrials) - nblockstart, choices(corrtrials), 'o', 'Color', bluecol,...
+    'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'MarkerSize', 9)
 hold on
-plot(xlst(~corrtrials) - nblockstart, choices(~corrtrials), 'x', 'Color', [202,0,32]/255,...
+plot(xlst(~corrtrials) - nblockstart, choices(~corrtrials), 'x', 'Color', redcol,...
     'MarkerSize', 9, 'LineWidth', 2)
 
 

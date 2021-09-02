@@ -2,35 +2,15 @@ function im = produce_heatmap(arr, xlst, ylst, varargin)
 
 % Parse the varargin and default values
 eval(evalargs(varargin));
-if ~exist('newfig', 'var')
-    newfig = 1;
-end
-
-if ~exist('x_label', 'var')
-    x_label = '';
-end
-
-if ~exist('y_label', 'var')
-    y_label = '';
-end
-
-if ~exist('ytickvalues', 'var')
-    ytickvalues = 0:0.5:1.5;
-end
-
-if ~exist('legendname', 'var')
-    legendname = '';
-end
-
-if ~exist('clim', 'var')
-    clim = [0, 1];
-end
-
-if ~exist('font_size', 'var')
-    font_size = 20;
-end
-
-
+if ~exist('newfig', 'var'); newfig = 1; end
+if ~exist('x_label', 'var'); x_label = ''; end
+if ~exist('y_label', 'var'); y_label = ''; end
+if ~exist('ytickvalues', 'var'); ytickvalues = 0:0.5:1.5; end
+if ~exist('legendname', 'var'); legendname = ''; end
+if ~exist('clim', 'var'); clim = [0, 1]; end
+if ~exist('font_size', 'var'); font_size = 20; end
+if ~exist('vertline', 'var'); vertline = nan; end
+if ~exist('horline', 'var'); horline = nan; end
 
 
 %2d interpolation
@@ -50,8 +30,18 @@ im = imshow(arr, 'InitialMagnification', 'fit', 'XData', [min(xlst), max(xlst)],
     'YData', [min(ylst), max(ylst)]);
 
 % Make colorbar
-colormap hot
+% redwhiteR = linspace(1, 0.7, 255);
+% redwhiteG = linspace(1, 0, 255);
+% redwhiteB = linspace(1, 0, 255);
 
+redwhiteR = linspace(1, 0, 255);
+redwhiteG = linspace(1, 0, 255);
+redwhiteB = linspace(1, 0.5, 255);
+redwhite = [redwhiteR; redwhiteG; redwhiteB]';
+
+redwhite = brewermap(5, 'Blues');
+colormap(redwhite);
+% colormap hot
 c = colorbar;
 c.Label.String = legendname;
 if newfig
@@ -77,8 +67,18 @@ set(gca, 'XDir', 'normal');
 set(gca, 'Visible', 'on')
 axis square
 
+if ~isnan(vertline)
+    l = vline(vertline, 'w--');
+    set(l, 'LineWidth', 1);
+end
+
+if ~isnan(horline)
+    l = hline(horline, 'w--');
+    set(l, 'LineWidth', 1);
+end
+
 mymakeaxis('x_label', x_label, 'y_label', y_label, 'interpreter', 'latex',...
-    'offsetRatio', 0, 'font_size', font_size, 'yticks', ytickvalues)
+    'offsetRatio', 0, 'font_size', font_size, 'yticks', ytickvalues); %%'majorTickRatio', 0)
 yticks(0:0.2:1.6);
 yticklabels(0:0.2:1.6);
 

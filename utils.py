@@ -39,19 +39,6 @@ def make_switching_world_withCheck(rlow, rhigh, nblocks, ntrialsLow, ntrialsHigh
     return world, ntrials
 
 
-def predict_sigmoid(p, x):
-    return p[2] + (1 - 2 * p[2]) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
-
-def errorsigmoid(p, x, y):
-    '''
-    Error function used for sigmoid fitting
-    '''
-    # lapse = p[2]
-    # preds = lapse + (1 - 2 * lapse) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
-    preds = predict_sigmoid(p, x)
-
-    return np.sum((preds - y) ** 2)
-
 
 def find_LR_transition_fit(world, agent, window):
     '''
@@ -82,6 +69,7 @@ def find_LR_transition_fit(world, agent, window):
     #     choicelst = np.array(choicelst)
 
     # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', world.side_history[0][0])
+
     if np.ndim(np.array(world.side_history)) == 1:
         # print('here, first side = ', )
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0])
@@ -92,7 +80,7 @@ def find_LR_transition_fit(world, agent, window):
     return pRight, pLeft, choicelst
 
 
-def find_experiment_metrics(data, window):
+def find_experiment_metrics(data, window, type='sigmoid'):
     '''
     Determine the parameter of the block switching in a given behavioral session
     filename: string, name of behavior .mat file containing allchoices and alltargets
@@ -103,6 +91,7 @@ def find_experiment_metrics(data, window):
     blocktrans = np.where(np.diff(data['alltargets']))[1]
     blocksizes = np.diff(blocktrans)
     blocksizes = np.hstack([blocktrans[0] + 1, blocksizes])
+    # print(blocksizes)
 
     choicelst = split_by_trials(data['allchoices'][0, :sum(blocksizes)], blocksizes, chop='max')
 
@@ -112,7 +101,27 @@ def find_experiment_metrics(data, window):
 
     choicelst = (choicelst + 1) / 2
 
-    pRight, pLeft = fit_sigmoidal(choicelst, first_side=1-data['alltargets'][0][0])
+    if type == 'sigmoid':
+        pRight, pLeft = fit_sigmoidal(choicelst, first_side=1-data['alltargets'][0][0])
+    elif type == 'doublesigmoid':
+        if data['alltargets'][0][0] == 0:
+            # print('left')
+            leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
+            rightAverage = np.nanmean(choicelst[::2, :], axis=0)
+        else:
+            # print('right')
+            rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
+            leftAverage = np.nanmean(choicelst[::2, :], axis=0)
+
+        pfit = fit_doublesigmoid_helper(leftAverage, rightAverage)
+        [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR] = pfit
+        pRight = [slopeR, offsetR, lapseR]
+        pLeft = [slopeL, offsetL, lapseL]
+
+    elif type == 'exponential':
+        first_side = 1-data['alltargets'][0][0]
+        pRight, _ = fit_expfun2([1, 0], np.arange(window), 1-np.mean(choicelst[first_side::2,:], axis=0)) #fit_exponential(choicelst, first_side=1 - data['alltargets'][0][0])
+        pLeft, _ = fit_expfun2([1, 0], np.arange(window), np.mean(choicelst[1-first_side::2,:], axis=0)) #fit_exponential(choicelst, first_side=1 - data['alltargets'][0][0])
 
     # Efficiency
     feedback = (-data['allchoices']) == (data['alltargets'].astype('int') * 2 - 1)
@@ -120,76 +129,6 @@ def find_experiment_metrics(data, window):
 
     return pRight, pLeft, choicelst, eff
 
-
-def find_transition_guess(sig):
-    '''
-    Returns the offset where a time series crosses 0.5
-    '''
-    return np.argmin((sig - 0.5) ** 2)
-
-
-def find_transition_guess_binary(sig):
-    '''
-    Returns the offset where a time series crosses 0.5, through binary segmentation
-    '''
-    candidates = np.where(np.diff(sig > 0.5) != 0)[0]
-    if len(candidates) == 0:
-        return -1
-    else:
-        return np.where(np.diff(sig > 0.5) != 0)[0][0]
-
-
-def fit_sigmoidal(choicelst, first_side):
-    '''
-    Fit a sigmoidal to the average choice data
-    first_side: first side that is rewarded, i.e. world.side_history[0][0]
-    returns: pright, pleft, where each is a tuple (slope, offset, lapse)
-    '''
-    # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', first_side)
-    if first_side == 0:
-        # print('left')
-        leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
-        rightAverage = np.nanmean(choicelst[::2, :], axis=0)
-    else:
-        # print('right')
-        rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
-        leftAverage = np.nanmean(choicelst[::2, :], axis=0)
-
-    offsetsR = np.arange(len(rightAverage))
-    offsetsL = np.arange(len(leftAverage))
-
-    # Fit right transitions
-    # print(rightAverage)
-    funR = lambda x: errorsigmoid(x, offsetsR, rightAverage)
-    switchGuessR = find_transition_guess_binary(rightAverage)  # offset that crosses 0.5
-    if switchGuessR == -1:  # No switch happened!
-        # pRight = [0, -np.inf, 0]
-        paramsRight = scipy.optimize.minimize(funR, [1, -len(rightAverage), 0],
-                                              bounds=((None, 0), (None, 0), (0, 0.5)))
-    else:
-        paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 0],
-                                              bounds=((None, 0), (None, 0), (0, 0.5)))
-    pRight = paramsRight.x
-    # print(pRight)
-
-    # print('done with right')
-    # Fit left transitions
-    # print(leftAverage)
-    funL = lambda x: errorsigmoid(x, offsetsL, leftAverage)
-    switchGuessL = find_transition_guess_binary(leftAverage)
-    if switchGuessL == -1:  # No switch happened!
-        # pLeft = [0, -np.inf, 0]
-        paramsLeft = scipy.optimize.minimize(funL, [-1, -len(leftAverage), 0],
-                                             bounds=((0, None), (None, 0), (0, 0.5)))
-    else:
-        # print('here')
-        paramsLeft = scipy.optimize.minimize(funL, [-1, -switchGuessL, 0],
-                                             bounds=((0, None), (None, 0), (0, 0.5)))
-    pLeft = paramsLeft.x
-    # print(pLeft)
-    # print('done with left')
-
-    return pRight, pLeft
 
 
 def split_by_trials(seq, ntrials, chop='none'):
@@ -344,6 +283,47 @@ def get_num_rewards_trailing_block(world, agent):
 
     return np.array(nrewlst)
 
+#### ERROR FUNCTIONS USED FOR CURVE FITTING #####
+def predict_sigmoid(x, p):
+    return p[2] + (1 - 2 * p[2]) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
+
+def predict_exponential(p, x):
+    C = p[1]
+    alpha = p[0]
+    return C - C * np.exp(-alpha * x)
+
+def predict_doublesigmoid(x, p):
+    gamma = p[2]
+    lamb = p[3]
+    return gamma + (1 - gamma - lamb) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
+
+def error_exponential(p, x, y):
+    '''
+    Error function used for exponential fitting
+    '''
+    preds = predict_exponential(p, x)
+    return np.sum((preds - y) ** 2)
+
+def errorsigmoid(p, x, y):
+    '''
+    Error function used for sigmoid fitting
+    '''
+    # lapse = p[2]
+    # preds = lapse + (1 - 2 * lapse) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
+    preds = predict_sigmoid(x, p)
+
+    return np.sum((preds - y) ** 2)
+
+def errordoublesigmoid(p, xR, yR, xL, yL):
+    '''
+    p is an array with [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR]
+    '''
+    [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR] = p
+    predR = predict_doublesigmoid(xR, [slopeR, offsetR, lapseL, lapseR])
+    predL = predict_doublesigmoid(xL, [slopeL, offsetL, lapseR, lapseL])
+    # print(predL, predR)
+
+    return np.nansum((predL - yL) ** 2) + np.nansum((predR - yR) ** 2) + 0.01 * (slopeL**2 + slopeR**2)
 
 def exp_fun(x, params):
     alpha = params[0]
@@ -368,13 +348,108 @@ def loss2(params, x, y):
     return np.sum((pred - y) ** 2)
 
 
+def find_transition_guess(sig):
+    '''
+    Returns the offset where a time series crosses 0.5
+    '''
+    return np.argmin((sig - 0.5) ** 2)
+
+
+def find_transition_guess_binary(sig):
+    '''
+    Returns the offset where a time series crosses 0.5, through binary segmentation
+    '''
+    candidates = np.where(np.diff(sig > 0.5) != 0)[0]
+    if len(candidates) == 0:
+        return -1
+    else:
+        return np.where(np.diff(sig > 0.5) != 0)[0][0]
+
+
+### FITTING FUNCITONS ####
+def fit_doublesigmoid_helper(leftAverage, rightAverage):
+    '''
+    Fit two sigmoids to the left/right average data
+    '''
+    offsetsR = np.arange(len(rightAverage))
+    offsetsL = np.arange(len(leftAverage))
+    funR = lambda x: errordoublesigmoid(x, offsetsR, 1-rightAverage, offsetsL, leftAverage)
+    switchGuessR = find_transition_guess_binary(leftAverage)  # offset that crosses 0.5
+    switchGuessL = find_transition_guess_binary(rightAverage)
+    if switchGuessR == -1:  # No switch happened!
+        switchGuessR = len(rightAverage)
+
+    if switchGuessL == -1:# No switch happened!
+        switchGuessL = len(leftAverage)
+        # pRight = [0, -np.inf, 0]
+
+    paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 1, -switchGuessL, 0, 0],
+                                          bounds=((None, 0), (None, 0), (None, 0), (None, 0), (0, 0.5), (0, 0.5)))
+    pRight = paramsRight.x
+
+    return pRight
+
+
+def fit_sigmoidal(choicelst, first_side):
+    '''
+    Fit a sigmoidal to the average choice data
+    first_side: first side that is rewarded, i.e. world.side_history[0][0]
+    returns: pright, pleft, where each is a tuple (slope, offset, lapse)
+    '''
+    # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', first_side)
+    if first_side == 0:
+        # print('left')
+        leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
+        rightAverage = np.nanmean(choicelst[::2, :], axis=0)
+    else:
+        # print('right')
+        rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
+        leftAverage = np.nanmean(choicelst[::2, :], axis=0)
+
+    offsetsR = np.arange(len(rightAverage))
+    offsetsL = np.arange(len(leftAverage))
+
+    # Fit right transitions
+    # print(rightAverage)
+    funR = lambda x: errorsigmoid(x, offsetsR, rightAverage)
+    switchGuessR = find_transition_guess_binary(rightAverage)  # offset that crosses 0.5
+    if switchGuessR == -1:  # No switch happened!
+        # pRight = [0, -np.inf, 0]
+        paramsRight = scipy.optimize.minimize(funR, [1, -len(rightAverage), 0],
+                                              bounds=((None, 0), (None, 0), (0, 0.2)))
+    else:
+        paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 0],
+                                              bounds=((None, 0), (None, 0), (0, 0.2)))
+    pRight = paramsRight.x
+    # print(pRight)
+
+    # print('done with right')
+    # Fit left transitions
+    # print(leftAverage)
+    funL = lambda x: errorsigmoid(x, offsetsL, leftAverage)
+    switchGuessL = find_transition_guess_binary(leftAverage)
+    if switchGuessL == -1:  # No switch happened!
+        # pLeft = [0, -np.inf, 0]
+        paramsLeft = scipy.optimize.minimize(funL, [-1, -len(leftAverage), 0],
+                                             bounds=((0, None), (None, 0), (0, 0.2)))
+    else:
+        # print('here')
+        paramsLeft = scipy.optimize.minimize(funL, [-1, -switchGuessL, 0],
+                                             bounds=((0, None), (None, 0), (0, 0.2)))
+    pLeft = paramsLeft.x
+    # print(pLeft)
+    # print('done with left')
+
+    return pRight, pLeft
+
 def fit_expfun2(params0, datax, datay):
     # Filter out nan's in datax and datay
-    goody = datay[~np.isnan(datax)]
-    goodx = datax[~np.isnan(datax)]
+    goody = datay[~np.isnan(datax) & ~np.isnan(datay)]
+    goodx = datax[~np.isnan(datax)& ~np.isnan(datay)]
+    # print(goodx, goody)
 
     result = scipy.optimize.minimize(loss2, params0, (goodx, goody),
-                                     bounds=((0, None), (0, None), (None, None)))
+                                     bounds=((0, None), (0, None)))
     params = result.x
     ypred = exp_fun2(datax, params)
     return params, ypred
@@ -425,6 +500,31 @@ def simulate_rew_error_correlations(world, agent):
             stds.append(np.nanstd(elem) / np.sqrt(len(elem)))
 
     return xvals[1:], means, stds, ysplit
+
+
+### USEFUL HELPER FUNCTIONS ###
+def in_percentile(arr, val):
+    '''
+    Returns the percentile of data point 'val' in lst
+    '''
+    arr = np.array(arr)
+    l = arr.shape[-1]
+    return np.sum(arr <= val, axis=arr.ndim - 1) / l
+
+
+def pad_to_same_length(arrlst):
+    arrlens = [len(arr) for arr in arrlst]
+    maxlen = np.max(arrlens)
+    # print(maxlen)
+    # pad everything to maxlen
+    padlst = []
+    for arr in arrlst:
+        Ntopad = maxlen - len(arr)
+        # print(Ntopad)
+        padded = np.pad(np.array(arr, dtype='float'), (0, Ntopad), constant_values=np.nan)
+        padlst.append(padded)
+    return np.array(padlst)
+
 
 
 

@@ -39,7 +39,7 @@ def run_repeated_single_agent(params):
         agent, world, pR, pL, hmm = run_single_agent(0, 0, params)
 
         xvals, means, _, _ = simulate_rew_error_correlations(world, agent)
-        paramsFit, _ = fit_expfun2([0.5, 4, 5], xvals, np.array(means))
+        paramsFit, _ = fit_expfun2([0.5, 4], xvals, np.array(means))
 
         efflist[idx] = agent.find_efficiency()
 
@@ -57,7 +57,7 @@ def run_repeated_single_agent(params):
         LapseR[idx] = pR[2]
         ParamsA[idx] = paramsFit[0]
         ParamsB[idx] = paramsFit[1]
-        ParamsC[idx] = paramsFit[2]
+        # ParamsC[idx] = paramsFit[2]
 
     return efflist, T11lst, T22lst, E1lst, E2lst, PRslopelist, PLslopelist, \
            PRoffsetlist, PLoffsetlist, LapseL, LapseR, ParamsA, ParamsB, ParamsC
@@ -101,7 +101,7 @@ def run_multiple_agents(params):
             agent, world, pR, pL, hmm = run_single_agent(idx, idy, params)
 
             xvals, means, _, _ = simulate_rew_error_correlations(world, agent)
-            paramsFit, _ = fit_expfun2([0.5, 4, 5], xvals, np.array(means))
+            paramsFit, _ = fit_expfun2([0.5, 4], xvals, np.array(means))
 
             efflist[idx][idy] = agent.find_efficiency()
 
@@ -119,7 +119,7 @@ def run_multiple_agents(params):
             LapseR[idx][idy] = pR[2]
             ParamsA[idx][idy] = paramsFit[0]
             ParamsB[idx][idy] = paramsFit[1]
-            ParamsC[idx][idy] = paramsFit[2]
+            # ParamsC[idx][idy] = paramsFit[2]
 
     return efflist, T11lst, T22lst, E1lst, E2lst, PRslopelist, PLslopelist, \
            PRoffsetlist, PLoffsetlist, LapseL, LapseR, ParamsA, ParamsB, ParamsC
