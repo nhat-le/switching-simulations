@@ -121,6 +121,7 @@ Xtrain = features_shuffled(1:ntrain,:);
 ytrain = labels_shuffled(1:ntrain);
 Xtest = features_shuffled(ntrain + 1:end,:);
 ytest = labels_shuffled(ntrain + 1:end);
+%%
 
 % t = templateLinear();
 t = templateSVM('Standardize',true, 'KernelFunction', 'rbf');
