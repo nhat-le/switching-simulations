@@ -446,6 +446,7 @@ def fit_expfun2(params0, datax, datay):
     # Filter out nan's in datax and datay
     goody = datay[~np.isnan(datax) & ~np.isnan(datay)]
     goodx = datax[~np.isnan(datax)& ~np.isnan(datay)]
+    # print(goodx, goody)
 
     result = scipy.optimize.minimize(loss2, params0, (goodx, goody),
                                      bounds=((0, None), (0, None)))
@@ -501,6 +502,7 @@ def simulate_rew_error_correlations(world, agent):
     return xvals[1:], means, stds, ysplit
 
 
+### USEFUL HELPER FUNCTIONS ###
 def in_percentile(arr, val):
     '''
     Returns the percentile of data point 'val' in lst
@@ -508,6 +510,20 @@ def in_percentile(arr, val):
     arr = np.array(arr)
     l = arr.shape[-1]
     return np.sum(arr <= val, axis=arr.ndim - 1) / l
+
+
+def pad_to_same_length(arrlst):
+    arrlens = [len(arr) for arr in arrlst]
+    maxlen = np.max(arrlens)
+    # print(maxlen)
+    # pad everything to maxlen
+    padlst = []
+    for arr in arrlst:
+        Ntopad = maxlen - len(arr)
+        # print(Ntopad)
+        padded = np.pad(np.array(arr, dtype='float'), (0, Ntopad), constant_values=np.nan)
+        padlst.append(padded)
+    return np.array(padlst)
 
 
 
