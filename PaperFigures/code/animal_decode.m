@@ -20,7 +20,13 @@ states = reshape(statesFlat, size(expeff_all, 1), []);
 
 
 %%
-plot(nanmean(states))
+paperaesthetics;
+errorbar(1:size(states, 2), nanmean(states), nanstd(states, [], 1) / sqrt(size(states, 1)), 'o',...
+    'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'Color', bluecol,...
+    'LineWidth', 2)
+xlim([0, 20])
+ylim([1 4])
+mymakeaxis('x_label', 'Training days', 'y_label', 'Mean decoded state')
 
 
 %% 

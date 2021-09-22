@@ -1,5 +1,5 @@
 % Figures for decoding performance
-load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/svmresults_from_pickle_083121.mat');
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/svmresults_from_pickle_090221.mat');
 
 mindecodingQ = min(decoding_perf, [], [3, 4]);
 mindecodingIB = squeeze(min(decoding_perf, [], [1, 2]));
@@ -16,7 +16,11 @@ produce_heatmap(mindecodingIB', prewlst, pswitchlst, 'clim', [0.5, 1], 'legendna
 
 %% Regime demarcation (with k-means clustering)
 % Form the feature vectors
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
+% filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
+prob = 0.6;
+rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
+filedir = sprintf('%s/EGreedyQLearningAgent-withCorr-prob%.2fto%.2f-072321.mat', rootdir, 1-prob, prob);
+
 load(filedir);
 
 % rng(19)
@@ -33,8 +37,9 @@ Qslope_flat = reshape(PLslopelist, [], 1);
 Qoffset_flat = reshape(PLoffsetlist, [], 1);
 
 [Qxdim, Qydim] = size(efflist);
+filedir = sprintf('%s/EGreedyInferenceBasedAgent-withCorr-prob%.2fto%.2f-072121.mat', rootdir, 1-prob, prob);
 
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyInferenceBasedAgent-withCorr-prob0.00to1.00-072121.mat';
+% filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyInferenceBasedAgent-withCorr-prob0.00to1.00-072121.mat';
 load(filedir);
 
 IBeff_flat = reshape(efflist, [], 1);
@@ -80,7 +85,7 @@ produce_heatmap(idxQ, epslst, gammalst, 'clim', [1 N], 'legendname', 'Performanc
 
 %% SVM on the class labels
 % Load simult sim dataset
-load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/svmresults_from_pickle_083121.mat');
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/svmresults_from_pickle_090221.mat');
 % idxQresize = ceil(imresize(idxQ, [11 11]));
 % idxIBresize = floor(imresize(idxIB, [11 11]));
 
