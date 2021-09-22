@@ -40,16 +40,12 @@ def make_switching_world_withCheck(rlow, rhigh, nblocks, ntrialsLow, ntrialsHigh
 
 
 
-def find_LR_transition_fit(world, agent, window):
+def find_LR_transition_fit(world, agent, window, type='sigmoid'):
     '''
     For a switching world, determines the agent transition functions,
     for left->right and right->left transitions
     window: how many trials after the transition do we want to keep for fitting?
     '''
-    # Find where the block transitions happen
-    # side_history = np.array(world.rate_history)[:, 0]
-    # blocktrans = np.where(np.diff(side_history) != 0)[0][:-1]
-
     # Get the choices around the transition
     if world.ntrialblocks[-1] == 0:
         choicelst = split_by_trials(np.array(agent.choice_history), world.ntrialblocks[:-1], chop='max')
@@ -59,24 +55,30 @@ def find_LR_transition_fit(world, agent, window):
     if window is None:
         window = choicelst.shape[1]
     choicelst = choicelst[:, :window]
-    # print(choicelst.shape)
 
-
-    #     choicelst = []
-    #     for i in range(window):
-    #         choicelst.append(np.array(agent.choice_history)[blocktrans + i])
-
-    #     choicelst = np.array(choicelst)
-
-    # print('choicemean = ', np.mean(choicelst[:,::2]), 'side=  ', world.side_history[0][0])
 
     if np.ndim(np.array(world.side_history)) == 1:
-        # print('here, first side = ', )
+        print('here, first side = ', )
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0])
     else:
         # print('here 2, first side = ', world.side_history[0][0])
-        # pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.side_history[0][0])
-        pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.rate_history[0][0] < 0.5)
+        if type == 'sigmoid':
+            pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.rate_history[0][0] < 0.5)
+        elif type == 'doublesigmoid':
+            # TODO: confirm side is correct!
+            if world.side_history[0][0] == 0:
+                # print('left')
+                leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
+                rightAverage = np.nanmean(choicelst[::2, :], axis=0)
+            else:
+                # print('right')
+                rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
+                leftAverage = np.nanmean(choicelst[::2, :], axis=0)
+
+            pfit = fit_doublesigmoid_helper(leftAverage, rightAverage)
+            [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR] = pfit
+            pRight = [slopeR, offsetR, lapseR]
+            pLeft = [slopeL, offsetL, lapseL]
     return pRight, pLeft, choicelst
 
 
