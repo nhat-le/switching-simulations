@@ -43,7 +43,7 @@ def fit_animal(animal, datarange=-1):
             pR, pL, choicelst, eff = find_experiment_metrics(expdata, window=20, type='doublesigmoid')
 
             # skip if too few blocks
-            if choicelst.shape[0] <= 5:
+            if choicelst.shape[0] <= 0:
                 pL_all.append([np.nan] * 3)
                 pR_all.append([np.nan] * 3)
                 eff_all.append(np.nan)

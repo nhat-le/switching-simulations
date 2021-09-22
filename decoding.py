@@ -4,7 +4,7 @@ from utils import in_percentile
 
 
 
-def get_Qmetrics(gamma, eps):
+def get_Qmetrics(gamma, eps, rlow=0):
     gammalst = [gamma]
     epslst = [eps]
 
@@ -20,7 +20,7 @@ def get_Qmetrics(gamma, eps):
     ntrials_per_block = [10, 40]
     seed = 0
     rlow = 0
-    rhigh = 1
+    rhigh = 1 - rlow
     np.random.seed(123)
 
     params = {'N_iters': N_iters, 'num_states': num_states, 'obs_dim': obs_dim,

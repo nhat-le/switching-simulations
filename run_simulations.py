@@ -100,8 +100,23 @@ def run_multiple_agents(params):
 
             agent, world, pR, pL, hmm = run_single_agent(idx, idy, params)
 
+            # Previous fitting code
             xvals, means, _, _ = simulate_rew_error_correlations(world, agent)
             paramsFit, _ = fit_expfun2([0.5, 4], xvals, np.array(means))
+            # if data['alltargets'][0][0] == 0:
+            #     # print('left')
+            #     leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
+            #     rightAverage = np.nanmean(choicelst[::2, :], axis=0)
+            # else:
+            #     # print('right')
+            #     rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
+            #     leftAverage = np.nanmean(choicelst[::2, :], axis=0)
+            #
+            # pfit = fit_doublesigmoid_helper(leftAverage, rightAverage)
+            # [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR] = pfit
+            # pRight = [slopeR, offsetR, lapseR]
+            # pLeft = [slopeL, offsetL, lapseL]
+
 
             efflist[idx][idy] = agent.find_efficiency()
 
@@ -165,6 +180,9 @@ def run_single_agent(idx, idy, params):
         hmm = None
 
     # Sigmoidal fit for choice transitions
-    pR, pL, _ = find_LR_transition_fit(world, agent, window=window)
+    # pR, pL, _ = find_LR_transition_fit(world, agent, window=window, type='sigmoid')
+    # print('sigmoid:', pR, pL)
+    pR, pL, _ = find_LR_transition_fit(world, agent, window=window, type='doublesigmoid')
+    # print('doublesigmoid', pR, pL)
     return agent, world, pR, pL, hmm
 

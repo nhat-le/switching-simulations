@@ -30,16 +30,19 @@ im = imshow(arr, 'InitialMagnification', 'fit', 'XData', [min(xlst), max(xlst)],
     'YData', [min(ylst), max(ylst)]);
 
 % Make colorbar
-% redwhiteR = linspace(1, 0.7, 255);
-% redwhiteG = linspace(1, 0, 255);
-% redwhiteB = linspace(1, 0, 255);
-
-redwhiteR = linspace(1, 0, 255);
+redwhiteR = linspace(1, 0.7, 255);
 redwhiteG = linspace(1, 0, 255);
-redwhiteB = linspace(1, 0.5, 255);
+redwhiteB = linspace(1, 0, 255);
+
+% for red gradient figures
+% redwhiteR = linspace(1, 0, 255);
+% redwhiteG = linspace(1, 0, 255);
+% redwhiteB = linspace(1, 0.5, 255);
 redwhite = [redwhiteR; redwhiteG; redwhiteB]';
 
-redwhite = brewermap(5, 'Blues');
+% for state decoding figs
+% redwhite = brewermap(5, 'Blues');
+
 colormap(redwhite);
 % colormap hot
 c = colorbar;
