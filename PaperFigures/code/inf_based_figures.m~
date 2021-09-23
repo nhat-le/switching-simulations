@@ -76,13 +76,8 @@ produce_heatmap(slope_at_X4, prewlst, pswitchlst, 'clim', [0,3], 'legendname', '
 % theoryeff = 0.5 + (1 - LapseL) .* (0.5 + PLoffsetlist / 30);
 % produce_heatmap(theoryeff, prewlst, pswitchlst, [0.5 1], 'Theory eff');
 
-% a(1:5)
-% 
-% a(0:5)
-% 
-% 
-% 0 , 5, 10 , 15
-% i* 5
+a(1:5)
+
 
 %% Plot correlation fits
 pAarr = ParamsA(:,2);
