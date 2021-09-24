@@ -1,4 +1,4 @@
-from utils import *
+from utils import * #fit_expfun2, make_switching_world, find_LR_transition_fit, simulate_rew_error_correlations
 from worldModels import *
 from agents import *
 import numpy as np
@@ -97,8 +97,9 @@ def run_multiple_agents(params):
         print('* idx = ', idx)
         for idy in range(len(ylst)):
             print('     idy = ', idy)
-
+            # print(idx, idy, params)
             agent, world, pR, pL, hmm = run_single_agent(idx, idy, params)
+            # print(pR, pL)
 
             # Previous fitting code
             xvals, means, _, _ = simulate_rew_error_correlations(world, agent)

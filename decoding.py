@@ -19,7 +19,7 @@ def get_Qmetrics(gamma, eps, rlow=0):
     sigmoid_window = 30
     ntrials_per_block = [10, 40]
     seed = 0
-    rlow = 0
+    # rlow = 0
     rhigh = 1 - rlow
     np.random.seed(123)
 
@@ -37,7 +37,7 @@ def get_Qmetrics(gamma, eps, rlow=0):
     return Qmetrics
 
 
-def get_IB_metrics(psw, prew):
+def get_IB_metrics(psw, prew, rlow=0):
     pswitchlst = [psw]
     prewlst = [prew]
 
@@ -52,8 +52,8 @@ def get_IB_metrics(psw, prew):
     sigmoid_window = 30
     ntrials_per_block = [10, 40]
     seed = 0
-    rlow = 0
-    rhigh = 1
+    # rlow = 0
+    rhigh = 1 - rlow
     np.random.seed(123)
 
     params = {'N_iters': N_iters, 'num_states': num_states, 'obs_dim': obs_dim,
