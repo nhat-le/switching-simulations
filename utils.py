@@ -66,7 +66,7 @@ def find_LR_transition_fit(world, agent, window, type='sigmoid'):
             pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.rate_history[0][0] < 0.5)
         elif type == 'doublesigmoid':
             # TODO: confirm side is correct!
-            if world.side_history[0][0] == 0:
+            if world.rate_history[0][0] > 0.5:
                 # print('left')
                 leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
                 rightAverage = np.nanmean(choicelst[::2, :], axis=0)
@@ -74,7 +74,8 @@ def find_LR_transition_fit(world, agent, window, type='sigmoid'):
                 # print('right')
                 rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
                 leftAverage = np.nanmean(choicelst[::2, :], axis=0)
-
+            # print(rightAverage)
+            # print(leftAverage)
             pfit = fit_doublesigmoid_helper(leftAverage, rightAverage)
             [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR] = pfit
             pRight = [slopeR, offsetR, lapseR]
@@ -384,12 +385,11 @@ def fit_doublesigmoid_helper(leftAverage, rightAverage):
     if switchGuessL == -1:# No switch happened!
         switchGuessL = len(leftAverage)
         # pRight = [0, -np.inf, 0]
+    # print('hi')
+    paramsFit = scipy.optimize.minimize(funR, [-switchGuessR, 1, -switchGuessL, 1, 0, 0],
+                                          bounds=((None, 0), (0, None), (None, 0), (0, None), (0, 0.5), (0, 0.5)))
 
-    paramsRight = scipy.optimize.minimize(funR, [1, -switchGuessR, 1, -switchGuessL, 0, 0],
-                                          bounds=((None, 0), (None, 0), (None, 0), (None, 0), (0, 0.5), (0, 0.5)))
-    pRight = paramsRight.x
-
-    return pRight
+    return paramsFit.x
 
 
 def fit_sigmoidal(choicelst, first_side):

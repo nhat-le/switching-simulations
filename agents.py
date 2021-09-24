@@ -159,6 +159,10 @@ class EGreedyQLearningAgent(Agent):
 
 
 
+
+
+
+
 class ValueAccumulationAgent(Agent):
     '''
     Simulate an agent that uses value accumulation as described in Mainen's paper
