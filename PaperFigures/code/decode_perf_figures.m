@@ -20,13 +20,14 @@
 addpath('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code')
 prob = 1;
 rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
-filedir = sprintf('%s/EGreedyQLearningAgent-withCorr-prob%.2fto%.2f-072321.mat', rootdir, 1-prob, prob);
+% filedir = sprintf('%s/EGreedyQLearningAgent-withCorr-prob%.2fto%.2f-072321.mat', rootdir, 1-prob, prob);
+filedir = sprintf('%s/EGreedyQLearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat', rootdir, 1-prob, prob);
 
 load(filedir);
 
 % rng('shuffle')
-rng(123)
-N = 3;
+rng(127)
+N = 5;
 Qeff_flat = reshape(efflist, [], 1);
 Qlapse_flat = reshape(LapseL, [], 1);
 Qslope_flat = reshape(PLslopelist, [], 1);
@@ -38,7 +39,8 @@ Qoffset_flat = reshape(PLoffsetlist, [], 1);
 % Qslope_flat(Qslope_flat > upperQslope) = nan;
 
 [Qxdim, Qydim] = size(efflist);
-filedir = sprintf('%s/EGreedyInferenceBasedAgent-withCorr-prob%.2fto%.2f-072121.mat', rootdir, 1-prob, prob);
+% filedir = sprintf('%s/EGreedyInferenceBasedAgent-withCorr-prob%.2fto%.2f-072121.mat', rootdir, 1-prob, prob);
+filedir = sprintf('%s/EGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat', rootdir, 1-prob, prob);
 
 % filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyInferenceBasedAgent-withCorr-prob0.00to1.00-072121.mat';
 load(filedir);
@@ -48,8 +50,8 @@ IBlapse_flat = reshape(LapseL, [], 1);
 IBslope_flat = reshape(PLslopelist, [], 1);
 IBoffset_flat = reshape(PLoffsetlist, [], 1);
 
-% IBoffset_flat(IBoffset_flat < -20) = -20;
-% Qoffset_flat(Qoffset_flat < -20) = -20;
+IBoffset_flat(IBoffset_flat < -20) = nan;
+Qoffset_flat(Qoffset_flat < -20) = nan;
 
 % for 0.7 prob
 % upperIBslope = median(IBslope_flat) + 1.6 * std(IBslope_flat);
@@ -69,10 +71,10 @@ features_norm = (features - nanmean(features, 1)) ./ nanstd(features, [], 1);
 
 [idx, C] = kmeans(features_norm, N, 'MaxIter', 2000);
 
-% idx(features(:,3) ./ features(:,2) > 4/0.15) = 2;
 
-% Permute the indices for a more logical order
-% We want: 2->5, 5->2
+% Refine the labels..
+idx(idx == 3 & features(:,4) > -2) = 4;
+
 
 idxcopy = idx;
 
@@ -81,7 +83,7 @@ switch prob
     case 1
 %         idx(idxcopy == 2) = 5;
 %         idx(idxcopy == 5) = 2;
-        idx = rotate(idx, [2, 3]);
+%         idx = rotate(idx, [2, 3]);
     case 0.9
 %         idx(idxcopy == 3) = 2;
 %         idx(idxcopy == 5) = 3;
@@ -99,6 +101,10 @@ idxIB = idx(1:numel(IBeff_flat));
 idxQ = idx(numel(IBeff_flat) + 1:end);
 idxIB =reshape(idxIB, IBxdim, IBydim);
 idxQ = reshape(idxQ, Qxdim, Qydim);
+
+
+
+
 
 % idxIB(isnan(idxIB)) =  N+1;
 % idxQ(isnan(idxQ)) = N+1;
@@ -128,19 +134,20 @@ if ~exist(filename, 'file')
 end
 
 
-%% Visualize clusters
+% Visualize clusters
 figure;
 hold on
 for i = 1:4
     for j = 1:4
         subplot(4,4,(i-1)*4+j)
         hold on
-        plot(features(idx==3,i), features(idx==3,j), '.'); %blue
+        plot(features(idx==1,i), features(idx==1,j), '.'); %blue
         plot(features(idx==2,i), features(idx==2,j), '.'); %red
-        plot(features(idx==1,i), features(idx==1,j), '.'); %yellow
-%         plot(features_norm(idx==4,i), features_norm(idx==4,j), '.'); %purple
-%         plot(features_norm(idx==5,i), features_norm(idx==5,j), '.'); %green
-
+        plot(features(idx==3,i), features(idx==3,j), '.'); %yellow
+        plot(features(idx==4,i), features(idx==4,j), '.'); %purple
+        plot(features(idx==5,i), features(idx==5,j), '.'); %green
+%         plot(features(idx==1 & features(:,4) > -2,i), features(idx==1 & features(:,4) > -2,j), 'kx'); %green
+        
         if i == 1
             xlabel('Eff')
         elseif i == 2
@@ -261,11 +268,11 @@ for i = 1:4
     for j = 1:4
         subplot(4,4,(i-1)*4+j)
         hold on
-        plot(features(labels==3,i), features(labels==3,j), '.'); %blue
+        plot(features(labels==1,i), features(labels==1,j), '.'); %blue
         plot(features(labels==2,i), features(labels==2,j), '.'); %red
-        plot(features(labels==1,i), features(labels==1,j), '.'); %yellow
-%         plot(features_norm(idx==4,i), features_norm(idx==4,j), '.'); %purple
-%         plot(features_norm(idx==5,i), features_norm(idx==5,j), '.'); %green
+        plot(features(labels==3,i), features(labels==3,j), '.'); %yellow
+        plot(features(labels==4,i), features(labels==4,j), '.'); %purple
+        plot(features(labels==5,i), features(labels==5,j), '.'); %green
 
         if i == 1
             xlabel('Eff')
