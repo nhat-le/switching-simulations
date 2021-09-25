@@ -1,7 +1,7 @@
 %% Plotting the performance
 addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTools')
 
-
+% filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/EGreedyQLearningAgent-withCorr-doublesigmoid-prob0.10to0.90-092321.mat';
 filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
 load(filedir);
 

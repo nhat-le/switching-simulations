@@ -18,7 +18,7 @@
 % Form the feature vectors
 % filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
 addpath('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code')
-prob = 1;
+prob = 0.7;
 rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
 % filedir = sprintf('%s/EGreedyQLearningAgent-withCorr-prob%.2fto%.2f-072321.mat', rootdir, 1-prob, prob);
 filedir = sprintf('%s/EGreedyQLearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat', rootdir, 1-prob, prob);
@@ -184,13 +184,6 @@ make_feature_plot(2, means, stds, 'Lapse', [0, 0.3]);
 make_feature_plot(3, means, stds, 'Slope', [0, 20]);
 make_feature_plot(4, -means, stds, 'Offset', nan);
 
-%%
-x = 1;
-while x < 10
-    disp(x)
-    x = x+1;
-    
-end
 
 %% SVM on the class labels
 % Load simult sim dataset

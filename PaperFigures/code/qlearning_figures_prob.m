@@ -2,19 +2,19 @@
 addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTools')
 addpath('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code')
 
-prob = 0.4;
+prob = 0.1;
 type = 'infbased';
 
 rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/';
 
 if strcmp(type, 'qlearning')
     savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/qlearningFigs';
-    filedir = sprintf('%sEGreedyQLearningAgent-withCorr-prob%.2fto%.2f-072321.mat', rootdir, prob, 1-prob);  
-    
+%     filedir = sprintf('%sEGreedyQLearningAgent-withCorr-prob%.2fto%.2f-072321.mat', rootdir, prob, 1-prob);  
+    filedir = sprintf('%sEGreedyQLearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat', rootdir, prob, 1-prob);  
 elseif strcmp(type, 'infbased')
     savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/infbasedFigs';
-    filedir = sprintf('%sEGreedyInferenceBasedAgent-withCorr-prob%.2fto%.2f-072121.mat', rootdir, prob, 1-prob);
-  
+%     filedir = sprintf('%sEGreedyInferenceBasedAgent-withCorr-prob%.2fto%.2f-072121.mat', rootdir, prob, 1-prob);
+    filedir = sprintf('%sEGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat', rootdir, prob, 1-prob);
 end
 savedir = sprintf('%s/prob%.2f', savedir, prob);
 if ~exist(savedir, 'dir')
@@ -38,7 +38,7 @@ plot([0.55, 0.7456, 0.99], [0.01, 0.1986, 0.45], 'kx', 'MarkerSize', 10, 'LineWi
 end
 
 
-saveas(gcf, sprintf('%s/%s-effprob%.2f.pdf', savedir, type, prob))
+% saveas(gcf, sprintf('%s/%s-effprob%.2f.pdf', savedir, type, prob))
 
 
 %% Plotting the switch offset
@@ -53,7 +53,7 @@ plot([0.55, 0.99], [0.01, 0.45], 'k--', 'LineWidth', 2)
 plot([0.55, 0.7456, 0.99], [0.01, 0.1986, 0.45], 'kx', 'MarkerSize', 10, 'LineWidth', 2);    
     
 end
-saveas(gcf, sprintf('%s/%s-offsetprob%.2f.pdf', savedir, type, prob))
+% saveas(gcf, sprintf('%s/%s-offsetprob%.2f.pdf', savedir, type, prob))
 
 
 %% Plotting the switch slope
@@ -66,7 +66,7 @@ produce_heatmap(PLslopelist, prewlst, pswitchlst, 'clim', [0, 15], 'legendname',
 plot([0.55, 0.99], [0.01, 0.45], 'k--', 'LineWidth', 2)
 plot([0.55, 0.7456, 0.99], [0.01, 0.1986, 0.45], 'kx', 'MarkerSize', 10, 'LineWidth', 2);  
 end
-saveas(gcf, sprintf('%s/%s-effslope%.2f.pdf', savedir, type, prob))
+% saveas(gcf, sprintf('%s/%s-effslope%.2f.pdf', savedir, type, prob))
 
 
 %% Plotting the lapse rate (exploration)
@@ -81,7 +81,7 @@ plot([0.55, 0.7456, 0.99], [0.01, 0.1986, 0.45], 'kx', 'MarkerSize', 10, 'LineWi
 
   
 end
-saveas(gcf, sprintf('%s/%s-efflapse%.2f.pdf', savedir, type, prob))
+% saveas(gcf, sprintf('%s/%s-efflapse%.2f.pdf', savedir, type, prob))
 
 
 %% Correlations
@@ -100,10 +100,10 @@ slope_at_X4 = ParamsA .* ParamsB .* exp(-ParamsA * 4);
 produce_heatmap(slope_at_X4, prewlst, pswitchlst, 'clim', [0,3], 'legendname', 'CorrA', ...
     'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4); 
 end
-saveas(gcf, sprintf('%s/%s-effCorrSlopeX4%.2f.pdf', savedir, type, prob))
+% saveas(gcf, sprintf('%s/%s-effCorrSlopeX4%.2f.pdf', savedir, type, prob))
 
-close all
-clear
+% close all
+% clear
 
 %% Theoretical eff
 % theoryeff = 0.5 + (1 - LapseL) .* (0.5 + PLoffsetlist / 30);
@@ -137,8 +137,8 @@ c = legend(lines, labels);
 c.Title.String = '\gamma';
 
 
-close all
-clear
+% close all
+% clear
 
 
 
