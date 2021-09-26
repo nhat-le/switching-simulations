@@ -1,4 +1,4 @@
-function out = load_data(opts)
+function [out,opts] = load_data(opts)
 % Load features of behavioral simulation
 
 %% parse options
@@ -13,6 +13,10 @@ end
 
 if ~isfield(opts, 'prob'); opts.prob = 1; end
 if ~isfield(opts, 'outliermode'); opts.outliermode = 1; end
+
+if ~isfield(opts, 'savepath')
+    opts.savepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
+end
 
 %%
 filedir = sprintf(['%s/' opts.filestem{1}], opts.rootdir, 1-opts.prob, opts.prob);
