@@ -37,4 +37,6 @@ nLlabels = unique(Lfill);
 fprintf('unique class labels: %d\n', numel(nLlabels));
 idx = labels;
 
+out.Y = Y;
+
 end

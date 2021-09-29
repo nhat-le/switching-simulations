@@ -128,7 +128,6 @@ for k = 1:20
     
 end
 
-opts.save = 1;
 if opts.save
     save(fullfile(folder, filename), 'counts_all', '-append');
     fprintf('File saved\n');
