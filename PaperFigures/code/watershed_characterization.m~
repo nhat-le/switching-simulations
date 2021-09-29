@@ -1,5 +1,5 @@
 folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
-prob = 0.3;
+prob = 0.1;
 switch prob
     case 0
         filename = 'opts_prob0.0-2021-09-25 20.52.mat';
@@ -115,10 +115,9 @@ for k = 1:20
     perf = sum(ypred == ytest) / numel(ytest);
 
     % Make the confusion matrix
-    N = numel(unique(ypred));
-    counts = nan(N,N);
-    for i = 1:N
-        for j = 1:N
+    counts = nan(5,5);
+    for i = 1:5
+        for j = 1:5
             counts(i,j) = sum(ypred == i & ytest == j);
 
         end
