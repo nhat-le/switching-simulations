@@ -232,11 +232,19 @@ end
 
 
 %% Now post-process
-counts_allprob1 = do_decoding(1, res1new, opts);
-counts_allprob09 = do_decoding(0.9, res2new, opts);
-counts_allprob08 = do_decoding(0.8, res3new, opts);
-counts_allprob07 = do_decoding(0.7, res4new, opts);
+opts.reps = 1;
+[counts_allprob1, Mdls1] = do_decoding(1, res1new, opts);
+[counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
+[counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
+[counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
 
+savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
+filename = 'decoding_common_092921_withMdl.mat';
+savename = fullfile(savedir, filename);
+if ~exist(savename, 'file')
+    save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
+        'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
+end
 %% Plot decoding accuracy, grouped by class
 load('decoding_common_092821.mat');
 counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
@@ -316,7 +324,7 @@ l.Title.String = 'Class';
 l.Title.FontSize = 12;
 l.Color = 'none';
 
-function counts_all = do_decoding(prob, res, opts)
+function [counts_all, Mdls] = do_decoding(prob, res, opts)
 opts.prob = prob;
 load(sprintf('%s/svmresults_from_pickle_092221_prob%.2f.mat', opts.rootdir, 1-opts.prob));
 
@@ -352,7 +360,9 @@ labels = [idxIBall; idxQall];
 
 %shuffle
 counts_all = {};
-for k = 1:20
+Mdls = {};
+
+for k = 1:opts.reps
 %     order = randperm(numel(labels));
     fprintf('Repetition %d\n', k);
     order = randsample(1:numel(labels), numel(labels), true);
@@ -387,6 +397,7 @@ for k = 1:20
     end
 
     counts_all{k} = counts;
+    Mdls{k} = Mdl;
     
 end
 end

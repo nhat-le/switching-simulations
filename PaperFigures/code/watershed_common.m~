@@ -232,10 +232,16 @@ end
 
 
 %% Now post-process
-counts_allprob1 = do_decoding(1, res1new, opts);
-counts_allprob09 = do_decoding(0.9, res2new, opts);
-counts_allprob08 = do_decoding(0.8, res3new, opts);
-counts_allprob07 = do_decoding(0.7, res4new, opts);
+opts.reps = 1;
+[counts_allprob1, Mdls1] = do_decoding(1, res1new, opts);
+[counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
+[counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
+[counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
+
+savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
+filename = 'svm_Mdl_all_1rep.mat';
+
+save(
 
 %% Plot decoding accuracy, grouped by class
 load('decoding_common_092821.mat');
@@ -300,21 +306,23 @@ for k = 1:Nclust
     end
 
 
-    h = errorbar(1:Nprobs, means, stds, 'o-', 'LineWidth', 0.75, ...
+    h = errorbar(0.7:0.1:1, means, stds, 'o-', 'LineWidth', 0.75, ...
         'MarkerEdgeColor', coltouse, 'Color', coltouse);
-    handles(i) = h;
+    handles(k) = h;
 %     plot(1:Nclust, means, 'Color', coltouse, 'LineWidth', 0.75);
 %     plot(mapvals{probi}, means, 'LineWidth', 2);
 end
 
-mymakeaxis('x_label', 'Probability', 'y_label', plottype{k}, 'xticks', probs, 'yticks', 0:0.1:0.5,...
+mymakeaxis('x_label', 'Probability', 'y_label', 'Decoding accuracy', 'xticks', [0.7 0.8 0.9 1.0],...
             'xticklabels', {'100-0', '90-10', '80-20', '70-30'})% l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.46,0.41,0.12,0.19]);
-% l.FontSize = 12;
-% l.Title.String = 'Probability';
-% l.Title.FontSize = 12;
-% l.Color = 'none';
 
-function counts_all = do_decoding(prob, res, opts)
+l = legend(handles, {'1', '2', '3', '4', '5'}, 'Position', [0.46,0.41,0.12,0.19]);
+l.FontSize = 12;
+l.Title.String = 'Class';
+l.Title.FontSize = 12;
+l.Color = 'none';
+
+function [counts_all, Mdls] = do_decoding(prob, res, opts)
 opts.prob = prob;
 load(sprintf('%s/svmresults_from_pickle_092221_prob%.2f.mat', opts.rootdir, 1-opts.prob));
 
@@ -350,7 +358,9 @@ labels = [idxIBall; idxQall];
 
 %shuffle
 counts_all = {};
-for k = 1:20
+Mdls = {};
+
+for k = 1:opts.reps
 %     order = randperm(numel(labels));
     fprintf('Repetition %d\n', k);
     order = randsample(1:numel(labels), numel(labels), true);
@@ -385,6 +395,7 @@ for k = 1:20
     end
 
     counts_all{k} = counts;
+    Mlds{k} = Mdl;
     
 end
 end
