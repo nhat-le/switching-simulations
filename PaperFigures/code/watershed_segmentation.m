@@ -22,8 +22,16 @@ D = pdist(out.features_norm);
 D = squareform(D);
 [Y,e] = cmdscale(D,2);
 
-% figure;
-% plot(Y(:,1), Y(:,2), '.');
+figure;
+plot(Y(:,1), Y(:,2), '.');
+
+%% pca
+V = pca(out.features_norm);
+Xproj = out.features_norm * V;
+
+figure;
+plot(Xproj(:,1), Xproj(:,2), '.');
+
 
 
 %%

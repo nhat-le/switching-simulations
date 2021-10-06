@@ -99,11 +99,9 @@ end
 %%
 % focus on f12 for main figure
 colors = brewermap(6, 'Pastel1');
-colorsbold = brewermap(6, 'Set1');
+colors2 = brewermap(6, 'Pastel1');
 
 colors = colors([2,1,5,4,3],:);
-colorsbold = colorsbold([2,1,5,4,3],:);
-
 
 figure;
 hold on
@@ -144,12 +142,12 @@ end
 imagesc(domains', 'XData', xcoords, 'YData', ycoords);
 for i = 1:5
     plot(res1.Y(res1.idx == i, 1), res1.Y(res1.idx == i, 2), 'o', ...
-      'MarkerFaceColor', colorsbold(i,:), 'MarkerEdgeColor', 'w', 'MarkerSize', 7);
+      'MarkerFaceColor', colors(i,:), 'MarkerEdgeColor', 'w', 'MarkerSize', 7);
 
 end
 i = 5;
-plot(Yanimals(i,1,1), Yanimals(i,1,2), 'rx', 'LineWidth', 3, 'MarkerSize', 15)
-plot(Yanimals(i,:, 1), Yanimals(i,:,2), 'k', 'LineWidth', 2)
+plot(Yanimals(i,1,1), Yanimals(i,1,2), 'ro')
+plot(Yanimals(i,:, 1), Yanimals(i,:,2), 'g')
 colormap(colors)
 % title(all_animals(i,:))
 

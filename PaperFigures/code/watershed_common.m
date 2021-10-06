@@ -55,7 +55,7 @@ end
 %% MDS plot
 colors = brewermap(6, 'Set1');
 probs = [1, 0.9, 0.8, 0.7];
-% colors = colors([2,1,5,4,3],:); %permute to align with MATLAB default..
+colors = colors([2,1,5,4,3],:); %permute to align with MATLAB default..
 for probi = 1:4
     figure()
     
@@ -241,10 +241,10 @@ opts.reps = 1;
 savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
 filename = 'decoding_common_092921_withMdl.mat';
 savename = fullfile(savedir, filename);
-if ~exist(savename, 'file')
-    save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
-        'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
-end
+% if ~exist(savename, 'file')
+%     save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
+%         'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
+% end
 %% Plot decoding accuracy, grouped by class
 load('decoding_common_092821.mat');
 counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
@@ -404,62 +404,5 @@ end
 
 function res = find_perf(arr, i)
 res = arr(i,i) / sum(arr(:,i));
-
-end
-
-
-function [out, opts] = load_and_run(prob)
-folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
-
-switch prob
-    case 0
-        filename = 'opts_prob0.0-2021-09-25 20.52.mat';
-    case 0.1
-        filename = 'opts_prob0.1-2021-09-25 21.44.mat';
-    case 0.2
-        filename = 'opts_prob0.2-2021-09-25 21.57.mat';
-    case 0.3
-        filename = 'opts_prob0.3-2021-09-25 22.29.mat';
-end
-
-load(fullfile(folder, filename));
-opts.save = 0;
-opts.savefeatures = 0;
-
-
-[idx, out] = run_watershed(opts);
-
-% Rotation for idx
-switch prob
-    case 0
-        idx = rotate(idx, [3, 2, 4]);
-    case 0.1
-        idx = rotate(idx, [6, 1, 3]);
-        idx = rotate(idx, [4 5]);
-    case 0.2
-        idx = rotate(idx, [2, 1, 4]);
-        idx = rotate(idx, [5, 3]);
-    case 0.3
-        idx = rotate(idx, [4, 1]);
-        idx = rotate(idx, [2, 5, 3]);
-end
-
-%[idxQ, idxIB] = reshapeidx(idx, out);
-out.idx = idx;
-
-
-end
-
-
-
-
-
-function res = rotate(arr, order)
-res = arr;
-for i = 1:numel(order) - 1
-    res(arr == order(i)) = order(i+1);
-end
-
-res(arr == order(end)) = order(1);
 
 end

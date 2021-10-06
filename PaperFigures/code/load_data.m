@@ -9,6 +9,8 @@ end
 if ~isfield(opts, 'filestem')
     opts.filestem{1} = 'EGreedyQLearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat';
     opts.filestem{2} = 'EGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat';
+%     opts.filestem{1} = 'EGreedyqlearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-100221.mat';
+%     opts.filestem{2} = 'EGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-100221.mat';
 end
 
 if ~isfield(opts, 'prob'); opts.prob = 1; end
