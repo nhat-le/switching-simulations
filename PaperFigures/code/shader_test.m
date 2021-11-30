@@ -1,3 +1,11 @@
+%%
+[res1, opts1] = load_and_run(0,1);
+[res1b, opts1b] = load_and_run(0,0);
+
+
+
+
+
 %% Load the data
 prob = 0;
 [res, opts] = load_and_run(prob, 1);

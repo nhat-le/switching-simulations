@@ -7,7 +7,9 @@ load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/expfit_par
 % 9.30.21 prob expfit params
 % load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/expfit_params_prob_093021.mat');
 
-load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/decoding_common_092921_withMdl.mat')
+% load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/decoding_common_100821_withknnMdl.mat')
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/decoding_common_101421_withknnMdl.mat')
+
 
 Mdl = Mdls1{1};
 % Decode for all animal sessions
@@ -45,8 +47,8 @@ for i = 1:5
     h(i).FaceColor = colors(orders(i),:);
     h(i).ShowBaseLine = 'off';
 end
-xlim([0.5,17.5])
-mymakeaxis('x_label', 'Training days', 'y_label', 'Fraction of animals', 'xticks', 1:17)
+xlim([0.5,16.5])
+mymakeaxis('x_label', 'Training days', 'y_label', 'Fraction of animals', 'xticks', 1:16)
 l = legend(h(1:3), {'Class 1', 'Class 2', 'Class 3'}, 'Position', [0.4,0.42,0.1,0.1], ...
     'FontSize', 14);
 
@@ -55,7 +57,7 @@ paperaesthetics;
 errorbar(1:size(states, 2), nanmean(states), nanstd(states, [], 1) / sqrt(size(states, 1)), 'o',...
     'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'Color', bluecol,...
     'LineWidth', 2)
-xlim([0, 17])
+xlim([0, 16])
 ylim([1 3])
 mymakeaxis('x_label', 'Training days', 'y_label', 'Mean decoded state', 'yticks', 1:3)
 
@@ -81,20 +83,6 @@ features_norm = (features_flatcopy - nanmean(res1.features, 1)) ./ nanstd(res1.f
 features_proj = features_norm * res1.V;
 Yanimals = reshape(features_proj(:, 1:2), size(expeff_all, 1), [], 2);
 
-%% plot
-figure;
-hold on
-for i = 1:15
-    subplot(4,4,i)
-    hold on
-    for j = 1:5
-        plot(res1.Y(res1.idx == j, 1), res1.Y(res1.idx == j, 2), '.')
-    end
-
-    plot(Yanimals(i,1,1), Yanimals(i,1,2), 'ro')
-    plot(Yanimals(i,:, 1), Yanimals(i,:,2), 'g')
-    title(all_animals(i,:))
-end
 
 %%
 % focus on f12 for main figure
@@ -131,11 +119,11 @@ for i = 1:numel(xcoords)
         
         dist = D(:,1).^2 + D(:,2).^2;
         
-%         Mdls1{1}.predict([xval yval]
+        domains(i,j) = Mdls1{1}.predict([xval; yval]);
         
-        id = argmin(dist);
+%         id = argmin(dist);
         
-        domains(i,j) = res1.idx(id);
+%         domains(i,j) = res1.idx(id);
         
         
     end
@@ -158,6 +146,31 @@ ylim([ymin, ymax])
 mymakeaxis('x_label', 'PC1', 'y_label', 'PC2')
 
 
+%% plot all animals
+figure;
+hold on
+for i = 1:15
+    subplot(4,4,i)
+    hold on
+    
+    imagesc(domains', 'XData', xcoords, 'YData', ycoords);
+%     for j = 1:5
+%         plot(res1.Y(res1.idx == j, 1), res1.Y(res1.idx == j, 2), 'o', ...
+%           'MarkerFaceColor', colorsbold(j,:), 'MarkerEdgeColor', 'w', 'MarkerSize', 7);
+% 
+%     end
+    plot(Yanimals(i,1,1), Yanimals(i,1,2), 'rx', 'LineWidth', 3, 'MarkerSize', 15)
+    plot(Yanimals(i,:, 1), Yanimals(i,:,2), 'k', 'LineWidth', 2)
+    colormap(colors)
+    
+
+    xlim([xmin, xmax])
+    ylim([ymin, ymax])
+    
+    
+    title(all_animals(i,:))
+    set(gca, 'FontSize', 10, 'FontName', 'helvetica');
+end
 
 
 
