@@ -53,5 +53,23 @@ text(4.5, 0.45, 'N_S', 'Interpreter', 'tex', 'FontSize', 15, 'FontAngle', 'itali
 text(22, 0.95, 'P_E', 'Interpreter', 'tex', 'FontSize', 15, 'FontAngle', 'italic')
 text(14.6, 0.7, '\alpha', 'Interpreter', 'tex', 'FontSize', 15)
 
+%%
+gammalst = linspace(0, 1.5, 25);
+epslst = linspace(0, 0.5, 20);
+figure;
+[xx,yy] = meshgrid(epslst, gammalst);
+plot(xx, yy, 'b.')
+mymakeaxis('x_label', 'Exploration, \epsilon', 'y_label', 'Learning rate, \gamma',...
+    'yticks', 0:0.5:1.5, 'font_size', 20)
+
+%%
+psw = linspace(0, 0.5, 15);
+prew = linspace(0.5, 1, 10);
+figure;
+[xx,yy] = meshgrid(prew, psw);
+plot(xx, yy, 'b.')
+mymakeaxis('x_label', 'P_{rew}', 'y_label', 'P_{switch}',...
+    'yticks', 0:0.1:0.5)
+
 
 

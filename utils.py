@@ -107,7 +107,7 @@ def find_experiment_metrics(data, window, type='sigmoid'):
     if type == 'sigmoid':
         pRight, pLeft = fit_sigmoidal(choicelst, first_side=1-data['alltargets'][0][0])
     elif type == 'doublesigmoid':
-        if data['alltargets'][0][0] == 0:
+        if data['alltargets'][0][0] != 0:
             # print('left')
             leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
             rightAverage = np.nanmean(choicelst[::2, :], axis=0)

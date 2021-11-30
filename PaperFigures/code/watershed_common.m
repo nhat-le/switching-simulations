@@ -55,7 +55,7 @@ end
 %% MDS plot
 colors = brewermap(6, 'Set1');
 probs = [1, 0.9, 0.8, 0.7];
-% colors = colors([2,1,5,4,3],:); %permute to align with MATLAB default..
+colors = colors([2,1,5,4,3],:); %permute to align with MATLAB default..
 for probi = 1:4
     figure()
     
@@ -231,14 +231,24 @@ end
 
 
 
-%% Now post-process
-counts_allprob1 = do_decoding(1, res1new, opts);
-counts_allprob09 = do_decoding(0.9, res2new, opts);
-counts_allprob08 = do_decoding(0.8, res3new, opts);
-counts_allprob07 = do_decoding(0.7, res4new, opts);
+%% Decoding analysis (all probabilities)
+opts.reps = 20;
+opts.method = 'knn';
+opts.nNeighbors = 5;
+[counts_allprob1, Mdls1] = do_decoding(1, res1new, opts);
+[counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
+[counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
+[counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
 
+savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
+filename = 'decoding_common_101421_withknnMdl.mat';
+savename = fullfile(savedir, filename);
+% if ~exist(savename, 'file')
+%     save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
+%         'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
+% end
 %% Plot decoding accuracy, grouped by class
-load('decoding_common_092821.mat');
+% load('decoding_common_092821.mat');
 counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
 % colors = brewermap(6, 'BuGn');
 colors = brewermap(6, 'Set1');
@@ -251,7 +261,7 @@ for probi = 1:numel(counts_all)
     coltouse = colors(probi,:);
     Nclust = size(allprob{1}, 1);
     for i = 1:Nclust
-        perf_clusti = cellfun(@(x) find_perf(x, i), allprob);
+        perf_clusti = cellfun(@(x) find_sensitivity(x, i), allprob);
         means(i) = mean(perf_clusti);
         stds(i) = std(perf_clusti);
     end
@@ -272,7 +282,7 @@ l.Title.FontSize = 12;
 l.Color = 'none';
 
 %% Plot decoding accuracy, grouped by prob
-load('decoding_common_092821.mat');
+% load('decoding_common_092821.mat');
 counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
 % colors = brewermap(6, 'BuGn');
 colors = brewermap(6, 'Set1');
@@ -294,7 +304,7 @@ for k = 1:Nclust
     means = [];
     stds = [];
     for i = 1:Nprobs
-        perf_clusti = cellfun(@(x) find_perf(x, k), counts_all{i});
+        perf_clusti = cellfun(@(x) find_sensitivity(x, k), counts_all{i});
         means(i) = mean(perf_clusti);
         stds(i) = std(perf_clusti);
     end
@@ -306,18 +316,27 @@ for k = 1:Nclust
 %     plot(1:Nclust, means, 'Color', coltouse, 'LineWidth', 0.75);
 %     plot(mapvals{probi}, means, 'LineWidth', 2);
 end
+ylim([0.5, 1])
 
-mymakeaxis('x_label', 'Probability', 'y_label', 'Decoding accuracy', 'xticks', [0.7 0.8 0.9 1.0],...
+mymakeaxis('x_label', 'Probability', 'y_label', 'Precision', 'xticks', [0.7 0.8 0.9 1.0],...
             'xticklabels', {'100-0', '90-10', '80-20', '70-30'})% l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.46,0.41,0.12,0.19]);
-
 l = legend(handles, {'1', '2', '3', '4', '5'}, 'Position', [0.46,0.41,0.12,0.19]);
 l.FontSize = 12;
 l.Title.String = 'Class';
 l.Title.FontSize = 12;
 l.Color = 'none';
 
-function counts_all = do_decoding(prob, res, opts)
+
+
+
+function [counts_all, Mdls] = do_decoding(prob, res, opts)
+
+if ~isfield(opts, 'method'); opts.method = 'knn'; end
+if ~isfield(opts, 'nNeighbors'); opts.nNeighbors = 5; end
+
+
 opts.prob = prob;
+
 load(sprintf('%s/svmresults_from_pickle_092221_prob%.2f.mat', opts.rootdir, 1-opts.prob));
 
 [idxQ, idxIB] = reshapeidx(res.idx, res);
@@ -350,18 +369,38 @@ features = [IBeffall IBlapseall IBslopeall IBoffsetall;
 
 labels = [idxIBall; idxQall];
 
+
+% To balance the number of examples for each class
+counts = [];
+for ilabel = 1:5
+    counts(ilabel) = sum(labels == ilabel);
+end
+
+mincounts = min(counts);
+filteredIDs = [];
+for ilabel = 1:5
+    label_pos = find(labels == ilabel);
+    filtered_lbl_pos = randsample(label_pos, mincounts, false);
+    filteredIDs = [filteredIDs; filtered_lbl_pos];
+end
+
+
+
+
 %shuffle
 counts_all = {};
-for k = 1:20
+Mdls = {};
+
+for k = 1:opts.reps
 %     order = randperm(numel(labels));
     fprintf('Repetition %d\n', k);
-    order = randsample(1:numel(labels), numel(labels), true);
+    order = randsample(filteredIDs, numel(labels), true);
     labels_shuffled = labels(order);
     features_shuffled = features(order,:);
 
     %80% training, 20% testing
     rng('shuffle');
-    ntrain = floor(numel(labels) * 0.8);
+    ntrain = floor(numel(filteredIDs) * 0.8);
     Xtrain = features_shuffled(1:ntrain,:);
     ytrain = labels_shuffled(1:ntrain);
     Xtest = features_shuffled(ntrain + 1:end,:);
@@ -369,11 +408,22 @@ for k = 1:20
 
     % t = templateLinear();
     t = templateSVM('Standardize',true, 'KernelFunction', 'rbf');
-    Mdl = fitcecoc(Xtrain',ytrain,'Learners',t,'ObservationsIn','columns');
-    ypred = Mdl.predict(Xtest);
-
-    % Performance
-    perf = sum(ypred == ytest) / numel(ytest);
+    
+    Xtrainraw = res.features;
+    Xtrainraw(:,3) = -Xtrainraw(:,3);
+    ytrainraw = res.idx;
+    
+    % TODO: check if need to transpose for SVM model, if not, do an if else
+    % condition check
+    
+    if strcmp(opts.method, 'knn')
+        Mdl = fitcknn(Xtrain,ytrain,'NumNeighbors', opts.nNeighbors,'Standardize',1);
+%         Mdl = fitcknn(Xtrainraw, ytrainraw, 'NumNeighbors', opts.nNeighbors,'Standardize',1);
+        ypred = Mdl.predict(Xtest);
+    else
+        Mdl = fitcecoc(Xtrain',ytrain,'Learners',t,'ObservationsIn','columns');
+        ypred = Mdl.predict(Xtest);
+    end
 
     % Make the confusion matrix
     N = numel(unique(ypred));
@@ -387,68 +437,18 @@ for k = 1:20
     end
 
     counts_all{k} = counts;
+    Mdls{k} = Mdl;
     
 end
 end
 
-function res = find_perf(arr, i)
+function res = find_sensitivity(arr, i)
 res = arr(i,i) / sum(arr(:,i));
 
 end
 
 
-function [out, opts] = load_and_run(prob)
-folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
-
-switch prob
-    case 0
-        filename = 'opts_prob0.0-2021-09-25 20.52.mat';
-    case 0.1
-        filename = 'opts_prob0.1-2021-09-25 21.44.mat';
-    case 0.2
-        filename = 'opts_prob0.2-2021-09-25 21.57.mat';
-    case 0.3
-        filename = 'opts_prob0.3-2021-09-25 22.29.mat';
-end
-
-load(fullfile(folder, filename));
-opts.save = 0;
-opts.savefeatures = 0;
-
-
-[idx, out] = run_watershed(opts);
-
-% Rotation for idx
-switch prob
-    case 0
-        idx = rotate(idx, [3, 2, 4]);
-    case 0.1
-        idx = rotate(idx, [6, 1, 3]);
-        idx = rotate(idx, [4 5]);
-    case 0.2
-        idx = rotate(idx, [2, 1, 4]);
-        idx = rotate(idx, [5, 3]);
-    case 0.3
-        idx = rotate(idx, [4, 1]);
-        idx = rotate(idx, [2, 5, 3]);
-end
-
-%[idxQ, idxIB] = reshapeidx(idx, out);
-out.idx = idx;
-
-
-end
-
-
-
-
-
-function res = rotate(arr, order)
-res = arr;
-for i = 1:numel(order) - 1
-    res(arr == order(i)) = order(i+1);
-end
-
-res(arr == order(end)) = order(1);
+function res = find_precision(arr, i)
+res = arr(i,i) / sum(arr(i,:));
 
 end
