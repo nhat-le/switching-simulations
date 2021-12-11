@@ -1,7 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 import scipy.io
-from utils import find_experiment_metrics
+from src.utils import find_experiment_metrics
 import matplotlib.pyplot as plt
 
 

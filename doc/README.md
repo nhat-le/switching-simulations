@@ -48,6 +48,8 @@ This notebook calls the functions in `decoding.py`. Remember to change the value
 
 Important notes:
 * The notebook will call the opts config stored in the folder `decodeFigs/opts`
+
+* Note that there is a mild filtering taking place in `PaperFigures/code/load_data.m` where offset values below -20 are clipped
 Results will be saved in files with the form `svmresults_from_pickle_092221_prob0.00.mat`, etc.
 
 

@@ -8,6 +8,13 @@ Refitted the simulations on 1000 blocks, model-free and inf-based
 IMPORTANT: changed trials_per_block = [15, 25] from [10, 40]
 New decoding file saved at `svmresults_from_pickle_121021_prob0.00.mat`, and in folder `simdata/12102021`
 
+- Re-organized code into levels with clearer structure, marking deprecated code with `_deprecated`
+
+- Re-organized `processed_data/simdata` folder (separating sim results of different days into separate folders)
+
+- Changed svm config path (which stores segmentation parameters) in new path: `processed_data/svm/configs` (old path was in PaperFigures/code/decodeFigs)
+
+
 
 
 

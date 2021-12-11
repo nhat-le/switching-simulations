@@ -1,15 +1,6 @@
-import numpy as np
-from worldModels import *
-# from agents import *
+from src.worldModels import *
 import scipy.optimize
-
-# import autograd.numpy as np
-# import autograd.numpy.random as npr
-# npr.seed(0)
-
 import ssm
-from ssm.util import find_permutation
-from ssm.plots import gradient_cmap, white_to_color_cmap
 
 def logistic(x, beta=1):
     return 1 / (1 + np.exp(-beta * x))

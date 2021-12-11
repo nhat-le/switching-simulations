@@ -1,6 +1,6 @@
-from run_simulations import *
+from src.run_simulations import *
 from sklearn import svm
-from utils import in_percentile
+from src.utils import in_percentile
 
 
 

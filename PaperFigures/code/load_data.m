@@ -3,7 +3,7 @@ function [out,opts] = load_data(opts)
 
 %% parse options
 if ~isfield(opts, 'rootdir')
-    opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
+    opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/09232021';
 end
 
 if ~isfield(opts, 'filestem')
@@ -17,7 +17,8 @@ if ~isfield(opts, 'prob'); opts.prob = 1; end
 if ~isfield(opts, 'outliermode'); opts.outliermode = 1; end
 
 if ~isfield(opts, 'savepath')
-    opts.savepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
+%     opts.savepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
+    opts.savepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs';
 end
 
 %%

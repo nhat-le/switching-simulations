@@ -1,6 +1,6 @@
-from utils import * #fit_expfun2, make_switching_world, find_LR_transition_fit, simulate_rew_error_correlations
-from worldModels import *
-from agents import *
+from src.utils import * #fit_expfun2, make_switching_world, find_LR_transition_fit, simulate_rew_error_correlations
+from src.worldModels import *
+from src.agents import *
 import numpy as np
 import ssm
 import tqdm
