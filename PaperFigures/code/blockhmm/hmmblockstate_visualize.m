@@ -61,7 +61,7 @@ end
 
 
 %%
-titles = {'mu', 'sigma', 'lapse'};
+titles = {'mu', 'sigma', 'lapse', 'unknown'};
 figure;
 for i = 1:4
     for j = 1:4
@@ -130,8 +130,8 @@ classarr = reshape(classflat, 4, [])';
 
 %% save
 rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata';
-save(fullfile(rootdir, 'allanimals_hmmblockfitsummary_102321.mat'), 'aggparamsarr', 'classarr', 'pfitall',...
-    'ypredall', 'aggmeansarr', 'classflat', 'manualflat', 'manualclass', 'folders')
+% save(fullfile(rootdir, 'allanimals_hmmblockfitsummary_102321.mat'), 'aggparamsarr', 'classarr', 'pfitall',...
+%     'ypredall', 'aggmeansarr', 'classflat', 'manualflat', 'manualclass', 'folders')
 
 
 %%

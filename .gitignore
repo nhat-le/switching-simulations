@@ -1,1 +1,9 @@
 .ipynb_checkpoints
+Figures/
+*.ai
+4x/
+*.pdf
+*.pptx
+*.mat
+*.pickle
+*.m\~

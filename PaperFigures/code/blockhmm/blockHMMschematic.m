@@ -68,7 +68,9 @@ end
 
 %% fh02 transition matrix plot
 % figure;
-imagesc(transition)
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/fh02_hmmblockfit_102121.mat', 'transmat');
+
+imagesc(transmat)
 axis xy
 colormap gray
 % colorbar

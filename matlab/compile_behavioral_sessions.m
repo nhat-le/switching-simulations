@@ -1,7 +1,8 @@
 
 % animals = {'f01', 'f02', 'f03', 'f04', 'f11', 'f12', 'E35', 'E40',...
 %     'fh01', 'fh02', 'f05', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23'};
-animals = {'f01', 'f02', 'f03', 'f04', 'e57', 'e54', 'f25'};
+% % animals = {'f25'};
+animals = {'e46'};
 f = waitbar(0);
 for i = 1:numel(animals)
     waitbar(i/numel(animals), f, sprintf('Processing animal %s', animals{i}));
@@ -56,7 +57,7 @@ for id = 1:numel(folders)
 end
 
 %%
-filename = sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/%s_all_sessions_111821.mat', animal);
+filename = sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/%s_all_sessions_113021.mat', animal);
 save(filename, 'session_names', 'choices_cell', 'targets_cell', 'maxdelays', 'probflags', 'feedbacks_cell');
 
 end

@@ -2,7 +2,8 @@
 addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTools')
 
 % filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/EGreedyQLearningAgent-withCorr-doublesigmoid-prob0.10to0.90-092321.mat';
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
+% filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
+filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/121021/EGreedyqlearningAgent-withCorr-doublesigmoid-prob0.00to1.00-121021.mat';
 load(filedir);
 
 produce_heatmap(efflist, epslst, gammalst, 'clim', [0.5,1], 'legendname', 'Efficiency', ...

@@ -1,11 +1,20 @@
 % 9.29.21 expfit params updated
-load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/expfit_params_092921.mat');
+% load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/expfit_params_092921.mat');
 
 % 9.30.21 prob expfit params
 % load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/expfit_params_prob_093021.mat');
 
 % load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/decoding_common_100821_withknnMdl.mat')
+
+% Load decoding models and performance of models (on simulated data)
+% Models are located at Mdls1, Mdls09, Mdls08 etc (100-0, 90-10 and 80-20
+% environments respectively).
 load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/decoding_common_101421_withknnMdl.mat')
+
+
+% Load blockHMM results for a single animal
+% This file contains info on: zstates and observations for all blocks of
+% trials that are of interest
 load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/f02_hmmblockfit_102121c.mat')
 
 
@@ -138,14 +147,14 @@ for id = 1:numel(animals)
     lh.Title.FontSize = 12;
     filename = sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/hmmblockFigs/%s_trainingevolution.pdf',...
         animals{id});
-    saveas(gcf, filename);
+%     saveas(gcf, filename);
     
     fracs_all_animals{id} = fracs_all;
     
 %     title(animals{id})
 end
 
-save('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/hmmblockfractions_102421b.mat', 'fracs_all_animals', 'animals');
+% save('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/hmmblockfractions_102421b.mat', 'fracs_all_animals', 'animals');
 
 %% Parse and average hmm summary fractions
 rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/';

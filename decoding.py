@@ -4,13 +4,22 @@ from utils import in_percentile
 
 
 
-def get_Qmetrics(gamma, eps, rlow=0):
+def get_Qmetrics(gamma, eps, N_iters=50, rlow=0):
+    '''
+    gamma: List[float], learning rate of agents
+    eps: List[float], exploration rates of agents
+    N_iters: int, number of blocks to simulate
+    rlow: float, 0 <= rlow <= 0.5, reward rate of lower side
+    Simulate a Q-learning agent for N_iters trials,
+    for each trial the behavior is carried out for nblocks (20)
+    returns the behavioral metrics (efficiency, lapse, offset, slope)
+    averaged across all the blocks in each trial
+    '''
     gammalst = [gamma]
     epslst = [eps]
 
     agent_type = 'qlearning'  # 'qlearning' or 'inf-based' or 'v-accumulation'
 
-    N_iters = 50
     num_states = 2
     obs_dim = 1
     nblocks = 20  # 100
@@ -37,13 +46,22 @@ def get_Qmetrics(gamma, eps, rlow=0):
     return Qmetrics
 
 
-def get_IB_metrics(psw, prew, rlow=0):
+def get_IB_metrics(psw, prew, N_iters=50, rlow=0):
+    '''
+       psw: List[float], prob. of switching states
+       prew: List[float], prob. of reward (0.5 <= prew < 1) of the high side
+       N_iters: int, number of blocks to simulate
+       rlow: float, 0 <= rlow <= 0.5, reward rate of lower side
+       Simulate a Q-learning agent for N_iters trials,
+       for each trial the behavior is carried out for nblocks (20)
+       returns the behavioral metrics (efficiency, lapse, offset, slope)
+       averaged across all the blocks in each trial
+   '''
     pswitchlst = [psw]
     prewlst = [prew]
 
     agent_type = 'inf-based'  # 'qlearning' or 'inf-based' or 'v-accumulation'
 
-    N_iters = 50
     num_states = 2
     obs_dim = 1
     nblocks = 20  # 100

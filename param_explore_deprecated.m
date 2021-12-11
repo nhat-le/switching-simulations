@@ -1,5 +1,5 @@
 %% Q-learning
-load EGreedyQLearning-prob0.2to0.8-071121.mat
+load simdata/EGreedyQLearning-prob0.2to0.8-071121.mat
 
 PLoffsetQ = PLoffsetlist;
 PLslopeQ = PLslopelist;
@@ -16,7 +16,7 @@ axis xy
 
 
 %% Inference-based
-load EGreedyInferenceBasedAgent-prob0.2to0.8-071121.mat
+load simdata/EGreedyInferenceBasedAgent-prob0.2to0.8-071121.mat
 PLoffsetIB = PLoffsetlist;
 PLslopeIB = PLslopelist;
 LapseIB = LapseL;
