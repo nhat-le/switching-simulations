@@ -1,0 +1,13 @@
+## Analysis log for 12.11.2021
+Performing simulations with 20x20 grids for inference-based and model-free agents
+in 100-0 environments
+
+This is to equalize the number of agents for the two strategies and test the effect on the decoding performance
+
+Refitted the simulations on 1000 blocks, model-free and inf-based
+IMPORTANT: changed trials_per_block = [15, 25] from [10, 40]
+New decoding file saved at `svmresults_from_pickle_121021_prob0.00.mat`, and in folder `simdata/12102021`
+
+
+
+

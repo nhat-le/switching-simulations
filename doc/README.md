@@ -43,7 +43,13 @@ opts.kernelsize = 3
 Results are saved in the `PaperFigures/decodeFigs` folder. There are option files with the form like `opts_prob0.0-2021-09-25 16.05.mat` which store the parameters of the segmentation, as well as .pdf figures that show the behavioral regime segmentation (Fig. 3 in the paper), the MDS space (points in the PC space, fig. 4 in the paper)
 
 ### 2. For running the decoding analysis
-% opts.seed = 0;Run `switching_world_classifier.ipynb` notebook
-opts.seed = 2;This notebook calls the functions in `decoding.py`
+Run `switching_world_classifier.ipynb` notebook
+This notebook calls the functions in `decoding.py`. Remember to change the value of `rlow` to the right probability of reward (for e.g. `rlow = 0.1` corresponds to a 90-10 world)
+
+Important notes:
+* The notebook will call the opts config stored in the folder `decodeFigs/opts`
+Results will be saved in files with the form `svmresults_from_pickle_092221_prob0.00.mat`, etc.
+
+
 
 
