@@ -79,3 +79,10 @@ Run `PaperFigures/code/schematic/ibmodels_comparison_figure.m` or `qmodelscompar
 For schematic of the switching dynamics (Fig. 1), run `PaperFigures/code/schematic/qlearning_matching_infbased_schematic.m`
 The data for the schematics are located in `processed_data/simdata/schematic`
 
+### Performing the block-HMM state decoding
+Run `code/blockhmm/hmmstate_decode_single_animals.m` for a quick assessment and visualizing the evolution of mixture of strategies of single animal (official figure for fh03 was created here, as well as mean mixture evolution plot)
+
+For visualizing the transition dynamics of each HMM mode, run `code/blockhmm/hmmblockstate_visualize.m` (these are the plots of switching dynamics of the 4 HMM modes in the official figure 8)
+
+`code/blockhmm/hmmblockstate_group.m` is an attempt at grouping the HMM modes in an unbiased way (by calling the decoders that were saved in the previous sections of the paper)
+

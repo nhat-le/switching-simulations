@@ -1,5 +1,5 @@
 
-rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/';
+rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/expdata/';
 folders = dir(fullfile(rootdir, '*hmmblockfit_102121.mat'));
 
 aggmeans = {};
@@ -58,6 +58,7 @@ for i = 1:48
     plot(xvals, ypredall(i,:));
  
 end
+
 
 
 %%

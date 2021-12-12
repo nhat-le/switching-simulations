@@ -1,0 +1,1 @@
+- Added `pathsetup.m` which stores the path to important data files and code files (for easy setup)

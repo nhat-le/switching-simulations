@@ -25,7 +25,10 @@ New decoding file saved at `svmresults_from_pickle_121021_prob0.00.mat`, and in 
 
 - In `decoding_after_watershed`, in `do_decoding` function, instead of clipping the offset values that are less than -20, eliminate this clipping
 
-- Define custom rotations for `load_and_run` instead of hard-coding
+- Define custom rotations for `load_and_run` instead of hard-coding/MCC
+
+- Implemented Matthews correlation to evaluate performance of decoders
+
 
 
 
