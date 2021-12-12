@@ -12,25 +12,59 @@ opts.version = '121021';
 %% Decoding analysis (all probabilities)
 opts.reps = 20;
 opts.method = 'knn';
-opts.nNeighbors = 5;
-opts.svmdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm';
-opts.svm_version = '092221';
+opts.nNeighbors = 1;
+opts.svmdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/';
+opts.svm_version = '121021';
+opts.save_model = 1;
 
 
-[counts_allprob1, Mdls1] = do_decoding(1, res1new, opts);
-[counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
-[counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
-[counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
+[counts_allprob1, Mdls1, MCCs] = do_decoding(1, res1, opts);
 
-savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
-filename = 'decoding_common_101421_withknnMdl.mat';
+% opts.method = 'svm';
+
+%%
+MCCs_means = [];
+MCCs_stds = [];
+Models = {};
+
+for i = 1:11
+    if i == 11
+        opts.method = 'svm';
+    else
+        opts.method = 'knn';
+        opts.nNeighbors = i;
+    end
+    [~, Mdl, MCCs] = do_decoding(1, res1, opts);
+    MCCs_means(i) = mean(MCCs);
+    MCCs_stds(i) = std(MCCs);
+    Models{i} = Mdl;
+    
+end
+
+
+
+
+
+% [counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
+% [counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
+% [counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
+
+%%
+savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/models';
+filename = sprintf('decoding_common_%s_with%sMdl.mat', opts.svm_version, opts.method);
 savename = fullfile(savedir, filename);
-% if ~exist(savename, 'file')
-%     save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
-%         'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
-% end
+if opts.save_model
+    if ~exist(savename, 'file')
+%         save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
+%             'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
+        save(savename, 'counts_allprob1', 'Mdls1')
 
-function [counts_all, Mdls] = do_decoding(prob, res, opts)
+    else
+        error('File exists')
+    end
+end
+
+function [counts_all, Mdls, MCCs] = do_decoding(prob, res, opts)
 
 if ~isfield(opts, 'method'); opts.method = 'knn'; end
 if ~isfield(opts, 'nNeighbors'); opts.nNeighbors = 5; end
@@ -60,8 +94,8 @@ Qslopeall = reshape(Qslope_arr, [], 1);
 Qlapseall = reshape(Qlapse_arr, [], 1);
 Qoffsetall = reshape(Qoffset_arr, [], 1);
 
-Qoffsetall(Qoffsetall < -20) = 3;
-IBoffsetall(IBoffsetall < -20) = 3;
+% Qoffsetall(Qoffsetall < -20) = 3;
+% IBoffsetall(IBoffsetall < -20) = 3;
 
 
 
@@ -70,8 +104,6 @@ features = [IBeffall IBlapseall IBslopeall IBoffsetall;
 % features_norm = (features - mean(features, 1)) ./ std(features, [], 1);
 
 labels = [idxIBall; idxQall];
-labels = randi(5, size(labels)); %!!DANGER!! FOR TESTING ONLY
-
 
 % To balance the number of examples for each class
 counts = [];
@@ -88,11 +120,10 @@ for ilabel = 1:5
 end
 
 
-
-
 %shuffle
 counts_all = {};
 Mdls = {};
+MCCs = [];
 
 for k = 1:opts.reps
 %     order = randperm(numel(labels));
@@ -109,7 +140,6 @@ for k = 1:opts.reps
     Xtest = features_shuffled(ntrain + 1:end,:);
     ytest = labels_shuffled(ntrain + 1:end);
 
-    % t = templateLinear();
     t = templateSVM('Standardize',true, 'KernelFunction', 'rbf');
     
     Xtrainraw = res.features;
@@ -121,7 +151,6 @@ for k = 1:opts.reps
     
     if strcmp(opts.method, 'knn')
         Mdl = fitcknn(Xtrain,ytrain,'NumNeighbors', opts.nNeighbors,'Standardize',1);
-%         Mdl = fitcknn(Xtrainraw, ytrainraw, 'NumNeighbors', opts.nNeighbors,'Standardize',1);
         ypred = Mdl.predict(Xtest);
     else
         Mdl = fitcecoc(Xtrain',ytrain,'Learners',t,'ObservationsIn','columns');
@@ -131,15 +160,13 @@ for k = 1:opts.reps
     % Make the confusion matrix
     N = numel(unique(ypred));
     fprintf('Number of clusters = %d\n', N);
-    counts = nan(N,N);
-    for i = 1:N
-        for j = 1:N
-            counts(i,j) = sum(ypred == i & ytest == j);
-
-        end
-    end
-
-    counts_all{k} = counts;
+    
+    counts = confusionmat(ytest, ypred); %confusion matrix
+    MCCs(k) = matthews_corr(counts');
+    % Matthews correlation coefficient
+    
+    
+    counts_all{k} = counts';
     Mdls{k} = Mdl;
     
 end

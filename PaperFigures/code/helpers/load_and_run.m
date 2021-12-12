@@ -14,18 +14,21 @@ end
 
 folder = fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs/', version);
 
-switch prob
-    case 0
-        filename = 'opts_prob0.0-2021-09-25 20.52.mat';
-    case 0.1
-        filename = 'opts_prob0.1-2021-09-25 21.44.mat';
-    case 0.2
-        filename = 'opts_prob0.2-2021-09-25 21.57.mat';
-    case 0.3
-        filename = 'opts_prob0.3-2021-09-25 22.29.mat';
-end
+filenames = dir(fullfile(folder, sprintf('opts_prob%.1f*_final.mat', prob)));
 
-load(fullfile(folder, filename));
+% Deprecated: files used for previous figure plotting
+% switch prob
+%     case 0
+%         filename = 'opts_prob0.0-2021-09-25 20.52.mat';
+%     case 0.1
+%         filename = 'opts_prob0.1-2021-09-25 21.44.mat';
+%     case 0.2
+%         filename = 'opts_prob0.2-2021-09-25 21.57.mat';
+%     case 0.3
+%         filename = 'opts_prob0.3-2021-09-25 22.29.mat';
+% end
+
+load(fullfile(folder, filenames(1).name));
 opts.save = 0;
 opts.savefeatures = 0;
 opts.usepca = usepca;

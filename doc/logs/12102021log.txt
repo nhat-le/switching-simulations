@@ -21,5 +21,11 @@ New decoding file saved at `svmresults_from_pickle_121021_prob0.00.mat`, and in 
 
 - Removed filtering in `PaperFigures/code/decoding/decode_perf_figures.m`
 
+- In `load_and_run.m`, instead of hardcoding filenames for the svm results, now wrote code for discovering the .mat file
+
+- In `decoding_after_watershed`, in `do_decoding` function, instead of clipping the offset values that are less than -20, eliminate this clipping
+
+- Define custom rotations for `load_and_run` instead of hard-coding
+
 
 
