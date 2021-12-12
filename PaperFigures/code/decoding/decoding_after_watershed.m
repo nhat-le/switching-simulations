@@ -51,14 +51,15 @@ end
 
 %%
 savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/models';
-filename = sprintf('decoding_common_%s_with%sMdl.mat', opts.svm_version, opts.method);
+filename = sprintf('decoding_common_%s_with%sMdl_knn_svm.mat', opts.svm_version, opts.method);
+notes = 'first 10 mdls are knns with nNeighbors = 1 to 10, last mdl is svm';
 savename = fullfile(savedir, filename);
 if opts.save_model
     if ~exist(savename, 'file')
 %         save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
 %             'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
-        save(savename, 'counts_allprob1', 'Mdls1')
-
+        save(savename, 'MCCs_means', 'MCCs_stds', 'Models', 'notes');
+        fprintf('File saved!\n');
     else
         error('File exists')
     end

@@ -70,6 +70,8 @@ Run `PaperFigures/code/decoding/decoding_after_watershed.m`
 
 * Decoding results and models saved in `processed_data/model` folder
 
+* Note that you will need to change the config file in `processed_data/svm/configs/{expdate}` to the `_final.mat` format so that the file will be recognized. This is because there might be multiple opts files that are saved, and the user should select only one of them to be the final file that will be read for this analysis.
+
 ### Schematic of model-free and inf-based agents (Fig. 2 with blue circles and red crosses)
 
 Run `PaperFigures/code/schematic/ibmodels_comparison_figure.m` or `qmodelscomparison_figure.m`

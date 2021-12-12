@@ -12,6 +12,10 @@ else
     version = opts.version;
 end
 
+if ~isfield(opts, 'rotations')
+    opts.rotations = {};
+end
+
 folder = fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs/', version);
 
 filenames = dir(fullfile(folder, sprintf('opts_prob%.1f*_final.mat', prob)));
@@ -49,36 +53,41 @@ else
 end
 
 % Rotation for idx
-if opts.usepca
-    switch prob
-        case 0
-            idx = myrotate(idx, [1,2,3,4]);
-        case 0.1
+for i = 1:numel(opts.rotations)
+    idx = myrotate(idx, opts.rotations{i});
+end
+
+% if opts.usepca
+%     switch prob
+%         case 0
+%             idx = myrotate(idx, [1,2,3,4]);
+%         case 0.1
+% %             idx = myrotate(idx, [6, 1, 3]);
+% %             idx = myrotate(idx, [4 5]);
+%         case 0.2
+% %             idx = myrotate(idx, [2, 1, 4]);
+% %             idx = myrotate(idx, [5, 3]);
+%         case 0.3
+% %             idx = myrotate(idx, [4, 1]);
+% %             idx = myrotate(idx, [2, 5, 3]);
+%     end
+% else
+%     switch prob
+%         case 0
+%             idx = myrotate(idx, [3, 2, 4]);
+%         case 0.1
 %             idx = myrotate(idx, [6, 1, 3]);
 %             idx = myrotate(idx, [4 5]);
-        case 0.2
+%         case 0.2
 %             idx = myrotate(idx, [2, 1, 4]);
 %             idx = myrotate(idx, [5, 3]);
-        case 0.3
+%         case 0.3
 %             idx = myrotate(idx, [4, 1]);
 %             idx = myrotate(idx, [2, 5, 3]);
-    end
-else
-    switch prob
-        case 0
-            idx = myrotate(idx, [3, 2, 4]);
-        case 0.1
-            idx = myrotate(idx, [6, 1, 3]);
-            idx = myrotate(idx, [4 5]);
-        case 0.2
-            idx = myrotate(idx, [2, 1, 4]);
-            idx = myrotate(idx, [5, 3]);
-        case 0.3
-            idx = myrotate(idx, [4, 1]);
-            idx = myrotate(idx, [2, 5, 3]);
-    end
-end
+%     end
+% end
 %[idxQ, idxIB] = reshapeidx(idx, out);
+
 out.idx = idx;
 
 % Project X on PC space

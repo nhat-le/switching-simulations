@@ -11,9 +11,11 @@ opts.nbinhist = 30;
 opts.imhmin = 3;
 opts.kernelsize = 3;
 opts.prob = 1;
-opts.save = 0;
+opts.save = 1;
 opts.seed = 3;
+opts.rotations = {[3, 5], [2, 4]};
 opts.plotfeatures = 0;
+
 
 rng(opts.seed);
 
