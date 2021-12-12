@@ -1,7 +1,7 @@
 %% Load the data
-prob = 0;
+prob = 0.1;
 [res, opts] = load_and_run(prob, 1);
-load('svm_small_prob1_100221.mat')
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/100221/svm_small_prob1_100221.mat')
 
 
 % svm predictions

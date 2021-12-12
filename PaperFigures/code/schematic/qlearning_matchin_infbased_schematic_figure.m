@@ -1,5 +1,5 @@
 %% Diagram for q-learning agent
-load simdata/qlearning-sim2.mat
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/qlearning-sim2.mat')
 figure('Position', [0 0 450 250]);
 trialid = 1:numel(choices);
 plot(trialid(rewards == 1 & choices == 1), choices(rewards == 1 & choices == 1), 'ro', 'MarkerFaceColor', 'r')
@@ -25,7 +25,7 @@ set(gca, 'color', 'none')
 
 
 %% Matching agent
-load matching-sim.mat
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/matching-sim.mat');
 figure('Position', [0 0 450 250]);
 trialid = 1:numel(choices);
 plot(trialid(rewards == 1), choices(rewards == 1), 'o', 'MarkerFaceColor', 'b')
@@ -46,7 +46,7 @@ set(gca, 'FontSize', 16)
 
 
 %% Inference agent
-load matching-sim2.mat
+load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/matching-sim2.mat')
 choices(1) = 0;
 choices(2:32) = 1;
 choices(33:end) = 0;

@@ -24,6 +24,8 @@ Results are saved in the files named `EGreedyqlearningAgent-withCorr-doublesigmo
 
 Run `PaperFigures/code/qlearning_figures.m` or `PaperFigures/code/inf_based_figures.m` for the 2d plots of the behavioral metrics
 
+Note that the `qlearning_figures_prob.m` might be the more updated script to produce the latest figures that are more convenient to use for all the probabilistic worlds.
+
 Current versions of the figures are based on:
 `'/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat'` and `'/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyInferenceBasedAgent-withCorr-prob0.00to1.00-072121.mat'`
 
@@ -31,7 +33,7 @@ Note that: `PLoffsetlist` is negative, `PLslopelist` is positive in the saved .m
 
 
 ### For behavioral regime segmentation:
-Run the script `watershed_segmentation.m`
+Run the script `PaperFigures/code/characterization/watershed_segmentation.m`
 
 The following are the standard parameters that were used:
 ```
@@ -40,18 +42,38 @@ opts.imhmin = 3;
 opts.kernelsize = 3
 ```
 
-Results are saved in the `PaperFigures/decodeFigs` folder. There are option files with the form like `opts_prob0.0-2021-09-25 16.05.mat` which store the parameters of the segmentation, as well as .pdf figures that show the behavioral regime segmentation (Fig. 3 in the paper), the MDS space (points in the PC space, fig. 4 in the paper)
+Important notes:
+* The notebook will call the opts config stored in the folder `decodeFigs/opts`
+There are option files with the form like `opts_prob0.0-2021-09-25 16.05.mat` which store the parameters of the segmentation, as well as .pdf figures that show the behavioral regime segmentation (this is *not* the final version seen in Fig. 3 in the paper), the MDS space (points in the PC space, fig. 4 in the paper)
+  
+* Figures are saved in the `PaperFigures/figs/watershedFigs/{expdate}` folder. opts configurations are saved in the `processed_data/svm/configs/{expdate}` folder.
 
-### 2. For running the decoding analysis
-Run `switching_world_classifier.ipynb` notebook
+* To visualize the segmentation for all probabilities (final version seen in Fig. 3 of the paper figure), run `PaperFigures/code/characterization/watershed_post_segmentation_plots.m`. This will also produce the segmented spaces that are used in the final figure versions.
+
+* The script also plots the average feature characterization (official figure) + performs the decoding analysis on the short data. It calls the helper function `do_decoding`, works on the saved data from `switching_world_classifier.ipynb` (see below), and then save the decoding models to `processed_data/svm/models`
+
+### For running the decoding analysis which requires simulation on the short data (20-block)
+Run `switching_world_classifier.ipynb` notebook to run this simulation
 This notebook calls the functions in `decoding.py`. Remember to change the value of `rlow` to the right probability of reward (for e.g. `rlow = 0.1` corresponds to a 90-10 world)
 
 Important notes:
 * The notebook will call the opts config stored in the folder `decodeFigs/opts`
 
-* Note that there is a mild filtering taking place in `PaperFigures/code/load_data.m` where offset values below -20 are clipped
+* Note that there is a mild filtering taking place in `PaperFigures/code/load_data.m` where offset values below -20 are clipped (disabled this feature on 12.11.2021)
+
 Results will be saved in files with the form `svmresults_from_pickle_092221_prob0.00.mat`, etc.
 
+### For decoding analysis
+Run `PaperFigures/code/decoding/decoding_after_watershed.m`
 
+* Need to change the `opts.svmdir` and `opts.svm_version` to the file with the correct date. This is the file where the processed data (Python simulations) are stored (usually in the `processed_data/svm` folder)
 
+* Decoding results and models saved in `processed_data/model` folder
+
+### Schematic of model-free and inf-based agents (Fig. 2 with blue circles and red crosses)
+
+Run `PaperFigures/code/schematic/ibmodels_comparison_figure.m` or `qmodelscomparison_figure.m`
+
+For schematic of the switching dynamics (Fig. 1), run `PaperFigures/code/schematic/qlearning_matching_infbased_schematic.m`
+The data for the schematics are located in `processed_data/simdata/schematic`
 

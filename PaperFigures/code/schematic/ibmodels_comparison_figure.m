@@ -63,7 +63,7 @@ mymakeaxis('x_label', 'Trials from switch', ...
 
 function [offset, slope, lapse] = get_behavioral_params(gammaid, epsid)
 % Behavioral params
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyInferenceBasedAgent-prob0.0to1.0-071621.mat';
+filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/071621/EGreedyInferenceBasedAgent-prob0.0to1.0-071621.mat';
 load(filedir);
 offset = PRoffsetlist(gammaid, epsid);
 slope = PRslopelist(gammaid, epsid);

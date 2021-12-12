@@ -1,6 +1,6 @@
 %% Let's collect the information from all clusters
 
-folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
+folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs/092521';
 probs = [0 0.1 0.2 0.3];
 meansAll = {};
 stdsAll = {};
@@ -79,7 +79,7 @@ arr = cellfun(@(x) find_perf(x, 2) * 100, counts_all);
 %%
 figure;
 hold on
-folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
+folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs/092521';
 probs = [0 0.1 0.2 0.3];
 mapvals = {[1 2 3 6], 1:6, [1 2 3 5 6], [1 2 3 5 6]};
 colors = brewermap(6, 'BuGn');

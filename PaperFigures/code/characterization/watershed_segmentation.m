@@ -2,35 +2,35 @@
 
 clear all
 
+% where the Python simulation results are stored (model-free/inf-based
+% simulations)
 opts = struct;
+opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata';
+opts.expfolder = '121021';
 opts.nbinhist = 30;
 opts.imhmin = 3;
 opts.kernelsize = 3;
-% opts.N = 6;
 opts.prob = 1;
 opts.save = 0;
-% opts.seed = 0;
-opts.seed = 2;
+opts.seed = 3;
+opts.plotfeatures = 0;
 
 rng(opts.seed);
 
 %% form the feature vectors
 [out,opts] = load_data(opts);
 
-%
 D = pdist(out.features_norm);
 D = squareform(D);
 [Y,e] = cmdscale(D,2);
 
-figure;
-plot(Y(:,1), Y(:,2), '.');
-
-%% pca
 V = pca(out.features_norm);
 Xproj = out.features_norm * V;
 
-figure;
-plot(Xproj(:,1), Xproj(:,2), '.');
+% figure;
+% plot(Y(:,1), Y(:,2), '.');
+% figure;
+% plot(Xproj(:,1), Xproj(:,2), '.');
 
 
 
@@ -92,28 +92,30 @@ mdsfig = gcf;
 
 
 %% Plot the embedded data
-figure;
-hold on
-for i = 1:4
-    for j = 1:4
-        subplot(4,4,(i-1)*4+j)
-        hold on
-        plot(out.features(idx==1,i), out.features(idx==1,j), '.'); %blue
-        plot(out.features(idx==2,i), out.features(idx==2,j), '.'); %red
-        plot(out.features(idx==3,i), out.features(idx==3,j), '.'); %yellow
-        plot(out.features(idx==4,i), out.features(idx==4,j), '.'); %purple
-        plot(out.features(idx==5,i), out.features(idx==5,j), '.'); %green
+if opts.plotfeatures
+    figure;
+    hold on
+    for i = 1:4
+        for j = 1:4
+            subplot(4,4,(i-1)*4+j)
+            hold on
+            plot(out.features(idx==1,i), out.features(idx==1,j), '.'); %blue
+            plot(out.features(idx==2,i), out.features(idx==2,j), '.'); %red
+            plot(out.features(idx==3,i), out.features(idx==3,j), '.'); %yellow
+            plot(out.features(idx==4,i), out.features(idx==4,j), '.'); %purple
+            plot(out.features(idx==5,i), out.features(idx==5,j), '.'); %green
 
-        if i == 1
-            xlabel('Eff')
-        elseif i == 2
-            xlabel('Lapse')
-        elseif i == 3
-            xlabel('Slope')
-        elseif i == 4 
-            xlabel('Offset')
+            if i == 1
+                xlabel('Eff')
+            elseif i == 2
+                xlabel('Lapse')
+            elseif i == 3
+                xlabel('Slope')
+            elseif i == 4 
+                xlabel('Offset')
+            end
+
         end
-        
     end
 end
 
@@ -142,25 +144,25 @@ if opts.save
     currdate = string(currdate);    
     
     %Save Q plot
-    filename = sprintf('%s/perfRegimeQ_prob%.1f-%s.pdf', opts.savepath, 1-opts.prob, currdate);
+    filename = sprintf('%s/perfRegimeQ_prob%.1f-%s.pdf', opts.figsavepath, 1-opts.prob, currdate);
     if ~exist(filename, 'file')
         saveas(qfig, filename);
     end
 
     % Save IB plot
-    filename = sprintf('%s/perfRegimeIB_prob%.1f-%s.pdf', opts.savepath, 1-opts.prob, currdate);
+    filename = sprintf('%s/perfRegimeIB_prob%.1f-%s.pdf', opts.figsavepath, 1-opts.prob, currdate);
     if ~exist(filename, 'file')
         saveas(ibfig, filename);
     end
     
     % Save mds fig
-    filename = sprintf('%s/mds_prob%.1f-%s.pdf', opts.savepath, 1-opts.prob, currdate);
+    filename = sprintf('%s/mds_prob%.1f-%s.pdf', opts.figsavepath, 1-opts.prob, currdate);
     if ~exist(filename, 'file')
         saveas(mdsfig, filename);
     end
     
     % Save options
-    filename = sprintf('%s/opts_prob%.1f-%s.mat', opts.savepath, 1-opts.prob, currdate);
+    filename = sprintf('%s/opts_prob%.1f-%s.mat', opts.datasavepath, 1-opts.prob, currdate);
     if ~exist(filename, 'file')
         save(filename, 'opts');
     end

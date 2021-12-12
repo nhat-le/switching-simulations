@@ -3,20 +3,22 @@ addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTool
 
 % filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/EGreedyQLearningAgent-withCorr-doublesigmoid-prob0.10to0.90-092321.mat';
 % filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/121021/EGreedyqlearningAgent-withCorr-doublesigmoid-prob0.00to1.00-121021.mat';
+filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/12102021/EGreedyqlearningAgent-withCorr-doublesigmoid-prob0.30to0.70-121021.mat';
 load(filedir);
 
 produce_heatmap(efflist, epslst, gammalst, 'clim', [0.5,1], 'legendname', 'Efficiency', ...
     'x_label', '$\epsilon$', 'y_label', '$\gamma$', 'vertline', 0.24, 'horline', 1.22);
+
+
 % plot([epslst(10) epslst(10) epslst(10)], [gammalst(1) gammalst(10) gammalst(22)],  'x', ...
 %     'MarkerSize', 9, 'LineWidth', 1)
 % plot([epslst(1) epslst(9) epslst(16)], [gammalst(22) gammalst(22) gammalst(22)],  'ko', ...
 %     'MarkerSize', 9, 'LineWidth', 1)
 
 %%
-meanslope = mean(Qslope_arr, 3);
-produce_heatmap(meanslope, epslst, gammalst, 'clim', [0 5], 'legendname', 'Efficiency', ...
-    'x_label', '$\epsilon$', 'y_label', '$\gamma$', 'vertline', 0.24, 'horline', 1.22);
+% meanslope = mean(Qslope_arr, 3);
+% produce_heatmap(meanslope, epslst, gammalst, 'clim', [0 5], 'legendname', 'Efficiency', ...
+%     'x_label', '$\epsilon$', 'y_label', '$\gamma$', 'vertline', 0.24, 'horline', 1.22);
 
 %%
 % eff_smallgamma = PLslopelist(gammalst < 1, :);

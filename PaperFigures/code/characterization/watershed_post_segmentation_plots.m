@@ -1,10 +1,11 @@
 %% Script for standardizing classification and segmentation for all probabilities
 
 % Load raw data
-[res1, opts] = load_and_run(0);
-res2 = load_and_run(0.1);
-res3 = load_and_run(0.2);
-res4 = load_and_run(0.3);
+opts = struct;
+[res1, opts] = load_and_run(0, opts);
+res2 = load_and_run(0.1, opts);
+res3 = load_and_run(0.2, opts);
+res4 = load_and_run(0.3, opts);
 
 % Split/combine so that we end up with 5 clusters for each space
 % For prob = 1, will split cluster 4 into two, based on results of clusters
@@ -76,8 +77,8 @@ for probi = 1:4
 %     colorbar()
 end
 
-%% IB/Q space heat plots
-savefig = 1;
+%% IB/Q space regime demarcation
+savefig = 0;
 currdate = datetime;
 currdate.Format = 'yyyy-MM-dd HH.mm';
 currdate = string(currdate); 
@@ -227,8 +228,6 @@ switch k
             'xticklabels', {'100-0', '90-10', '80-20', '70-30'})
         
 end
-
-
 
 
 %% Decoding analysis (all probabilities)

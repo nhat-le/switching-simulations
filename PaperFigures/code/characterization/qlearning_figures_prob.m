@@ -1,20 +1,19 @@
 %% Plotting the performance
 addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTools')
-addpath('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code')
-
 prob = 0.1;
 type = 'infbased';
 
-rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/';
+expdate = '092321';
+rootdir = fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/', expdate);
 
 if strcmp(type, 'qlearning')
     savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/qlearningFigs';
 %     filedir = sprintf('%sEGreedyQLearningAgent-withCorr-prob%.2fto%.2f-072321.mat', rootdir, prob, 1-prob);  
-    filedir = sprintf('%sEGreedyQLearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat', rootdir, prob, 1-prob);  
+    filedir = sprintf('%s/EGreedyQLearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-%s.mat', rootdir, prob, 1-prob, expdate);  
 elseif strcmp(type, 'infbased')
     savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/infbasedFigs';
 %     filedir = sprintf('%sEGreedyInferenceBasedAgent-withCorr-prob%.2fto%.2f-072121.mat', rootdir, prob, 1-prob);
-    filedir = sprintf('%sEGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-092321.mat', rootdir, prob, 1-prob);
+    filedir = sprintf('%s/EGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-%s.mat', rootdir, prob, 1-prob, expdate);
 end
 savedir = sprintf('%s/prob%.2f', savedir, prob);
 if ~exist(savedir, 'dir')

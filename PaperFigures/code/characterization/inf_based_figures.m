@@ -1,8 +1,8 @@
 %% Plotting the performance
 addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTools')
 
-
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyInferenceBasedAgent-withCorr-prob0.00to1.00-072121.mat';
+filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/12102021/EGreedyinf-basedAgent-withCorr-doublesigmoid-prob0.30to0.70-121021.mat';
+% filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyInferenceBasedAgent-withCorr-prob0.00to1.00-072121.mat';
 load(filedir);
 
 % produce_heatmap(efflist, epslst, gammalst, [0.5,1], 'Efficiency');

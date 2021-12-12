@@ -1,12 +1,18 @@
-function [out, opts] = load_and_run(prob, varargin)
+function [out, opts] = load_and_run(prob, opts)
 
-if numel(varargin) == 0
+if ~isfield(opts, 'usepca')
     usepca = 0;
 else
-    usepca = varargin{1};
+    usepca = opts.usepca;
 end
 
-folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
+if ~isfield(opts, 'version')
+    version = '092521';
+else
+    version = opts.version;
+end
+
+folder = fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs/', version);
 
 switch prob
     case 0
@@ -23,8 +29,15 @@ load(fullfile(folder, filename));
 opts.save = 0;
 opts.savefeatures = 0;
 opts.usepca = usepca;
+opts.version = version;
 
 
+if strcmp(version, '092521')
+    % old version, need to update the root directory
+    opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata';
+    opts.filestem{1} = 'EGreedyQLearningAgent-withCorr-doublesigmoid-prob%.2fto%.2f-%s.mat';
+    opts.filestem{2} = 'EGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-%s.mat';
+end
 % changed 9.30.21 from run_watershed to run_watershed_pca
 if usepca
     [idx, out] = run_watershed_pca(opts);

@@ -14,7 +14,12 @@ New decoding file saved at `svmresults_from_pickle_121021_prob0.00.mat`, and in 
 
 - Changed svm config path (which stores segmentation parameters) in new path: `processed_data/svm/configs` (old path was in PaperFigures/code/decodeFigs)
 
+- In `PaperFigures/code/decode_perf_figures.m`, removed filtering of outliers for offset (offset_flat < -20 = nan is removed).
 
+- Removed filtering of features. Note that there was a mild filtering taking place in `PaperFigures/code/load_data.m` where offset values below -20 are clipped (disabled this feature on 12.11.2021). This affects the plots of the svm segmentation
+(TODO: will need to re-do these plots)
+
+- Removed filtering in `PaperFigures/code/decoding/decode_perf_figures.m`
 
 
 
