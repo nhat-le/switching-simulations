@@ -316,6 +316,10 @@ def get_num_rewards_trailing_block(world, agent):
 
 #### ERROR FUNCTIONS USED FOR CURVE FITTING #####
 def predict_sigmoid(x, p):
+    '''
+    x: an np array of x values
+    p: an array of [slope(positive), offset (negative), lapse (0 to 0.5)]
+    '''
     return p[2] + (1 - 2 * p[2]) * 1 / (1 + np.exp(-p[0] * (x + p[1])))
 
 def predict_exponential(p, x):

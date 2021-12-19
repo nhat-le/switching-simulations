@@ -4,7 +4,7 @@
 
 %% Load the data
 paths = pathsetup('matchingsim');
-expfitdate = '113021';
+expfitdate = '121921';
 rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
 folders = dir(fullfile(rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
@@ -19,7 +19,7 @@ opts.svmmodelpath = paths.svmmodelpath;
 
 if opts.python_assist
     % For loading python-assisted param fitting
-    sigmoid_file = dir(fullfile(rootdir, 'sigmoid_fit_all_113021.mat'));
+    sigmoid_file = dir(sprintf('%s/sigmoid_fit_all_%s.mat', rootdir, expfitdate));
     load(fullfile(sigmoid_file(1).folder, sigmoid_file(1).name));
     [params, aggmeans, aggparams] = load_params_python_assisted(files, opts, params_all);
 else
@@ -213,13 +213,10 @@ plot(x1 ./ x2);
 
 
 function allmeans = getmeans(obs, zstates)
-% visualize trials in state
 allmeans = [];
 for i = 1:max(zstates) + 1
-%     figure;
     obsfilt = obs(zstates == i-1, :);
     allmeans(i,:) = nanmean(obsfilt, 1);
-%     imagesc(obsfilt)
 end
 
 end
@@ -251,13 +248,14 @@ function [params, aggmeans, aggparams] = load_params_python_assisted(files, opts
 
         % Mean transition function for all trials in a particular z-state
         allmeans = getmeans(obs, zstates);
+        
+        nstates = size(params, 2);
 
         % efficiency second try
         effs = [];
-%         effs2 = [];
         switch effmethod
             case 'rawdata'
-                for zid = 1:4
+                for zid = 1:nstates
                     block_corr_filt = double(block_corrs(zstates == zid - 1));
                     block_lens_filt = double(block_lens(zstates == zid - 1));
 
@@ -277,7 +275,7 @@ function [params, aggmeans, aggparams] = load_params_python_assisted(files, opts
                 end
 
             case 'boost'
-                for zid = 1:4
+                for zid = 1:nstates
                     obsfiltered = obs(zstates == zid-1,:);
 
                 % TODO: determine if this 'boosting' can be improved...
@@ -285,38 +283,24 @@ function [params, aggmeans, aggparams] = load_params_python_assisted(files, opts
                 end
 
             case 'sim'
-                for zid = 1:4
+                for zid = 1:nstates
                     paramset = squeeze(params_all(i, zid, :));
                     paramset(paramset < -20) = -20;
-                    
-%                     paramset1 = paramset(1:3);
-%                     paramset2 = paramset(4:6);
                     
                     delta = 0.1;
                     ntrials = 25;
                     transfunc = mathfuncs.sigmoid(0:delta:ntrials, -paramset(1), paramset(2), paramset(3));
                     effs(zid) = sum(transfunc) * delta / ntrials;
-%                     effs1(zid) = sum(transfunc1) * delta / ntrials;
-%                     transfunc1 = mathfuncs.sigmoid(0:delta:ntrials, -paramset1(1), paramset1(2), paramset1(3));
-%                     transfunc2 = mathfuncs.sigmoid(0:delta:ntrials, -paramset2(1), paramset2(2), paramset2(3));
-%                     
-%                     effs1(zid) = sum(transfunc1) * delta / ntrials;
-%                     effs2(zid) = sum(transfunc2) * delta / ntrials;
-
                 end
 
         end 
-
-%         disp(effs)
         
         params = squeeze(params_all(i,:,:));
-%         params1 = params(:,1:3);
-%         params2 = params(:,4:6);
-%         params = [params1; params2];
+        params(:,1) = -params(:,1);
         params(:, end+1) = effs;
 
         aggmeans{i} = allmeans;
-        aggparams{i} = params;   
+        aggparams{i} = params';   
 
     end
 end
@@ -386,8 +370,6 @@ function [params, aggmeans, aggparams] = load_params(folders, opts)
                 end
 
         end 
-
-        disp(effs)
 
         params(end + 1, :) = effs;
 
