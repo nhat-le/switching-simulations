@@ -52,6 +52,7 @@ for i = 1:numel(aggmeans_double)
     diff = (aggmeans_double{i} - aggmeans_native{i}).^2;
     assert(sum(diff(:)) == 0);
 end
+fprintf('All tests passed \n');
 
 %% Which is the better fit?
 for id = 1:17

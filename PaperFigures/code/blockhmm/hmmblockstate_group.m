@@ -4,7 +4,7 @@
 
 %% Load the data
 paths = pathsetup('matchingsim');
-expfitdate = '121921';
+expfitdate = '113021';
 rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
 folders = dir(fullfile(rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
@@ -12,33 +12,64 @@ mdltypes = 1:2;
 mdlids = 1:10;
 opts.filter_blocks_by_lengths = 0;
 opts.weighted = 1;
-opts.python_assist = 0;
+opts.python_assist = 1;
 opts.effmethod = 'sim';
 opts.model_name = 'decoding_common_121721_withsvmMdl_knn_svm_v4.mat';
 opts.svmmodelpath = paths.svmmodelpath;
 
-if opts.python_assist
-    % For loading python-assisted param fitting
-    sigmoid_file = dir(sprintf('%s/sigmoid_fit_all_%s.mat', rootdir, expfitdate));
-    load(fullfile(sigmoid_file(1).folder, sigmoid_file(1).name));
-    [params, aggmeans, aggparams] = load_params_python_assisted(files, opts, params_all);
-else
-    [params, aggmeans, aggparams] = load_params(folders, opts);
+
+% For loading python-assisted param fitting
+sigmoid_file = dir(sprintf('%s/sigmoid_fit_all_%s.mat', rootdir, expfitdate));
+load(fullfile(sigmoid_file(1).folder, sigmoid_file(1).name));
+
+folder_names = {folders.name};
+folders_ordered = folders;
+
+
+% Rearange files and folders to have the same order
+for i = 1:size(files, 1)
+    file_path = strtrim(files(i,:));
+    fileparts = strsplit(file_path, '/');
+    filename = fileparts{end};
+
+    subparts = strsplit(filename, '_');
+    animal = subparts{1};
+    
+    % reorder the folders
+    idx = contains(folder_names, animal);
+    assert(sum(idx) == 1)
+    
+    folders_ordered(i) = folders(idx);
+    
+    
+    
 end
 
 
+[~, aggmeans_double, aggparams_double] = load_params_python_assisted(files, opts, params_all);
+
+[~, aggmeans_native, aggparams_native] = load_params(folders_ordered, opts);
 
 
+if opts.python_assist
+    aggparams = aggparams_double;
+    aggmeans = aggmeans_double;
+else
+    aggparams = aggparams_native;
+    aggmeans = aggmeans_native;
+end
 
-%%
-all_params = cell2mat(aggparams);
-all_params(all_params < -20) = -20;
 
-load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/models/decoding_common_121721_withsvmMdl_knn_svm_v4.mat');
-Mdl = Models{1}{2};
-
-
-
+% 
+% %%
+% all_params = cell2mat(aggparams);
+% all_params(all_params < -20) = -20;
+% 
+% load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/models/decoding_common_121721_withsvmMdl_knn_svm_v4.mat');
+% Mdl = Models{1}{2};
+% 
+% 
+% 
 
 %%
 % f = waitbar(0);
@@ -46,7 +77,6 @@ for mdltype = 1:9 %mdltypes
     for mdlid = 1
         opts.mdltype = mdltype;
         opts.mdlid = mdlid;
-%         [all_aggparams, aggmeans_all, statesFlat, features_flat] = apply_model_python_assisted(aggparams, aggmeans, opts);
         [all_aggparams, aggmeans_all, statesFlat, features_flat] = apply_model(aggparams, aggmeans, opts);
 
         % Plot
@@ -210,18 +240,6 @@ x2 = double(blencell{2});
 plot(x1 ./ x2);
 
 
-
-
-function allmeans = getmeans(obs, zstates)
-allmeans = [];
-for i = 1:max(zstates) + 1
-    obsfilt = obs(zstates == i-1, :);
-    allmeans(i,:) = nanmean(obsfilt, 1);
-end
-
-end
-
-
 function [params, aggmeans, aggparams] = load_params_python_assisted(files, opts, params_all)
     effmethod = opts.effmethod;
     filter_blocks_by_lengths = opts.filter_blocks_by_lengths;
@@ -380,37 +398,17 @@ function [params, aggmeans, aggparams] = load_params(folders, opts)
 end
 
 
-function [all_aggparams, aggmeans_all, statesFlat, features_flat, MCC] = apply_model_python_assisted(aggparams, aggmeans, opts)
-% Load the model 
-% load(fullfile(svmmodelpath, 'decoding_common_101421_withknnMdl.mat'), 'Mdls1');
-load(fullfile(opts.svmmodelpath, opts.model_name))
-
-all_aggparams = cell2mat(aggparams');
-Mdl = Models{opts.mdltype}{opts.mdlid};
-MCC = MCCs_all{opts.mdltype}(opts.mdlid);
-offsetFlat = all_aggparams(:,1);
-offsetFlat(offsetFlat < -20) = -20; %important!
-
-slopesFlat = all_aggparams(:,2);
-lapseFlat = all_aggparams(:,3);
-effFlat = all_aggparams(:,4);
-
-% Note: no normalization since normalization already handled in svm Mdl
-features_flat = [offsetFlat slopesFlat lapseFlat effFlat];
-
-% features_flat(4, 2) = 0.07;
-statesFlat = Mdl.predict(features_flat);
-% disp(statesFlat');
-
-% Grouping and plotting the transition function by decoded states
-aggmeans_all = cell2mat(aggmeans');
+function allmeans = getmeans(obs, zstates)
+allmeans = [];
+for i = 1:max(zstates) + 1
+    obsfilt = obs(zstates == i-1, :);
+    allmeans(i,:) = nanmean(obsfilt, 1);
 end
 
-
+end
 
 function [all_aggparams, aggmeans_all, statesFlat, features_flat, MCC] = apply_model(aggparams, aggmeans, opts)
 % Load the model 
-% load(fullfile(svmmodelpath, 'decoding_common_101421_withknnMdl.mat'), 'Mdls1');
 load(fullfile(opts.svmmodelpath, opts.model_name))
 
 all_aggparams = cell2mat(aggparams);
@@ -426,7 +424,6 @@ features_flat = [-offsetFlat slopesFlat lapseFlat effFlat];
 
 % features_flat(4, 2) = 0.07;
 statesFlat = Mdl.predict(features_flat);
-% disp(statesFlat');
 
 % Grouping and plotting the transition function by decoded states
 aggmeans_all = cell2mat(aggmeans');
