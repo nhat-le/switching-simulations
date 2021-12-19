@@ -16,7 +16,7 @@ def run_and_save(animal, seed, N_iters=3000, num_states=6):
     print(f'Starting run and save for {animal}, seed {seed}')
     # Load data
     version = '113021'
-    version_save = '121821'
+    version_save = '121921'
     paths = pathsetup('matchingsim')
 
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     # animals = ['e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23']
     paths = pathsetup('matchingsim')
     files = glob.glob(f"{paths['expdatapath']}/113021/*_all_sessions_113021.mat")
-    num_states = 6
+    num_states = 3
     N_iters = 3000
     # animals = ['f01']
     animals = [file.split('_')[1].split('/')[-1] for file in files]

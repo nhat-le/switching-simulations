@@ -4,15 +4,15 @@
 
 %% Load the data
 paths = pathsetup('matchingsim');
-% expfitdate = '113021';
+expfitdate = '113021';
 rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
 folders = dir(fullfile(rootdir, ...
-    sprintf('*hmmblockfit_%s.mat', expfitdate)));
+    sprintf('*hmmblockfit_*%s.mat', expfitdate)));
 mdltypes = 1:2;
 mdlids = 1:10;
 opts.filter_blocks_by_lengths = 0;
 opts.weighted = 1;
-opts.python_assist = 1;
+opts.python_assist = 0;
 opts.effmethod = 'sim';
 opts.model_name = 'decoding_common_121721_withsvmMdl_knn_svm_v4.mat';
 opts.svmmodelpath = paths.svmmodelpath;
@@ -31,7 +31,7 @@ end
 
 
 %%
-all_params = cell2mat(aggparams');
+all_params = cell2mat(aggparams);
 all_params(all_params < -20) = -20;
 
 load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/models/decoding_common_121721_withsvmMdl_knn_svm_v4.mat');
@@ -46,7 +46,8 @@ for mdltype = 1:9 %mdltypes
     for mdlid = 1
         opts.mdltype = mdltype;
         opts.mdlid = mdlid;
-        [all_aggparams, aggmeans_all, statesFlat, features_flat] = apply_model_python_assisted(aggparams, aggmeans, opts);
+%         [all_aggparams, aggmeans_all, statesFlat, features_flat] = apply_model_python_assisted(aggparams, aggmeans, opts);
+        [all_aggparams, aggmeans_all, statesFlat, features_flat] = apply_model(aggparams, aggmeans, opts);
 
         % Plot
         figure('Name', sprintf('mdltype = %d, mdlid = %d', mdltype, mdlid));
@@ -60,7 +61,7 @@ for mdltype = 1:9 %mdltypes
                 continue
             end
             single_aggmeans = aggmeans_all(statesFlat == i,:);
-            filtered_aggparams = all_aggparams(statesFlat == i,:);
+            filtered_aggparams = all_aggparams(:, statesFlat == i);
             filtered_aggparams(filtered_aggparams < -20) = -20;
             single_aggparams{i} = filtered_aggparams;
             subplot(2,3,i)
@@ -214,7 +215,7 @@ plot(x1 ./ x2);
 function allmeans = getmeans(obs, zstates)
 % visualize trials in state
 allmeans = [];
-for i = 1:4
+for i = 1:max(zstates) + 1
 %     figure;
     obsfilt = obs(zstates == i-1, :);
     allmeans(i,:) = nanmean(obsfilt, 1);
@@ -344,9 +345,10 @@ function [params, aggmeans, aggparams] = load_params(folders, opts)
 
         % efficiency second try
         effs = [];
+        nstates = size(params, 2);
         switch effmethod
             case 'rawdata'
-                for zid = 1:4
+                for zid = 1:nstates
                     block_corr_filt = double(block_corrs(zstates == zid - 1));
                     block_lens_filt = double(block_lens(zstates == zid - 1));
 
@@ -366,7 +368,7 @@ function [params, aggmeans, aggparams] = load_params(folders, opts)
                 end
 
             case 'boost'
-                for zid = 1:4
+                for zid = 1:nstates
                     obsfiltered = obs(zstates == zid-1,:);
 
                 % TODO: determine if this 'boosting' can be improved...
@@ -374,7 +376,7 @@ function [params, aggmeans, aggparams] = load_params(folders, opts)
                 end
 
             case 'sim'
-                for zid = 1:4
+                for zid = 1:nstates
                     paramset = params(:, zid);
                     delta = 0.1;
                     ntrials = 25;

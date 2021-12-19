@@ -81,19 +81,22 @@ Run `PaperFigures/code/schematic/ibmodels_comparison_figure.m` or `qmodelscompar
 For schematic of the switching dynamics (Fig. 1), run `PaperFigures/code/schematic/qlearning_matching_infbased_schematic.m`
 The data for the schematics are located in `processed_data/simdata/schematic`
 
+### BlockHMM
+For running the model fitting on simulated data, run `blockHMM.ipynb`
+
+For running the exp fitting procedure, run `blockHMM_expfit.ipynb`
+Alternatively, for quickly iterating through all animals, can use the code in the module `src/run_multi_hmm_fits.py`
+* If we run this script, the blockhmm fit results will be saved in the folder `processed_data/blockhmmfit/{expdate}`
+
+For running the sigmoidal fits of the blockhmm mode (same fitting procedure as the characterization simulations), we run the notebook `blockhmm_classifier.ipynb`, results will be saved in the `processed_data/blockhmmfit/{expdate}` folder.
+* To run this notebook, you need to specify the `version` (the exp date folder that the hmmblockfit data is stored), and the number of states. The script checks that the format of the fit data agrees with this number. Results will be saved as `sigmoid_fit_all__}version}.mat`
+
+
+
 ### Performing the block-HMM state decoding
 Run `code/blockhmm/hmmstate_decode_single_animals.m` for a quick assessment and visualizing the evolution of mixture of strategies of single animal (official figure for fh03 was created here, as well as mean mixture evolution plot)
 
 For visualizing the transition dynamics of each HMM mode, run `code/blockhmm/hmmblockstate_visualize.m` (these are the plots of switching dynamics of the 4 HMM modes in the official figure 8)
 
 `code/blockhmm/hmmblockstate_group.m` is an attempt at grouping the HMM modes in an unbiased way (by calling the decoders that were saved in the previous sections of the paper)
-
-### BlockHMM
-For running the model fitting on simulated data, run `blockHMM.ipynb`
-
-For running the exp fitting procedure, run `blockHMM_expfit.ipynb`
-
-Alternatively, for quickly iterating through all animals, can use the code in the module `src/run_multi_hmm_fits.py`
-
-In particular, if we run this script, the blockhmm fits will be saved in the folder `processed_data/blockhmmfit/{expdate}`
 
