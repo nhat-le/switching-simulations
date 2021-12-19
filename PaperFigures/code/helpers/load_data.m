@@ -1,5 +1,6 @@
 function [out,opts] = load_data(opts)
 % Load features of behavioral simulation
+paths = pathsetup('matchingsim');
 
 %% parse options
 if ~isfield(opts, 'expfolder')
@@ -7,7 +8,7 @@ if ~isfield(opts, 'expfolder')
 end
 
 if ~isfield(opts, 'rootdir')
-    opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata';
+    opts.rootdir = paths.simdatapath; %'/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata';
 end
 
 if ~isfield(opts, 'filestem')
@@ -22,12 +23,12 @@ if ~isfield(opts, 'outliermode'); opts.outliermode = 1; end
 
 if ~isfield(opts, 'datasavepath')
 %     opts.savepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
-    opts.datasavepath = sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs/%s', opts.expfolder);
+    opts.datasavepath = sprintf('%s/%s', paths.svmconfigpath, opts.expfolder);
 end
 
 if ~isfield(opts, 'figsavepath')
 %     opts.savepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
-    opts.figsavepath = sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/figs/watershedFigs/%s', opts.expfolder);
+    opts.figsavepath = sprintf('%s/watershedFigs/%s', paths.figpath, opts.expfolder);
 end
 
 %%
@@ -57,6 +58,7 @@ IBoffset_flat = reshape(PLoffsetlist, [], 1);
 % Parse the outputs
 out.IBdim = size(efflist);
 
+% TODO: change this order to be consistent with the decoding
 out.features = [IBeff_flat IBlapse_flat IBslope_flat IBoffset_flat;
     Qeff_flat Qlapse_flat Qslope_flat Qoffset_flat];
 

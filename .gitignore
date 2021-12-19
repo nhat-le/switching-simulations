@@ -3,7 +3,10 @@ deprecated/figs/
 *.ai
 4x/
 *.pdf
+*.png
 *.pptx
 *.mat
 *.pickle
+*.txt
+*.pkl
 *.m\~

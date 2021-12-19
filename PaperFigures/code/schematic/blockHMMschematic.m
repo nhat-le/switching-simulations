@@ -13,7 +13,7 @@ for i = 1:3
     mu = params(i, 1);
     sigma = params(i, 2);
     lapse = params(i, 3);
-    yvals = sigmoid(xvals, mu, sigma, lapse);
+    yvals = mathfuncs.sigmoid(xvals, mu, sigma, lapse);
     yall(:,i) = yvals;
 end
 
@@ -45,13 +45,33 @@ plot(tvals(yflat == 0), choicesflat(yflat == 0), 'rx', 'LineWidth', 1.5)
 vline(blockstarts, 'k--')
 colors = brewermap(3, 'Set1');
 colors = colors([3, 1, 2],:);
-for i = 1:numel(zstates)  
-    opts={'EdgeColor', 'none',...
-      'FaceColor', colors(zstates(i),:), 'FaceAlpha', 0.2};
-    fill_between([blockstarts(i), blockstarts(i+1)], [-1 -1], 1, [], opts{:})
-end
+% for i = 1:numel(zstates)  
+%     opts={'EdgeColor', 'none',...
+%       'FaceColor', colors(zstates(i),:), 'FaceAlpha', 0.2};
+%     fill_between([blockstarts(i), blockstarts(i+1)], [-1 -1], 1, [], opts{:})
+% end
 ylim([-1.5, 1.5])
 mymakeaxis('x_label', 'Trials', 'y_label', 'Choice', 'yticks', [-1, 1])
+
+
+%%
+% plot the average choice profile
+figure;
+meanfeedbacks = mean(feedbacks);
+
+%fit a sigmoidal curve to the mean trace
+p0 = [1, 1, 0.2];
+pfit = fminsearch(@(x) sigmoid_likelihood(x, meanfeedbacks), p0); 
+
+probs = mathfuncs.sigmoid(0:numel(meanfeedbacks), pfit(1), pfit(2), pfit(3));
+l1 = plot(mean(feedbacks), 'LineWidth', 2);
+hold on
+l2 = plot(0:numel(meanfeedbacks), probs,'k--', 'LineWidth', 2);
+
+mymakeaxis('x_label', 'Num trials', 'y_label', 'P(correct)', 'xticks', 0:5:15)
+
+legend([l1, l2], {'Session average', 'Fitted'}, 'FontSize', 16)
+
 
 
 %% Plot the kernel functions
@@ -87,11 +107,13 @@ b.Label.FontName = 'helvetica';
 
 
 
+function L = sigmoid_likelihood(p, y)
+mu = p(1);
+sigma = p(2);
+lapse = p(3);
 
-
-
-
-function y = sigmoid(x, mu, sigma, lapse)
-y = lapse + (1-2*lapse) ./ (1 + exp(-(x-mu) * sigma));
+probs = mathfuncs.sigmoid(1:numel(y), mu, sigma, lapse);
+L = -sum(y .* log(probs) + (1 - y) .* log(1-probs));
 
 end
+

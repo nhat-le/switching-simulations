@@ -18,7 +18,13 @@ end
 
 folder = fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/configs/', version);
 
-filenames = dir(fullfile(folder, sprintf('opts_prob%.1f*_final.mat', prob)));
+filenames = dir(fullfile(folder, sprintf('opts_prob%.1f*.mat', prob)));
+if numel(filenames) == 0
+    error('No opts files found!')
+elseif numel(filenames) > 1
+    filenames = dir(fullfile(folder, sprintf('opts_prob%.1f*_final.mat', prob)));
+end
+    
 
 % Deprecated: files used for previous figure plotting
 % switch prob

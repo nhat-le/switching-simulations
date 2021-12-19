@@ -2,6 +2,35 @@ from src.worldModels import *
 import scipy.optimize
 import ssm
 
+def pathsetup(project):
+    out = {}
+    if project == 'matchingsim':
+        out['datapath'] = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/'
+        out['codepath'] = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/'
+
+        out['expdatapath'] = out['datapath']+ 'expdata'
+        out['blockhmmfitpath'] = out['datapath']+ 'blockhmmfit'
+        out['simdatapath'] = out['datapath']+ 'simdata'
+        out['svmdatapath'] = out['datapath']+ 'svm'
+        out['svmconfigpath'] = out['datapath']+ 'svm/configs'
+        out['svmmodelpath'] = out['datapath']+ 'svm/models'
+
+        out['blockhmm_codepath'] = out['codepath']+ 'blockhmm'
+        out['characterize_codepath'] = out['codepath']+ 'characterization'
+        out['decoding_codepath'] = out['codepath']+ 'decoding'
+        out['expfit_codepath'] = out['codepath']+ 'expfit'
+        out['schematic_codepath'] = out['codepath']+ 'schematic'
+    elif project == 'tca':
+        out['datapath'] = '/Users/minhnhatle/Documents/ExternalCode/tca/data'
+        out['codepath'] = '/Users/minhnhatle/Documents/ExternalCode/tca/src/matlab'
+        out['rawdatapath'] = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/raw/extracted'
+        out['tcamatpath'] = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/tca-factors'
+
+    else:
+        raise ValueError('invalid project, must be tca or matchingsim')
+
+    return out
+
 def logistic(x, beta=1):
     return 1 / (1 + np.exp(-beta * x))
 
@@ -56,17 +85,25 @@ def find_LR_transition_fit(world, agent, window, type='sigmoid'):
         if type == 'sigmoid':
             pRight, pLeft = fit_sigmoidal(choicelst, first_side=world.rate_history[0][0] < 0.5)
         elif type == 'doublesigmoid':
+            odd_rows = choicelst[1::2,:]
+            even_rows = choicelst[::2,:]
+
+            len_odds = max(np.sum(~np.isnan(odd_rows), axis=1))
+            len_evens = max(np.sum(~np.isnan(even_rows), axis=1))
+
+            odd_rows = odd_rows[:,:len_odds]
+            even_rows = even_rows[:,:len_evens]
+
             # TODO: confirm side is correct!
             if world.rate_history[0][0] > 0.5:
                 # print('left')
-                leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
-                rightAverage = np.nanmean(choicelst[::2, :], axis=0)
+                leftAverage = np.nanmean(odd_rows, axis=0)
+                rightAverage = np.nanmean(even_rows, axis=0)
             else:
                 # print('right')
-                rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
-                leftAverage = np.nanmean(choicelst[::2, :], axis=0)
-            # print(rightAverage)
-            # print(leftAverage)
+                rightAverage = np.nanmean(odd_rows, axis=0)
+                leftAverage = np.nanmean(even_rows, axis=0)
+
             pfit = fit_doublesigmoid_helper(leftAverage, rightAverage)
             [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR] = pfit
             pRight = [slopeR, offsetR, lapseR]
@@ -354,8 +391,10 @@ def find_transition_guess_binary(sig):
     Returns the offset where a time series crosses 0.5, through binary segmentation
     '''
     candidates = np.where(np.diff(sig > 0.5) != 0)[0]
-    if len(candidates) == 0:
-        return -1
+    if sum(sig > 0.5) == 0:
+        return 1
+    elif len(candidates) == 0:
+        return 1
     else:
         return np.where(np.diff(sig > 0.5) != 0)[0][0]
 
@@ -364,19 +403,25 @@ def find_transition_guess_binary(sig):
 def fit_doublesigmoid_helper(leftAverage, rightAverage):
     '''
     Fit two sigmoids to the left/right average data
+    leftAverage is increasing from 0 to 1
+    rightAverage is decreasing from 1 to 0
     '''
     offsetsR = np.arange(len(rightAverage))
     offsetsL = np.arange(len(leftAverage))
     funR = lambda x: errordoublesigmoid(x, offsetsR, 1-rightAverage, offsetsL, leftAverage)
     switchGuessR = find_transition_guess_binary(leftAverage)  # offset that crosses 0.5
     switchGuessL = find_transition_guess_binary(rightAverage)
-    if switchGuessR == -1:  # No switch happened!
-        switchGuessR = len(rightAverage)
-
-    if switchGuessL == -1:# No switch happened!
+    if sum(leftAverage > 0.5) == 0:
         switchGuessL = len(leftAverage)
+
+    if sum(rightAverage < 0.5) == 0:
+        switchGuessR = len(rightAverage)
+    # if switchGuessR == -1:  # No switch happened!
+    #     switchGuessR = len(rightAverage)
+    #
+    # if switchGuessL == -1:# No switch happened!
+    #     switchGuessL = len(leftAverage)
         # pRight = [0, -np.inf, 0]
-    # print('hi')
     paramsFit = scipy.optimize.minimize(funR, [-switchGuessR, 1, -switchGuessL, 1, 0, 0],
                                           bounds=((None, 0), (0, None), (None, 0), (0, None), (0, 0.5), (0, 0.5)))
 
@@ -517,6 +562,16 @@ def pad_to_same_length(arrlst):
         padded = np.pad(np.array(arr, dtype='float'), (0, Ntopad), constant_values=np.nan)
         padlst.append(padded)
     return np.array(padlst)
+
+
+if __name__ == '__main__':
+    mean_singlez = np.array([0.55555556, 0.73015873, 0.85714286, 0.86507937, 0.92857143,
+       0.98412698, 0.95238095, 0.93650794, 1.        , 0.95238095,
+       0.98412698, 0.95238095, 0.96825397, 0.93650794, 0.96825397])
+
+    L = fit_doublesigmoid_helper(mean_singlez, 1-mean_singlez)
+    print(L)
+
 
 
 

@@ -1,12 +1,12 @@
 %% Build the options for the run
 
 clear all
-
+paths = pathsetup('matchingsim');
 % where the Python simulation results are stored (model-free/inf-based
 % simulations)
 opts = struct;
-opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata';
-opts.expfolder = '121021';
+opts.rootdir = paths.simdatapath;
+opts.expfolder = '121721';
 opts.nbinhist = 30;
 opts.imhmin = 3;
 opts.kernelsize = 3;
@@ -15,9 +15,8 @@ opts.save = 1;
 opts.seed = 3;
 opts.rotations = {[3, 5], [2, 4]};
 opts.plotfeatures = 0;
-
-
 rng(opts.seed);
+
 
 %% form the feature vectors
 [out,opts] = load_data(opts);
@@ -28,12 +27,6 @@ D = squareform(D);
 
 V = pca(out.features_norm);
 Xproj = out.features_norm * V;
-
-% figure;
-% plot(Y(:,1), Y(:,2), '.');
-% figure;
-% plot(Xproj(:,1), Xproj(:,2), '.');
-
 
 
 %%

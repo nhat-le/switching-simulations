@@ -26,7 +26,7 @@ def get_Qmetrics(gamma, eps, N_iters=50, rlow=0):
     eps = 0
     hmm_fit = False
     sigmoid_window = 30
-    ntrials_per_block = [10, 40]
+    ntrials_per_block = [15, 25]
     seed = 0
     # rlow = 0
     rhigh = 1 - rlow
@@ -68,7 +68,7 @@ def get_IB_metrics(psw, prew, N_iters=50, rlow=0):
     eps = 0
     hmm_fit = False
     sigmoid_window = 30
-    ntrials_per_block = [10, 40]
+    ntrials_per_block = [15, 25]
     seed = 0
     # rlow = 0
     rhigh = 1 - rlow
