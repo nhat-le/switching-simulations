@@ -1,0 +1,9 @@
+- Added `pathsetup.m` which stores the path to important data files and code files (for easy setup)
+
+- Optimizing decoders:
+* Capping offset at -20 improves decoding performance
+* Gaussian kernel for SVM (93.2%), linear (86%), RBF(92%), but with capping and RBF kernel(94.9%)
+
+- New decoders saved:
+* decoding_common_121021_withsvmMdl_knn_svm.mat: old decoder, with randsample with replacement (not as accurate)
+* decoding_common_121021_withsvmMdl_knn_svm_v2.mat: new decoder with cap (offset capped at -20), randsample without replacement, reordered columns

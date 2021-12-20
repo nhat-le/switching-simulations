@@ -1,0 +1,34 @@
+## Analysis log for 12.11.2021
+Performing simulations with 20x20 grids for inference-based and model-free agents
+in 100-0 environments
+
+This is to equalize the number of agents for the two strategies and test the effect on the decoding performance
+
+Refitted the simulations on 1000 blocks, model-free and inf-based
+IMPORTANT: changed trials_per_block = [15, 25] from [10, 40]
+New decoding file saved at `svmresults_from_pickle_121021_prob0.00.mat`, and in folder `simdata/12102021`
+
+- Re-organized code into levels with clearer structure, marking deprecated code with `_deprecated`
+
+- Re-organized `processed_data/simdata` folder (separating sim results of different days into separate folders)
+
+- Changed svm config path (which stores segmentation parameters) in new path: `processed_data/svm/configs` (old path was in PaperFigures/code/decodeFigs)
+
+- In `PaperFigures/code/decode_perf_figures.m`, removed filtering of outliers for offset (offset_flat < -20 = nan is removed).
+
+- Removed filtering of features. Note that there was a mild filtering taking place in `PaperFigures/code/load_data.m` where offset values below -20 are clipped (disabled this feature on 12.11.2021). This affects the plots of the svm segmentation
+(TODO: will need to re-do these plots)
+
+- Removed filtering in `PaperFigures/code/decoding/decode_perf_figures.m`
+
+- In `load_and_run.m`, instead of hardcoding filenames for the svm results, now wrote code for discovering the .mat file
+
+- In `decoding_after_watershed`, in `do_decoding` function, instead of clipping the offset values that are less than -20, eliminate this clipping
+
+- Define custom rotations for `load_and_run` instead of hard-coding/MCC
+
+- Implemented Matthews correlation to evaluate performance of decoders
+
+
+
+

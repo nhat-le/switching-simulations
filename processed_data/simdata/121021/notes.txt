@@ -1,0 +1,4 @@
+Performing simulations with 20x20 grids for inference-based and model-free agents
+in 100-0 environments
+
+This is to equalize the number of agents for the two strategies and test the effect on the decoding performance
