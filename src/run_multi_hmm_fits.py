@@ -9,20 +9,20 @@ from src.utils import pathsetup
 
 import ssm
 import smartload.smartload as smart
-from ssm.exputils import load_multiple_sessions, make_savedict
+from exputils import load_multiple_sessions, make_savedict
 npr.seed(0)
 
-def run_and_save(animal, seed, N_iters=3000, num_states=6):
+def run_and_save(animal, seed, version, version_save, N_iters=3000, num_states=6):
     print(f'Starting run and save for {animal}, seed {seed}')
     # Load data
-    version = '113021'
-    version_save = '122021'
     paths = pathsetup('matchingsim')
-
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
     fitrangefile = f"{paths['expdatapath']}/102121/fitranges_102121.mat"
-    datarange = smart.loadmat(fitrangefile)
-    fitrange = datarange['ranges'][datarange['animals'] == animal][0]
+    if os.path.exists(fitrangefile):
+        datarange = smart.loadmat(fitrangefile)
+        fitrange = datarange['ranges'][datarange['animals'] == animal][0]
+    else:
+        fitrange = [6, 10]
     obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
 
     # Find the foraging efficiencies of all blocks
@@ -63,7 +63,7 @@ def run_and_save(animal, seed, N_iters=3000, num_states=6):
             'fitrange', 'filepath', 'obs', 'seed', 'hmm_lls', 'effs', 'block_lens', 'block_corrs']
     savedict = make_savedict(vars, locals())
 
-    savefile = 1
+    savefile = 0
     if savefile and not os.path.exists(savepath):
         scipy.io.savemat(savepath, savedict)
         print('File saved')
@@ -71,7 +71,7 @@ def run_and_save(animal, seed, N_iters=3000, num_states=6):
         print('File exists, skipping save..')
 
 
-def run_animal(animal, seeds, N_iters=3000, num_states=6):
+def run_animal(animal, seeds, version, N_iters=3000, num_states=6):
     '''
     Given animal name and seed number, run block HMM over all the seeds and report the results
     :param animal: str: animal name
@@ -80,11 +80,14 @@ def run_animal(animal, seeds, N_iters=3000, num_states=6):
     '''
     paths = pathsetup('matchingsim')
     # Load data
-    version = '113021'
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
-    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_102121.mat"
-    datarange = smart.loadmat(fitrangefile)
-    fitrange = datarange['ranges'][datarange['animals'] == animal][0]
+    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_122221.mat"
+
+    if os.path.exists(fitrangefile):
+        datarange = smart.loadmat(fitrangefile)
+        fitrange = datarange['ranges'][datarange['animals'] == animal][0]
+    else:
+        fitrange = [1,2,3]
     obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
 
     # Run the fitting procedure
@@ -108,23 +111,25 @@ def run_animal(animal, seeds, N_iters=3000, num_states=6):
     return seeds[idbest]
 
 if __name__ == '__main__':
-    seeds = [121, 122, 123, 124, 125]
+    seeds = [121] #[121, 122, 123, 124, 125]
     # animals = ['e46']
     # animals = ['f02', 'f03', 'f04', 'f11', 'f12', 'e35', 'e40',
     #     'fh01', 'fh02', 'f05', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23']
     # animals = ['e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23']
+    version = '122221'
+    version_save = '122221'
     paths = pathsetup('matchingsim')
-    files = glob.glob(f"{paths['expdatapath']}/113021/*_all_sessions_113021.mat")
+    files = glob.glob(f"{paths['expdatapath']}/{version}/*_all_sessions_{version}.mat")
     num_states = 3
-    N_iters = 3000
+    N_iters = 3 #3000
     # animals = ['f01']
     animals = [file.split('_')[1].split('/')[-1] for file in files]
     for animal in animals:
         print(f"Running animal: {animal}")
         try:
-            bestseed = run_animal(animal, seeds, N_iters, num_states)
+            bestseed = run_animal(animal, seeds, version, N_iters, num_states)
 
             # Run and save with the best seed
-            run_and_save(animal, bestseed, N_iters, num_states)
+            run_and_save(animal, bestseed, version, version_save, N_iters, num_states)
         except:
             continue
