@@ -1,4 +1,17 @@
-## Instructions for creating figures in the paper
+## Instructions for running the analysis and simulation scripts
+
+### Basic setup
+0. Install python, anaconda and jupyter notebook if these have not been installed
+1. Clone the directory `git clone https://github.com/nhat-le/switching-simulations`
+2. Add the folder `MatchingSimulations/PaperFigures/code/helpers` to the MATLAB path
+3. In the script `.../code/helpers/pathsetup.m`, modify the following directories:
+   * `out.rigboxpath` should point to the directory where the rigbox behavioral datafiles are stored
+   * `out.rootpath` should point to the root directory (the full path to the `MatchingSimulations` folder)
+4. Install the following Python packages: `smartload, ssm` 
+
+`python -m pip install [package_name]`
+
+### MATLAB setup
 
 
 ### 0. Experimental schematics
@@ -95,7 +108,7 @@ Alternatively, for quickly iterating through all animals, can use the code in th
 * If we run this script, the blockhmm fit results will be saved in the folder `processed_data/blockhmmfit/{expdate}`
 
 For running the sigmoidal fits of the blockhmm mode (same fitting procedure as the characterization simulations), we run the notebook `blockhmm_classifier.ipynb`, results will be saved in the `processed_data/blockhmmfit/{expdate}` folder.
-* To run this notebook, you need to specify the `version` (the exp date folder that the hmmblockfit data is stored), and the number of states. The script checks that the format of the fit data agrees with this number. Results will be saved as `sigmoid_fit_all__}version}.mat`
+* To run this notebook, you need to specify the `version` (the exp date folder that the hmmblockfit data is stored), and the number of states. The script checks that the format of the fit data agrees with this number. Results will be saved as `sigmoid_fit_all_{version}.mat`
 
 
 

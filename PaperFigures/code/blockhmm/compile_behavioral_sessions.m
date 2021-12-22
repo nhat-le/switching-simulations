@@ -2,18 +2,26 @@
 % animals = {'f01', 'f02', 'f03', 'f04', 'f11', 'f12', 'E35', 'E40',...
 %     'fh01', 'fh02', 'f05', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23'};
 % % animals = {'f25'};
-animals = {'e46'};
+animals = {'f29', 'f26', 'f27', 'f32'};
+version = '122221';
+paths = pathsetup('matchingsim');
+opts.savefile = 1;
+
+
 f = waitbar(0);
 for i = 1:numel(animals)
     waitbar(i/numel(animals), f, sprintf('Processing animal %s', animals{i}));
-    process_animal(animals{i});
+    opts.root = fullfile(paths.rigboxpath, animals{i});
+    opts.savepath = fullfile(paths.expdatapath, version, sprintf('%s_all_sessions_%s.mat', animals{i}, version));
+    process_animal(animals{i}, opts); 
 end
 close(f);
 
 
-function process_animal(animal)
+function process_animal(animal, opts)
 fprintf('****** Processing animal %s...*******\n', animal);
-root = fullfile('/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox', animal);
+paths = pathsetup('matchingsim');
+root = opts.root;
 folders = dir(fullfile(root, '202*'));
 choices_cell = {};
 targets_cell = {};
@@ -57,7 +65,14 @@ for id = 1:numel(folders)
 end
 
 %%
-filename = sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/%s_all_sessions_113021.mat', animal);
-save(filename, 'session_names', 'choices_cell', 'targets_cell', 'maxdelays', 'probflags', 'feedbacks_cell');
+if opts.savefile && ~exist(opts.savepath, 'file')
+    save(opts.savepath, 'session_names', 'choices_cell', 'targets_cell', 'maxdelays', 'probflags', 'feedbacks_cell');
+    fprintf('File saved!\n');
+else
+    fprintf('Skipping save, file exists...\n');
+end
 
 end
+
+
+

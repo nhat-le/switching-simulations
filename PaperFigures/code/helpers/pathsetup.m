@@ -6,9 +6,10 @@ function out = pathsetup(project)
 switch project
     case 'matchingsim'
         out.rigboxpath = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox';
-        out.datapath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data';
-        out.codepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code';
-        out.figpath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/figs';
+        out.rootpath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations';
+        out.datapath = fullfile(out.rootpath, 'processed_data');
+        out.codepath = fullfile(out.rootpath, 'PaperFigures/code');
+        out.figpath = fullfile(out.rootpath, '/PaperFigures/figs');
         
         out.expdatapath = fullfile(out.datapath, 'expdata');
         out.blockhmmfitpath = fullfile(out.datapath, 'blockhmmfit');
