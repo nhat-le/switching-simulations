@@ -16,7 +16,7 @@ def run_and_save(animal, seed, N_iters=3000, num_states=6):
     print(f'Starting run and save for {animal}, seed {seed}')
     # Load data
     version = '113021'
-    version_save = '121921'
+    version_save = '122021'
     paths = pathsetup('matchingsim')
 
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"

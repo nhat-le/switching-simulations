@@ -1,11 +1,12 @@
-
-rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/expdata/';
-folders = dir(fullfile(rootdir, '*hmmblockfit_102121.mat'));
+paths = pathsetup('matchingsim');
+rootdir = paths.expdatapath;
+version = '102121';
+folders = dir(fullfile(rootdir, version, '*hmmblockfit_102121.mat'));
 
 aggmeans = {};
 aggparams = {};
 for i = 1:numel(folders)
-    load(fullfile(rootdir, folders(i).name));
+    load(fullfile(folders(i).folder, folders(i).name));
     
     if i == numel(folders)
         obs(isnan(obs)) = 1;

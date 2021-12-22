@@ -1,5 +1,10 @@
 ## Instructions for creating figures in the paper
 
+
+### 0. Experimental schematics
+* Fig. 1C (illustration of behavior metrics s, alpha, epsilon, E): run `PaperFigures/code/schematic/setup_figure.m`
+* Example behavior of model-free and inference-based agent:
+
 ### 1. For simulations of model-free and inference-based agents (getting the grid metrics with efficiency, slope, lapse, and offset in fig. 2)
 * For Python analysis:
 
@@ -74,7 +79,7 @@ Run `PaperFigures/code/decoding/decoding_after_watershed.m`
 
 * Note that you will need to change the config file in `processed_data/svm/configs/{expdate}` to the `_final.mat` format so that the file will be recognized. This is because there might be multiple opts files that are saved, and the user should select only one of them to be the final file that will be read for this analysis.
 
-### Schematic of model-free and inf-based agents (Fig. 2 with blue circles and red crosses)
+### Schematic of model-free and inf-based agents (Fig 3 and 4 with blue circles and red crosses)
 
 Run `PaperFigures/code/schematic/ibmodels_comparison_figure.m` or `qmodelscomparison_figure.m`
 
@@ -82,6 +87,7 @@ For schematic of the switching dynamics (Fig. 1), run `PaperFigures/code/schemat
 The data for the schematics are located in `processed_data/simdata/schematic`
 
 ### BlockHMM
+First, run script `/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/compile_behavioral_sessions.m` to produce _all_sessions files
 For running the model fitting on simulated data, run `blockHMM.ipynb`
 
 For running the exp fitting procedure, run `blockHMM_expfit.ipynb`
@@ -96,7 +102,10 @@ For running the sigmoidal fits of the blockhmm mode (same fitting procedure as t
 ### Performing the block-HMM state decoding
 Run `code/blockhmm/hmmstate_decode_single_animals.m` for a quick assessment and visualizing the evolution of mixture of strategies of single animal (official figure for fh03 was created here, as well as mean mixture evolution plot)
 
-For visualizing the transition dynamics of each HMM mode, run `code/blockhmm/hmmblockstate_visualize.m` (these are the plots of switching dynamics of the 4 HMM modes in the official figure 8)
+For visualizing the transition dynamics of each HMM mode, run `code/blockhmm/hmmblockstate_visualize_122121.m` (these are the plots of switching dynamics of the 4 HMM modes in the official figure 8)
 
 `code/blockhmm/hmmblockstate_group.m` is an attempt at grouping the HMM modes in an unbiased way (by calling the decoders that were saved in the previous sections of the paper)
+
+### Block HMM selection of K by cross-validation
+Run `blockHMM_K_selection.ipynb`. Results are saved as a pkl file, for e.g. `blockhmm_validation_120221.pkl`
 

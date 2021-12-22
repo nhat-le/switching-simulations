@@ -31,3 +31,12 @@
 * Second column: slope (positive, capped at 3)
 * Third column: lapse (positive, between 0 and 0.5)
 * Fourth column: efficiency (positive, between 0.5 and 1)
+
+### Data format of blockHMM aggregate params
+This is used in the script `hmmblockstate_group`
+- aggparams_double contains cell arrays of 4 x `nstates`
+
+* First row: offset (positive)
+* Second row: slope (positive)
+* Third row: lapse (0 to 0.5)
+* Fourth row: efficiency

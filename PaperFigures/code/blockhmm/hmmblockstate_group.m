@@ -4,7 +4,7 @@
 
 %% Load the data
 paths = pathsetup('matchingsim');
-expfitdate = '113021';
+expfitdate = '121821';
 rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
 folders = dir(fullfile(rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
@@ -12,9 +12,9 @@ mdltypes = 1:2;
 mdlids = 1:10;
 opts.filter_blocks_by_lengths = 0;
 opts.weighted = 1;
-opts.python_assist = 1;
+opts.python_assist = 0;
 opts.effmethod = 'sim';
-opts.model_name = 'decoding_common_121721_withsvmMdl_knn_svm_v4.mat';
+opts.model_name = 'decoding_common_121721_withsvmMdl_knn_svm_v5.mat';
 opts.svmmodelpath = paths.svmmodelpath;
 
 
@@ -59,34 +59,27 @@ else
     aggmeans = aggmeans_native;
 end
 
-
-% 
-% %%
-% all_params = cell2mat(aggparams);
-% all_params(all_params < -20) = -20;
-% 
-% load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/models/decoding_common_121721_withsvmMdl_knn_svm_v4.mat');
-% Mdl = Models{1}{2};
-% 
-% 
-% 
-
 %%
-% f = waitbar(0);
-for mdltype = 1:9 %mdltypes
-    for mdlid = 1
+load(fullfile(opts.svmmodelpath, opts.model_name), 'Models');
+%%
+num_state5 = [];
+f = waitbar(0);
+for mdltype = 7 %1:numel(Models)
+    waitbar(mdltype / numel(Models), f);
+    for mdlid = 1 %1:numel(Models{1})
         opts.mdltype = mdltype;
         opts.mdlid = mdlid;
         [all_aggparams, aggmeans_all, statesFlat, features_flat] = apply_model(aggparams, aggmeans, opts);
 
         % Plot
         figure('Name', sprintf('mdltype = %d, mdlid = %d', mdltype, mdlid));
-        clf;
+%         clf;
 
         single_aggparams = {};
-        disp(sum(statesFlat == 5));
+        num_state5(end+1) = sum(statesFlat == 5);
 
-        for i = 1:5
+        %Plot
+        for i = 1:5 %5 performance regimes
             if sum(statesFlat == i) == 0
                 continue
             end
@@ -101,6 +94,13 @@ for mdltype = 1:9 %mdltypes
         end
     end
 end
+close(f)
+
+disp(num_state5);
+
+
+%%
+numstate5_arr = reshape(num_state5, [], numel(Models));
 
 %%
 % for i =61:80
@@ -240,191 +240,193 @@ x2 = double(blencell{2});
 plot(x1 ./ x2);
 
 
-function [params, aggmeans, aggparams] = load_params_python_assisted(files, opts, params_all)
-    effmethod = opts.effmethod;
-    filter_blocks_by_lengths = opts.filter_blocks_by_lengths;
-    weighted = opts.weighted;
-    
-    paths = pathsetup('matchingsim');
-
-    aggmeans = {};
-    aggparams = {};
-    block_corr_all = {};
-    block_lens_all = {};
-    for i = 1:size(files, 1)
-        file_path = strtrim(files(i,:));
-        fileparts = strsplit(file_path, '/');
-        filename = fileparts{end};
-        
-        subparts = strsplit(filename, '_');
-        version = subparts{end}(1:end-4);
-      
-        
-        file_path_full = fullfile(paths.blockhmmfitpath, version, filename);
-        
-        load(file_path_full);
-
-        % Mean transition function for all trials in a particular z-state
-        allmeans = getmeans(obs, zstates);
-        
-        nstates = size(params, 2);
-
-        % efficiency second try
-        effs = [];
-        switch effmethod
-            case 'rawdata'
-                for zid = 1:nstates
-                    block_corr_filt = double(block_corrs(zstates == zid - 1));
-                    block_lens_filt = double(block_lens(zstates == zid - 1));
-
-                    if filter_blocks_by_lengths
-                        block_corr_filt = block_corr_filt(block_lens_filt > 15 & block_lens_filt < 25);
-                        block_lens_filt = block_lens_filt(block_lens_filt > 15 & block_lens_filt < 25);
-                    end
-
-                    if weighted
-                        effs(zid) = sum(block_corr_filt) / sum(block_lens_filt);
-                    else
-                        effs(zid) = mean(block_corr_filt ./ block_lens_filt);
-                    end
-
-                    block_corr_all{end+1} = block_corr_filt;
-                    block_lens_all{end+1} = block_lens_filt;
-                end
-
-            case 'boost'
-                for zid = 1:nstates
-                    obsfiltered = obs(zstates == zid-1,:);
-
-                % TODO: determine if this 'boosting' can be improved...
-                    effs(zid) = sum(obsfiltered(:) == 1) / numel(obsfiltered) / 15*20;
-                end
-
-            case 'sim'
-                for zid = 1:nstates
-                    paramset = squeeze(params_all(i, zid, :));
-                    paramset(paramset < -20) = -20;
-                    
-                    delta = 0.1;
-                    ntrials = 25;
-                    transfunc = mathfuncs.sigmoid(0:delta:ntrials, -paramset(1), paramset(2), paramset(3));
-                    effs(zid) = sum(transfunc) * delta / ntrials;
-                end
-
-        end 
-        
-        params = squeeze(params_all(i,:,:));
-        params(:,1) = -params(:,1);
-        params(:, end+1) = effs;
-
-        aggmeans{i} = allmeans;
-        aggparams{i} = params';   
-
-    end
-end
-
-
-
-function [params, aggmeans, aggparams] = load_params(folders, opts)
-    effmethod = opts.effmethod;
-    filter_blocks_by_lengths = opts.filter_blocks_by_lengths;
-    weighted = opts.weighted;
-
-
-    aggmeans = {};
-    aggparams = {};
-    block_corr_all = {};
-    block_lens_all = {};
-    for i = 1:numel(folders)
-        load(fullfile(folders(i).folder, folders(i).name));
-
-        if i == numel(folders)
-            obs(isnan(obs)) = 1;
-        end
-
-        % Mean transition function for all trials in a particular z-state
-        allmeans = getmeans(obs, zstates);
-
-        % efficiency second try
-        effs = [];
-        nstates = size(params, 2);
-        switch effmethod
-            case 'rawdata'
-                for zid = 1:nstates
-                    block_corr_filt = double(block_corrs(zstates == zid - 1));
-                    block_lens_filt = double(block_lens(zstates == zid - 1));
-
-                    if filter_blocks_by_lengths
-                        block_corr_filt = block_corr_filt(block_lens_filt > 15 & block_lens_filt < 25);
-                        block_lens_filt = block_lens_filt(block_lens_filt > 15 & block_lens_filt < 25);
-                    end
-
-                    if weighted
-                        effs(zid) = sum(block_corr_filt) / sum(block_lens_filt);
-                    else
-                        effs(zid) = mean(block_corr_filt ./ block_lens_filt);
-                    end
-
-                    block_corr_all{end+1} = block_corr_filt;
-                    block_lens_all{end+1} = block_lens_filt;
-                end
-
-            case 'boost'
-                for zid = 1:nstates
-                    obsfiltered = obs(zstates == zid-1,:);
-
-                % TODO: determine if this 'boosting' can be improved...
-                    effs(zid) = sum(obsfiltered(:) == 1) / numel(obsfiltered) / 15*20;
-                end
-
-            case 'sim'
-                for zid = 1:nstates
-                    paramset = params(:, zid);
-                    delta = 0.1;
-                    ntrials = 25;
-                    transfunc = mathfuncs.sigmoid(0:delta:ntrials, paramset(1), paramset(2), paramset(3));
-                    effs(zid) = sum(transfunc) * delta / ntrials;
-
-                end
-
-        end 
-
-        params(end + 1, :) = effs;
-
-        aggmeans{i} = allmeans;
-        aggparams{i} = params;   
-
-    end
-end
-
-
-function allmeans = getmeans(obs, zstates)
-allmeans = [];
-for i = 1:max(zstates) + 1
-    obsfilt = obs(zstates == i-1, :);
-    allmeans(i,:) = nanmean(obsfilt, 1);
-end
-
-end
-
-function [all_aggparams, aggmeans_all, statesFlat, features_flat, MCC] = apply_model(aggparams, aggmeans, opts)
-% Load the model 
-load(fullfile(opts.svmmodelpath, opts.model_name))
-
-all_aggparams = cell2mat(aggparams);
-Mdl = Models{opts.mdltype}{opts.mdlid};
-MCC = MCCs_all{opts.mdltype}(opts.mdlid);
-offsetFlat = all_aggparams(1,:)';
-slopesFlat = all_aggparams(2,:)';
-lapseFlat = all_aggparams(3,:)';
-effFlat = all_aggparams(4,:)';
-
-% Note: no normalization since normalization already handled in svm Mdl
-features_flat = [-offsetFlat slopesFlat lapseFlat effFlat];
-
-% features_flat(4, 2) = 0.07;
-statesFlat = Mdl.predict(features_flat);
-
-% Grouping and plotting the transition function by decoded states
-aggmeans_all = cell2mat(aggmeans');
-end
+% function [params, aggmeans, aggparams] = load_params_python_assisted(files, opts, params_all)
+%     effmethod = opts.effmethod;
+%     filter_blocks_by_lengths = opts.filter_blocks_by_lengths;
+%     weighted = opts.weighted;
+%     
+%     paths = pathsetup('matchingsim');
+% 
+%     aggmeans = {};
+%     aggparams = {};
+%     block_corr_all = {};
+%     block_lens_all = {};
+%     for i = 1:size(files, 1)
+%         file_path = strtrim(files(i,:));
+%         fileparts = strsplit(file_path, '/');
+%         filename = fileparts{end};
+%         
+%         subparts = strsplit(filename, '_');
+%         version = subparts{end}(1:end-4);
+%       
+%         
+%         file_path_full = fullfile(paths.blockhmmfitpath, version, filename);
+%         
+%         load(file_path_full);
+% 
+%         % Mean transition function for all trials in a particular z-state
+%         allmeans = getmeans(obs, zstates);
+%         
+%         nstates = size(params, 2);
+% 
+%         % efficiency second try
+%         effs = [];
+%         switch effmethod
+%             case 'rawdata'
+%                 for zid = 1:nstates
+%                     block_corr_filt = double(block_corrs(zstates == zid - 1));
+%                     block_lens_filt = double(block_lens(zstates == zid - 1));
+% 
+%                     if filter_blocks_by_lengths
+%                         block_corr_filt = block_corr_filt(block_lens_filt > 15 & block_lens_filt < 25);
+%                         block_lens_filt = block_lens_filt(block_lens_filt > 15 & block_lens_filt < 25);
+%                     end
+% 
+%                     if weighted
+%                         effs(zid) = sum(block_corr_filt) / sum(block_lens_filt);
+%                     else
+%                         effs(zid) = mean(block_corr_filt ./ block_lens_filt);
+%                     end
+% 
+%                     block_corr_all{end+1} = block_corr_filt;
+%                     block_lens_all{end+1} = block_lens_filt;
+%                 end
+% 
+%             case 'boost'
+%                 for zid = 1:nstates
+%                     obsfiltered = obs(zstates == zid-1,:);
+% 
+%                 % TODO: determine if this 'boosting' can be improved...
+%                     effs(zid) = sum(obsfiltered(:) == 1) / numel(obsfiltered) / 15*20;
+%                 end
+% 
+%             case 'sim'
+%                 for zid = 1:nstates
+%                     paramset = squeeze(params_all(i, zid, :));
+%                     paramset(paramset < -20) = -20;
+%                     
+%                     delta = 0.1;
+%                     ntrials = 25;
+%                     transfunc = mathfuncs.sigmoid(0:delta:ntrials, -paramset(1), paramset(2), paramset(3));
+%                     effs(zid) = sum(transfunc) * delta / ntrials;
+%                 end
+% 
+%         end 
+%         
+%         params = squeeze(params_all(i,:,:));
+%         params(:,1) = -params(:,1);
+%         params(:, end+1) = effs;
+% 
+%         aggmeans{i} = allmeans;
+%         aggparams{i} = params';   
+% 
+%     end
+% end
+% 
+% 
+% 
+% function [params, aggmeans, aggparams] = load_params(folders, opts)
+%     effmethod = opts.effmethod;
+%     filter_blocks_by_lengths = opts.filter_blocks_by_lengths;
+%     weighted = opts.weighted;
+% 
+% 
+%     aggmeans = {};
+%     aggparams = {};
+%     block_corr_all = {};
+%     block_lens_all = {};
+%     for i = 1:numel(folders)
+%         load(fullfile(folders(i).folder, folders(i).name));
+% 
+%         if i == numel(folders)
+%             obs(isnan(obs)) = 1;
+%         end
+% 
+%         % Mean transition function for all trials in a particular z-state
+%         allmeans = getmeans(obs, zstates);
+% 
+%         % efficiency second try
+%         effs = [];
+%         nstates = size(params, 2);
+%         switch effmethod
+%             case 'rawdata'
+%                 for zid = 1:nstates
+%                     block_corr_filt = double(block_corrs(zstates == zid - 1));
+%                     block_lens_filt = double(block_lens(zstates == zid - 1));
+% 
+%                     if filter_blocks_by_lengths
+%                         block_corr_filt = block_corr_filt(block_lens_filt > 15 & block_lens_filt < 25);
+%                         block_lens_filt = block_lens_filt(block_lens_filt > 15 & block_lens_filt < 25);
+%                     end
+% 
+%                     if weighted
+%                         effs(zid) = sum(block_corr_filt) / sum(block_lens_filt);
+%                     else
+%                         effs(zid) = mean(block_corr_filt ./ block_lens_filt);
+%                     end
+% 
+%                     block_corr_all{end+1} = block_corr_filt;
+%                     block_lens_all{end+1} = block_lens_filt;
+%                 end
+% 
+%             case 'boost'
+%                 for zid = 1:nstates
+%                     obsfiltered = obs(zstates == zid-1,:);
+% 
+%                 % TODO: determine if this 'boosting' can be improved...
+%                     effs(zid) = sum(obsfiltered(:) == 1) / numel(obsfiltered) / 15*20;
+%                 end
+% 
+%             case 'sim'
+%                 for zid = 1:nstates
+%                     paramset = params(:, zid);
+%                     delta = 0.1;
+%                     ntrials = 25;
+%                     transfunc = mathfuncs.sigmoid(0:delta:ntrials, paramset(1), paramset(2), paramset(3));
+%                     effs(zid) = sum(transfunc) * delta / ntrials;
+% 
+%                 end
+% 
+%         end 
+% 
+%         params(end + 1, :) = effs;
+% 
+%         aggmeans{i} = allmeans;
+%         aggparams{i} = params;   
+% 
+%     end
+% end
+% 
+% 
+% function allmeans = getmeans(obs, zstates)
+% allmeans = [];
+% for i = 1:max(zstates) + 1
+%     obsfilt = obs(zstates == i-1, :);
+%     allmeans(i,:) = nanmean(obsfilt, 1);
+% end
+% 
+% end
+% 
+% function [all_aggparams, aggmeans_all, statesFlat, features_flat, MCC] = apply_model(aggparams, aggmeans, opts)
+% % Load the model 
+% load(fullfile(opts.svmmodelpath, opts.model_name))
+% 
+% all_aggparams = cell2mat(aggparams);
+% Mdl = Models{opts.mdltype}{opts.mdlid};
+% MCC = MCCs_all{opts.mdltype}(opts.mdlid);
+% offsetFlat = all_aggparams(1,:)';
+% slopesFlat = all_aggparams(2,:)';
+% lapseFlat = all_aggparams(3,:)';
+% effFlat = all_aggparams(4,:)';
+% 
+% % Note: no normalization since normalization already handled in svm Mdl
+% features_flat = [-offsetFlat slopesFlat lapseFlat effFlat];
+% 
+% features_flat(features_flat < -20) = -20; 
+% 
+% % features_flat(4, 2) = 0.07;
+% statesFlat = Mdl.predict(features_flat);
+% 
+% % Grouping and plotting the transition function by decoded states
+% aggmeans_all = cell2mat(aggmeans');
+% end

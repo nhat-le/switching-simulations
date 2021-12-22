@@ -5,7 +5,7 @@ function out = pathsetup(project)
 
 switch project
     case 'matchingsim'
-        
+        out.rigboxpath = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox';
         out.datapath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data';
         out.codepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code';
         out.figpath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/figs';

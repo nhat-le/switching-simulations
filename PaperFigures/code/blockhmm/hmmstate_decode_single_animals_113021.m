@@ -9,14 +9,14 @@
 % Load decoding models and performance of models (on simulated data)
 % Models are located at Mdls1, Mdls09, Mdls08 etc (100-0, 90-10 and 80-20
 % environments respectively).
-pathsetup;
-load(fullfile(svmmodelpath, 'decoding_common_101421_withknnMdl.mat'))
+paths = pathsetup('matchingsim');
+load(fullfile(paths.svmmodelpath, 'decoding_common_101421_withknnMdl.mat'))
 
 
 % Load blockHMM results for a single animal
 % This file contains info on: zstates and observations for all blocks of
 % trials that are of interest
-load(fullfile(expdatapath, '102121', 'f02_hmmblockfit_102121c.mat'))
+load(fullfile(paths.expdatapath, '102121', 'f02_hmmblockfit_102121c.mat'))
 
 
 
@@ -67,8 +67,8 @@ disp(statesFlat');
 % statesFlat(isnan(lapseFlat) | isnan(effFlat) | isnan(offsetFlat) | isnan(slopesFlat)) = nan;
 
 %% classify and visualize state distributions
-files = dir(fullfile(expdatapath, '102121', '*hmmblockfit_102121.mat'));
-load(fullfile(expdatapath, '102321', 'allanimals_hmmblockfitsummary_102321.mat'));
+files = dir(fullfile(paths.expdatapath, '102121', '*hmmblockfit_102121.mat'));
+load(fullfile(paths.expdatapath, '102321', 'allanimals_hmmblockfitsummary_102321.mat'));
 
 filenames = {files.name};
 animals = cellfun(@(x) extractName(x), filenames, 'UniformOutput', false);
@@ -154,7 +154,7 @@ end
 
 %% Parse and average hmm summary fractions
 rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/';
-load(fullfile(expdatapath, 'hmmblockfractions_102421b.mat'));
+load(fullfile(paths.expdatapath, 'hmmblockfractions_102421b.mat'));
 
 % for i = 1:numel(animals)
 %     filename = sprintf('%s_hmmblockfit_102121.mat', animals{i});
@@ -189,7 +189,7 @@ for i = 1:numel(animalnames)
      
     
     filename = sprintf('%s_hmmblockfit_102121.mat', animalnames{i});
-    load(fullfile(expdatapath, '102121', filename));
+    load(fullfile(paths.expdatapath, '102121', filename));
     
     trialsrange = (max(range(1), fitrange(1))):(range(2)-5);
     

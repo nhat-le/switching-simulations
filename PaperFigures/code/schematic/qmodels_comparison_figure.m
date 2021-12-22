@@ -1,5 +1,7 @@
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
-load(filedir);
+paths = pathsetup('matchingsim');
+
+opts.filedir = fullfile(paths.simdatapath, '07232021/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat');
+load(opts.filedir);
 rng(124);
 
 paperaesthetics;
@@ -8,14 +10,14 @@ plottype = 0; % 1 for constant eps
 
 % For simulating constant eps, vary gamma, eps = 0.2
 if plottype
-    [offset1, slope1, lapse1] = get_behavioral_params(1, 10);
-    [offset2, slope2, lapse2] = get_behavioral_params(10, 10);
-    [offset3, slope3, lapse3] = get_behavioral_params(22, 10);
+    [offset1, slope1, lapse1] = get_behavioral_params(1, 10, opts);
+    [offset2, slope2, lapse2] = get_behavioral_params(10, 10, opts);
+    [offset3, slope3, lapse3] = get_behavioral_params(22, 10, opts);
 else
 % For simulating constant gamma, vary eps, gamma = 1.2
-    [offset1, slope1, lapse1] = get_behavioral_params(22, 1);
-    [offset2, slope2, lapse2] = get_behavioral_params(22, 9);
-    [offset3, slope3, lapse3] = get_behavioral_params(22, 16);
+    [offset1, slope1, lapse1] = get_behavioral_params(22, 1, opts);
+    [offset2, slope2, lapse2] = get_behavioral_params(22, 9, opts);
+    [offset3, slope3, lapse3] = get_behavioral_params(22, 16, opts);
 end
 
 Nsteps = 25;
@@ -64,9 +66,9 @@ end
 
 
 
-function [offset, slope, lapse] = get_behavioral_params(gammaid, epsid)
+function [offset, slope, lapse] = get_behavioral_params(gammaid, epsid, opts)
 % Behavioral params
-filedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat';
+filedir = opts.filedir;
 load(filedir);
 offset = PRoffsetlist(gammaid, epsid);
 slope = PRslopelist(gammaid, epsid);

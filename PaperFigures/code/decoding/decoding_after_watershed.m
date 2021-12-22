@@ -11,10 +11,11 @@ opts.version = '121021';
 
 
 %% Decoding analysis (all probabilities)
+paths = pathsetup('matchingsim');
 opts.reps = 20;
 opts.method = 'knn';
 opts.nNeighbors = 1;
-opts.svmdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/svm/';
+opts.svmdir = paths.svmdatapath;
 opts.svm_version = '121721';
 opts.save_model = 1;
 
@@ -30,9 +31,10 @@ MCCs_all = {};
 Models = {};
 confusions_all = {};
 
-fit_values = [1,2,3,4,5,100,200,500,-1];
-for i = 1:numel(fit_values)
-    fitval = fit_values(i);%1:11
+model_types = [2:2:30 -1]; %[1,2,3,4,5,6,7,8,9,10,-1];
+
+for i = 1:numel(model_types)
+    fitval = model_types(i);%1:11
     if fitval == -1
         opts.method = 'svm';
     else
@@ -83,14 +85,14 @@ leg = legend([l1, l2], {'Accuracy', 'Matthews correlation'}, 'FontSize', 16);
 
 %%
 savedir = paths.svmmodelpath;
-filename = sprintf('decoding_common_%s_with%sMdl_knn_svm_v4.mat', opts.svm_version, opts.method);
-notes = 'first 10 mdls are knns with nNeighbors = 1,2,3,4,5,100,200,500, last mdl is svm';
+filename = sprintf('decoding_common_%s_with%sMdl_knn_svm_v5.mat', opts.svm_version, opts.method);
+notes = 'model types described in model_types variable, -1 means svm';
 savename = fullfile(savedir, filename);
 if opts.save_model
     if ~exist(savename, 'file')
 %         save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
 %             'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
-        save(savename, 'MCCs_means', 'MCCs_stds', 'Models', 'notes', 'MCCs_all');
+        save(savename, 'MCCs_means', 'MCCs_stds', 'Models', 'notes', 'MCCs_all', 'model_types');
         fprintf('File saved!\n');
     else
         error('File exists')
