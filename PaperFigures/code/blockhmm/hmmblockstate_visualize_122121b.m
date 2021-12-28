@@ -10,7 +10,7 @@ opts.filter_blocks_by_lengths = 0;
 opts.weighted = 1;
 opts.python_assist = 0;
 opts.effmethod = 'sim';
-opts.savefile = 0;
+opts.savefile = 1;
 opts.model_name = 'decoding_common_121721_withknnMdl_knn_svm_v7.mat';
 opts.svmmodelpath = paths.svmmodelpath;
 
@@ -36,12 +36,12 @@ K = 6;
 idx = kmeans(aggmeans_all, K);
 %shuffle the idx
 idxcopy = idx;
-idx(idxcopy == 1) = 5;
-idx(idxcopy == 2) = 3;
-idx(idxcopy == 3) = 6;
-idx(idxcopy == 4) = 2;
-idx(idxcopy == 5) = 1;
-idx(idxcopy == 6) = 4;
+idx(idxcopy == 2) = 6;
+idx(idxcopy == 6) = 2;
+% idx(idxcopy == 3) = 6;
+% idx(idxcopy == 4) = 2;
+% idx(idxcopy == 5) = 1;
+% idx(idxcopy == 6) = 4;
 
 
 
@@ -81,7 +81,7 @@ for i = 1:K
     plot(mean(yvals_sub, 1), 'r', 'Color', 'r', 'LineWidth', 2);
     ylim([0, 1])
     mymakeaxis('x_label', 'Trials from block start', 'y_label', 'P(Correct)', ...
-        'yticks', 0:0.2:1);
+        'yticks', 0:0.2:1, 'xticks', 0:5:15);
 
 
 end

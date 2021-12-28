@@ -97,28 +97,11 @@ def run_multiple_agents(params):
         print('* idx = ', idx)
         for idy in range(len(ylst)):
             print('     idy = ', idy)
-            # print(idx, idy, params)
             agent, world, pR, pL, hmm = run_single_agent(idx, idy, params)
-            # print(pR, pL)
 
             # Previous fitting code
             xvals, means, _, _ = simulate_rew_error_correlations(world, agent)
             paramsFit, _ = fit_expfun2([0.5, 4], xvals, np.array(means))
-            # if data['alltargets'][0][0] == 0:
-            #     # print('left')
-            #     leftAverage = np.nanmean(choicelst[1::2, :], axis=0)
-            #     rightAverage = np.nanmean(choicelst[::2, :], axis=0)
-            # else:
-            #     # print('right')
-            #     rightAverage = np.nanmean(choicelst[1::2, :], axis=0)
-            #     leftAverage = np.nanmean(choicelst[::2, :], axis=0)
-            #
-            # pfit = fit_doublesigmoid_helper(leftAverage, rightAverage)
-            # [offsetL, slopeL, offsetR, slopeR, lapseL, lapseR] = pfit
-            # pRight = [slopeR, offsetR, lapseR]
-            # pLeft = [slopeL, offsetL, lapseL]
-
-
             efflist[idx][idy] = agent.find_efficiency()
 
             if params['hmm_fit']:
@@ -135,7 +118,6 @@ def run_multiple_agents(params):
             LapseR[idx][idy] = pR[2]
             ParamsA[idx][idy] = paramsFit[0]
             ParamsB[idx][idy] = paramsFit[1]
-            # ParamsC[idx][idy] = paramsFit[2]
 
     return efflist, T11lst, T22lst, E1lst, E2lst, PRslopelist, PLslopelist, \
            PRoffsetlist, PLoffsetlist, LapseL, LapseR, ParamsA, ParamsB, ParamsC

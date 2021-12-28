@@ -1,5 +1,6 @@
 import numpy as np
-import src.utils
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 
 class Agent():
     '''
@@ -45,6 +46,27 @@ class Agent():
         running_1sidefrac = np.convolve(rewards1side, kernel, 'same')
 
         return running_1sidefrac / (running_0sidefrac + running_1sidefrac)
+
+
+    def do_history_logistic_fit(self, Tmax):
+        choice_t = self.choice_history[10:0]
+        choices_t = [np.array(self.choice_history[(Tmax - i):(-i - 1)]) * 2 - 1 for i in range(Tmax)]
+        rewards_t = [np.array(self.outcome_history[(Tmax - i):(-i - 1)]) for i in range(Tmax)]
+
+        RewC_t = [choices_t[i] * rewards_t[i] for i in range(len(choices_t))]
+        #UnrC_t = [choices_t[i] * (1 - rewards_t[i]) for i in range(len(choices_t))]
+
+        X = np.vstack(choices_t[1:] + RewC_t[1:] + rewards_t[1:]).T
+        y = choices_t[0]
+
+        # Logistic regression
+        Xtrain, Xtest, ytrain, ytest = train_test_split(X, y, train_size=0.8)
+        model = LogisticRegression(random_state=0, C=1).fit(Xtrain, ytrain)
+
+        perf_train = np.sum(model.predict(Xtrain) == ytrain) / len(ytrain)
+        perf_test = np.sum(model.predict(Xtest) == ytest) / len(ytest)
+
+        return model.coef_.flatten(), perf_train, perf_test
 
 
 class MatchingAgent(Agent):

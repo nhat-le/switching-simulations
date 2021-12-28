@@ -71,7 +71,7 @@ for id = 1:numel(animalinfo)
     
     animalinfo(id).composition = composition;
     nsess = size(composition, 1);
-    xlimmax = nsess;
+    xlimmax = min(nsess, 30);
 
     if opts.plotting
         % Plot bar graph to show the composition
@@ -84,12 +84,12 @@ for id = 1:numel(animalinfo)
             h(i).ShowBaseLine = 'off';
         end
         xlim([0.5 xlimmax + 0.5])
-        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction')
+        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction', 'xticks', 0:5:30)
 %         legend(h(1:5), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Inference-based 4', 'Inference-based 5'}, 'Position', [0.4,0.42,0.1,0.1], ...
 %             'FontSize', 14);
         filename = fullfile(paths.figpath, 'hmmblockFigs/compositions_animals/',...
             sprintf('%s_training_evolution.pdf', animalinfo(id).animal));
-        saveas(gcf, filename);
+%         saveas(gcf, filename);
     end
 end
 % close all
@@ -146,8 +146,8 @@ for i =1:5
 end
 
 mymakeaxis('x_label', 'Session', 'y_label', 'Fraction', 'xticks', 0:5:30)
-l = legend(lines, {'1', '2', '3', '4', '5'});
-l.Title.String = 'HMM mode';
+l = legend(lines, {'Q1', 'Q2', 'Q3', 'IB4', 'IB5'});
+l.Title.String = 'Regime';
 l.Title.FontSize = 12;
 l.FontSize = 12;
 
