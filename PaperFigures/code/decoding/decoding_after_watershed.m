@@ -4,9 +4,10 @@ paths = pathsetup('matchingsim');
 % Load raw data
 opts = struct;
 opts.version = '121021';
+
 [res1, opts] = load_and_run(0, opts);
 % res2 = load_and_run(0.1, opts);
-% res3 = load_and_run(0.2, opts);
+% res3 = load_and_run(0.2, opts);a
 % res4 = load_and_run(0.3, opts);
 
 
@@ -31,23 +32,43 @@ MCCs_all = {};
 Models = {};
 confusions_all = {};
 
-model_types = [2:2:30 -1]; %[1,2,3,4,5,6,7,8,9,10,-1];
 
-for i = 1:numel(model_types)
-    fitval = model_types(i);%1:11
-    if fitval == -1
-        opts.method = 'svm';
-    else
-        opts.method = 'knn';
-        opts.nNeighbors = fitval;
+model_types = 2:2:30; %[1,2,3,4,5,6,7,8,9,10,-1];
+
+for seed = 14
+    rng(seed);
+
+    for i = 1:numel(model_types)
+        fitval = model_types(i);%1:11
+        if fitval == -1
+            opts.method = 'svm';
+        else
+            opts.method = 'knn';
+            opts.nNeighbors = fitval;
+        end
+        [confusions, Mdl, MCCs] = do_decoding(1, res1, opts);
+        confusions_all{i} = confusions;
+        MCCs_means(i) = mean(MCCs);
+        MCCs_stds(i) = std(MCCs);
+        Models{i} = Mdl;
+        MCCs_all{i} = MCCs;
+
     end
-    [confusions, Mdl, MCCs] = do_decoding(1, res1, opts);
-    confusions_all{i} = confusions;
-    MCCs_means(i) = mean(MCCs);
-    MCCs_stds(i) = std(MCCs);
-    Models{i} = Mdl;
-    MCCs_all{i} = MCCs;
     
+%     meanperfs = [];
+%     for i = 1:numel(confusions_all)
+%         perfs = [];
+%         for j = 1:numel(confusions_all{1})
+%             confusion_mat = confusions_all{i}{j};
+%             perfs(j) = sum(diag(confusion_mat)) / sum(confusion_mat(:));
+%         end
+% 
+%         meanperfs(i) = mean(perfs);
+% 
+%     end
+    
+%     [x,y] = max(meanperfs);
+%     fprintf('seed = %d, maxid = %d\n', seed, y);
 end
 
 
@@ -67,13 +88,13 @@ for i = 1:numel(confusions_all)
 end
 
 figure;
-l1 = errorbar(0:numel(meanperfs) - 1, meanperfs, stdperfs, 'o', 'LineWidth', 2);
+l1 = errorbar(model_types, meanperfs, stdperfs, 'o', 'LineWidth', 2);
 hold on
-l2 = errorbar(0:numel(meanperfs) - 1, MCCs_means , MCCs_stds, 'o', 'LineWidth', 2);
+l2 = errorbar(model_types, MCCs_means , MCCs_stds, 'o', 'LineWidth', 2);
+ylim([0.9, 0.95])
 
-mymakeaxis('x_label', 'k Neighbors', 'y_label', 'Decoding performance', 'xticks', 0:10, ...
-    'xticklabels', {'1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'SVM'});
-
+mymakeaxis('x_label', 'k Neighbors', 'y_label', 'Decoding performance', 'xticks', model_types, ...
+     'yticks', 0.9:0.01:0.95);
 leg = legend([l1, l2], {'Accuracy', 'Matthews correlation'}, 'FontSize', 16);
 % leg.String.FontSize
 
@@ -85,14 +106,14 @@ leg = legend([l1, l2], {'Accuracy', 'Matthews correlation'}, 'FontSize', 16);
 
 %%
 savedir = paths.svmmodelpath;
-filename = sprintf('decoding_common_%s_with%sMdl_knn_svm_v5.mat', opts.svm_version, opts.method);
-notes = 'model types described in model_types variable, -1 means svm';
+filename = sprintf('decoding_common_%s_with%sMdl_knn_svm_v7.mat', opts.svm_version, opts.method);
+notes = 'knn models with k = 2:2:30';
 savename = fullfile(savedir, filename);
 if opts.save_model
     if ~exist(savename, 'file')
 %         save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
 %             'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
-        save(savename, 'MCCs_means', 'MCCs_stds', 'Models', 'notes', 'MCCs_all', 'model_types');
+        save(savename, 'MCCs_means', 'MCCs_stds', 'Models', 'notes', 'MCCs_all', 'model_types', 'seed');
         fprintf('File saved!\n');
     else
         error('File exists')
@@ -163,13 +184,13 @@ MCCs = [];
 
 for k = 1:opts.reps
 %     order = randperm(numel(labels));
-    fprintf('Repetition %d\n', k);
+%     fprintf('Repetition %d\n', k);
     order = randsample(filteredIDs, numel(filteredIDs), false);
     labels_shuffled = labels(order);
     features_shuffled = features(order,:);
 
     %80% training, 20% testing
-    rng('shuffle');
+%     rng('shuffle');
     ntrain = floor(numel(filteredIDs) * 0.8);
     Xtrain = features_shuffled(1:ntrain,:);
     ytrain = labels_shuffled(1:ntrain);
@@ -192,7 +213,7 @@ for k = 1:opts.reps
 
     % Make the confusion matrix
     N = numel(unique(ypred));
-    fprintf('Number of clusters = %d\n', N);
+%     fprintf('Number of clusters = %d\n', N);
     
     counts = confusionmat(ytest, ypred); %confusion matrix
     MCCs(k) = matthews_corr(counts');

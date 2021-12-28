@@ -45,11 +45,11 @@ plot(tvals(yflat == 0), choicesflat(yflat == 0), 'rx', 'LineWidth', 1.5)
 vline(blockstarts, 'k--')
 colors = brewermap(3, 'Set1');
 colors = colors([3, 1, 2],:);
-% for i = 1:numel(zstates)  
-%     opts={'EdgeColor', 'none',...
-%       'FaceColor', colors(zstates(i),:), 'FaceAlpha', 0.2};
-%     fill_between([blockstarts(i), blockstarts(i+1)], [-1 -1], 1, [], opts{:})
-% end
+for i = 1:numel(zstates)  
+    opts={'EdgeColor', 'none',...
+      'FaceColor', colors(zstates(i),:), 'FaceAlpha', 0.2};
+    fill_between([blockstarts(i), blockstarts(i+1)], [-1 -1], 1, [], opts{:})
+end
 ylim([-1.5, 1.5])
 mymakeaxis('x_label', 'Trials', 'y_label', 'Choice', 'yticks', [-1, 1])
 
@@ -64,11 +64,12 @@ p0 = [1, 1, 0.2];
 pfit = fminsearch(@(x) sigmoid_likelihood(x, meanfeedbacks), p0); 
 
 probs = mathfuncs.sigmoid(0:numel(meanfeedbacks), pfit(1), pfit(2), pfit(3));
-l1 = plot(mean(feedbacks), 'LineWidth', 2);
+l1 = plot(mean(feedbacks), 'k', 'LineWidth', 2);
 hold on
-l2 = plot(0:numel(meanfeedbacks), probs,'k--', 'LineWidth', 2);
+l2 = plot(0:numel(meanfeedbacks), probs,'b--', 'LineWidth', 2);
 
-mymakeaxis('x_label', 'Num trials', 'y_label', 'P(correct)', 'xticks', 0:5:15)
+mymakeaxis('x_label', 'Num trials', 'y_label', 'P(correct)', 'xticks', 0:5:15,...
+    'yticks', 0:0.5:1)
 
 legend([l1, l2], {'Session average', 'Fitted'}, 'FontSize', 16)
 
@@ -87,8 +88,9 @@ end
 
 
 %% fh02 transition matrix plot
-% figure;
-load('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/fh02_hmmblockfit_102121.mat', 'transmat');
+figure;
+paths = pathsetup('matchingsim');
+load(fullfile(paths.blockhmmfitpath, '113021/fh02_hmmblockfit_113021.mat'), 'transmat');
 
 imagesc(transmat)
 axis xy

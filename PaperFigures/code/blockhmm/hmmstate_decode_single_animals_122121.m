@@ -4,7 +4,8 @@ paths = pathsetup('matchingsim');
 % Load classification info file
 version = '121821';
 opts.rootdir = fullfile(paths.blockhmmfitpath, version);
-opts.plotting = 0;
+opts.plotting = 1;
+opts.save = 1;
 
 classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*.mat'));
 assert(numel(classification_info_files) == 1);
@@ -56,7 +57,9 @@ for i = 1:numel(folders)
 end
 
 %% Plot state evolution profile for each animal
+f = waitbar(0);
 for id = 1:numel(animalinfo)
+    waitbar(id / numel(animalinfo), f);
     zclassified = animalinfo(id).zclassified;
     composition = nan(numel(zclassified), nstates_regimes);
     for i = 1:numel(zclassified)
@@ -67,10 +70,12 @@ for id = 1:numel(animalinfo)
     end
     
     animalinfo(id).composition = composition;
+    nsess = size(composition, 1);
+    xlimmax = nsess;
 
     if opts.plotting
         % Plot bar graph to show the composition
-        figure('Position', [440,423,736,375]);
+        figure('Position', [440,423,736,375], 'Name', animalinfo(id).animal);
         h = bar(composition,'stacked');
         colors = brewermap(6, 'Set1');
         orders = [2, 1, 5, 4, 3];
@@ -78,14 +83,28 @@ for id = 1:numel(animalinfo)
             h(i).FaceColor = colors(orders(i),:);
             h(i).ShowBaseLine = 'off';
         end
-    %     xlim([0.5 17.5])
-        mymakeaxis('x_label', 'HMM mode', 'y_label', 'Fraction', 'xticks', 1:17)
-        legend(h(1:5), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Inference-based 4', 'Inference-based 5'}, 'Position', [0.4,0.42,0.1,0.1], ...
-            'FontSize', 14);
+        xlim([0.5 xlimmax + 0.5])
+        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction')
+%         legend(h(1:5), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Inference-based 4', 'Inference-based 5'}, 'Position', [0.4,0.42,0.1,0.1], ...
+%             'FontSize', 14);
+        filename = fullfile(paths.figpath, 'hmmblockFigs/compositions_animals/',...
+            sprintf('%s_training_evolution.pdf', animalinfo(id).animal));
+        saveas(gcf, filename);
     end
 end
+% close all
+close(f)
 
 
+%% Save if requested
+savefilename = fullfile(opts.rootdir, sprintf('hmmblock_composition_info_%s', version));
+
+if opts.save && ~exist(savefilename, 'file')
+    save(savefilename, 'opts', 'animalinfo');
+    fprintf('File saved!\n');
+else
+    fprintf('Skipping save...\n');   
+end
 
 
 %% Parse and average hmm summary fractions
@@ -118,14 +137,15 @@ hold on
 lines = [];
 for i =1:5
     sline = pad_to_same_length(extracted_all, i);
-    h = errorbar(1:size(sline, 2), nanmean(sline, 1), nanstd(sline, [], 1) / sqrt(size(sline, 1)), ...
+    N = sum(~isnan(sline));
+    h = errorbar(1:size(sline, 2), nanmean(sline, 1), nanstd(sline, [], 1) ./ sqrt(N), ...
         'o-', 'Color', colors(i,:), 'MarkerFaceColor', colors(i,:));
     lines(i) = h;
-%     xlim([1, 15])
+    xlim([1, 30])
     ylim([0, 1])
 end
 
-mymakeaxis('x_label', 'Session', 'y_label', 'Fraction', 'xticks', 0:5:15)
+mymakeaxis('x_label', 'Session', 'y_label', 'Fraction', 'xticks', 0:5:30)
 l = legend(lines, {'1', '2', '3', '4', '5'});
 l.Title.String = 'HMM mode';
 l.Title.FontSize = 12;

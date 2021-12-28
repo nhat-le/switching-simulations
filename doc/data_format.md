@@ -40,3 +40,6 @@ This is used in the script `hmmblockstate_group`
 * Second row: slope (positive)
 * Third row: lapse (0 to 0.5)
 * Fourth row: efficiency
+
+
+### Notes for raw data format

@@ -12,17 +12,21 @@ import smartload.smartload as smart
 from exputils import load_multiple_sessions, make_savedict
 npr.seed(0)
 
+
 def run_and_save(animal, seed, version, version_save, N_iters=3000, num_states=6):
+    #TODO: unify fitranges (and potentially other variables, for this function and the
+    # run_animal function
     print(f'Starting run and save for {animal}, seed {seed}')
     # Load data
     paths = pathsetup('matchingsim')
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
-    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_102121.mat"
+    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_122221.mat"
     if os.path.exists(fitrangefile):
         datarange = smart.loadmat(fitrangefile)
         fitrange = datarange['ranges'][datarange['animals'] == animal][0]
     else:
-        fitrange = [6, 10]
+        raise IOError('File does not exist')
+        # fitrange = [6, 10]
     obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
 
     # Find the foraging efficiencies of all blocks
@@ -63,7 +67,7 @@ def run_and_save(animal, seed, version, version_save, N_iters=3000, num_states=6
             'fitrange', 'filepath', 'obs', 'seed', 'hmm_lls', 'effs', 'block_lens', 'block_corrs']
     savedict = make_savedict(vars, locals())
 
-    savefile = 0
+    savefile = 1
     if savefile and not os.path.exists(savepath):
         scipy.io.savemat(savepath, savedict)
         print('File saved')
@@ -87,7 +91,8 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6):
         datarange = smart.loadmat(fitrangefile)
         fitrange = datarange['ranges'][datarange['animals'] == animal][0]
     else:
-        fitrange = [1,2,3]
+        raise IOError('File does not exist')
+        # fitrange = [1,2,3]
     obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
 
     # Run the fitting procedure
@@ -120,10 +125,12 @@ if __name__ == '__main__':
     version_save = '122221'
     paths = pathsetup('matchingsim')
     files = glob.glob(f"{paths['expdatapath']}/{version}/*_all_sessions_{version}.mat")
-    num_states = 3
-    N_iters = 3 #3000
+    num_states = 6
+    N_iters = 3000
     # animals = ['f01']
-    animals = [file.split('_')[1].split('/')[-1] for file in files]
+    # animals = [file.split('_')[1].split('/')[-1] for file in files]
+    # animals = ['e35', 'e54', 'e57', 'e56']
+    animals = ['f26']
     for animal in animals:
         print(f"Running animal: {animal}")
         try:

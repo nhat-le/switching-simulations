@@ -28,6 +28,9 @@ def get_id_range(filepath):
 def load_session(filepath, id, trialsperblock=15):
     data = scipy.io.loadmat(filepath)
 
+    if id == 78:
+        print('here')
+
     if len(data['choices_cell'][0][id]) == 0:
         print('empty file:', id)
         return None

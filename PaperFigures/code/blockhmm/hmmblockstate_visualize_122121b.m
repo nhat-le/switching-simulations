@@ -1,6 +1,6 @@
 paths = pathsetup('matchingsim');
 % expfitdate = '121821';
-expfitdate = '121821';
+expfitdate = '121821b';
 opts.rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
@@ -11,7 +11,7 @@ opts.weighted = 1;
 opts.python_assist = 0;
 opts.effmethod = 'sim';
 opts.savefile = 0;
-opts.model_name = 'decoding_common_121721_withsvmMdl_knn_svm_v5.mat';
+opts.model_name = 'decoding_common_121721_withknnMdl_knn_svm_v7.mat';
 opts.svmmodelpath = paths.svmmodelpath;
 
 
@@ -92,7 +92,7 @@ end
 load(fullfile(opts.svmmodelpath, opts.model_name), 'Models');
 
 num_state5 = [];
-opts.mdltype = 12;
+opts.mdltype = 8;
 opts.mdlid = 4;
 [all_aggparams, aggmeans_all, statesFlat, features_flat] = apply_model(aggparams_native, aggmeans_native, opts);
 
