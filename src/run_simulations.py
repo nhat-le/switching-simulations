@@ -93,11 +93,20 @@ def run_multiple_agents(params):
     ParamsB = np.zeros((len(xlst), len(ylst)))
     ParamsC = np.zeros((len(xlst), len(ylst)))
 
+    coefs_all = []
+    perf_train_all = []
+    perf_test_all = []
+
     for idx in range(len(xlst)):
         print('* idx = ', idx)
         for idy in range(len(ylst)):
             print('     idy = ', idy)
             agent, world, pR, pL, hmm = run_single_agent(idx, idy, params)
+
+            coefs, perf_train, perf_test = agent.do_history_logistic_fit(Tmax=params['Tmax'])
+            coefs_all.append(coefs)
+            perf_train_all.append(perf_train)
+            perf_test_all.append(perf_test)
 
             # Previous fitting code
             xvals, means, _, _ = simulate_rew_error_correlations(world, agent)
@@ -119,8 +128,15 @@ def run_multiple_agents(params):
             ParamsA[idx][idy] = paramsFit[0]
             ParamsB[idx][idy] = paramsFit[1]
 
+    # Reshape the logistic regression results
+    coefs_arr = np.array(coefs_all)
+    coefs_arr = np.reshape(coefs_arr, [len(xlst), len(ylst), -1])
+    perf_train_arr = np.reshape(perf_train_all, [len(xlst), -1])
+    perf_test_arr = np.reshape(perf_test_all, [len(xlst), -1])
+
     return efflist, T11lst, T22lst, E1lst, E2lst, PRslopelist, PLslopelist, \
-           PRoffsetlist, PLoffsetlist, LapseL, LapseR, ParamsA, ParamsB, ParamsC
+           PRoffsetlist, PLoffsetlist, LapseL, LapseR, ParamsA, ParamsB, ParamsC, \
+            coefs_arr, perf_train_arr, perf_test_arr
 
 
 
