@@ -1,6 +1,6 @@
 path = pathsetup('matchingsim');
 
-prob = 0;
+prob = 0.4;
 
 rootdir = fullfile(path.simdatapath, sprintf('122821/EGreedyinf-based*%.2f*.mat', prob));
 files = dir(rootdir);
@@ -24,7 +24,7 @@ paths = pathsetup('matchingsim');
 opts = struct;
 opts.version = '121021';
 
-[res, opts] = load_and_run(prob, opts);
+[res, opts] = load_and_run(0, opts);
 
 [idxQ, idxIB] = reshapeidx(res.idx, res);
 
@@ -52,7 +52,7 @@ for i = 1:5
     mymakeaxis('x_label', 'Factor', 'y_label', 'Past trials', 'xticks', 1:3, 'yticks', -1:-1:-5,...
         'xticklabels', {'Choice', 'Choice x Reward', 'Reward'})
     
-    savename = fullfile(savepath, sprintf('history_coefs_split_by_class_class%d_122921.pdf', i));
+    savename = fullfile(savepath, sprintf('history_coefs_split_by_class_class%d_prob0.4_122921.pdf', i));
     if ~exist(savename, 'file')
         saveas(gcf, savename);
         fprintf('File saved!\n')

@@ -7,6 +7,7 @@ def pathsetup(project):
     if project == 'matchingsim':
         out['datapath'] = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/'
         out['codepath'] = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/'
+        out['blockhmmsimdata'] ='/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/blockhmm'
 
         out['expdatapath'] = out['datapath']+ 'expdata'
         out['blockhmmfitpath'] = out['datapath']+ 'blockhmmfit'

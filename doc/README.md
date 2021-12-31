@@ -103,7 +103,11 @@ First, run script `/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/Paper
 
 Then, modify the `fitrange` file, located in `processed_data/expdata/fitranges_122221.mat`. This file indicates the ranges of files that are good to analyze. For example, if `fitrange` is [6,7,8,9], the blockhmm protocol only looks at the sessions 6 to 9 (note these are Python zero-indexed) in the saved `_all_sessions` file
 
-* For running the model fitting on simulated data, run `blockHMM.ipynb`
+* For running the model fitting on simulated data, run `blockHMM_simulations.ipynb`.
+  
+Raw data files will be saved in the folder `simdata/blockhmm`.
+
+Then run the code in `code/blockhmm/blockhmm_simulated_data.m`
 * For selecting K by cross-validation: Run `blockHMM_K_selection.ipynb`. Results are saved as a pkl file, for e.g. `blockhmm_validation_120221.pkl`
 
 For running the exp fitting procedure, run `blockHMM_expfit.ipynb`
