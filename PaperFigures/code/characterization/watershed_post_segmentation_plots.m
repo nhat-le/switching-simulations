@@ -53,6 +53,18 @@ for i = 1:Nprobs
 end
 
 
+%% MDS plot without colors
+
+figure()
+    
+hold on
+for i = 1:Nclust
+%     col2use = colors(i,:);
+    plot(res1.Y(:, 1), res1.Y(:, 2), 'o', ...
+        'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'w', 'MarkerSize', 7)             
+end
+mymakeaxis('x_label', 'PC1', 'y_label', 'PC2')
+
 %% MDS plot
 colors = brewermap(6, 'Set1');
 probs = [1, 0.9, 0.8, 0.7];

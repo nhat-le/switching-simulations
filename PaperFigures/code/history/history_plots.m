@@ -1,13 +1,14 @@
 path = pathsetup('matchingsim');
 
-prob = 0.4;
+prob = 0.1;
+version = '122821';
 
-rootdir = fullfile(path.simdatapath, sprintf('122821/EGreedyinf-based*%.2f*.mat', prob));
+rootdir = fullfile(path.simdatapath, sprintf('%s/EGreedyinf-based*%.2f*.mat', version, prob));
 files = dir(rootdir);
 load(fullfile(files(1).folder, files(1).name));
 IB_coefs = reshape(coefs_all, size(coefs_all, 1), size(coefs_all, 2), [], 3);
 
-rootdir = fullfile(path.simdatapath, sprintf('122821/EGreedyqlearning*%.2f*.mat', prob));
+rootdir = fullfile(path.simdatapath, sprintf('%s/EGreedyqlearning*%.2f*.mat', version, prob));
 files = dir(rootdir);
 load(fullfile(files(1).folder, files(1).name));
 Q_coefs = reshape(coefs_all, size(coefs_all, 1), size(coefs_all, 2), [], 3);
@@ -43,7 +44,7 @@ savepath = fullfile(paths.figpath, 'history');
 for i = 1:5
     figure('Position', [734,262,653,346]);
     imagesc(coefs_means{i}, 'YData', -1:-1:-5)
-    caxis([-2, 2])
+    caxis([-10, 10])
     colormap('redblue');
     colorbar('Position', [0.92,0.4,0.03,0.4], 'FontName', 'helvetica',...
         'FontSize', 14, 'FontAngle', 'italic')
@@ -52,13 +53,13 @@ for i = 1:5
     mymakeaxis('x_label', 'Factor', 'y_label', 'Past trials', 'xticks', 1:3, 'yticks', -1:-1:-5,...
         'xticklabels', {'Choice', 'Choice x Reward', 'Reward'})
     
-    savename = fullfile(savepath, sprintf('history_coefs_split_by_class_class%d_prob0.4_122921.pdf', i));
-    if ~exist(savename, 'file')
-        saveas(gcf, savename);
-        fprintf('File saved!\n')
-    else
-        fprintf('File exists, skipping save...\n');
-    end
+%     savename = fullfile(savepath, sprintf('history_coefs_split_by_class_class%d_prob0.4_122921.pdf', i));
+%     if ~exist(savename, 'file')
+%         saveas(gcf, savename);
+%         fprintf('File saved!\n')
+%     else
+%         fprintf('File exists, skipping save...\n');
+%     end
     
 end
 

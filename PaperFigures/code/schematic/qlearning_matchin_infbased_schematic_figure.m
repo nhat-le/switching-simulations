@@ -88,7 +88,7 @@ set(gca, 'color', 'none')
 
 %% Plot the behavior of the agents over multiple blocks
 paths = pathsetup('matchingsim');
-load(fullfile(paths.simdatapath, 'schematic/infbased_sim_combinations.mat'));
+load(fullfile(paths.simdatapath, 'schematic/qlearning_sim_combinations.mat'));
 
 figure('Position', [440,368,695,430]);
 hold on
@@ -117,13 +117,13 @@ for id = 1:3
     choicelst = squeeze(choicelst_all(idchoose,:,:));
 
     % imagesc(choicelst)
-    stdshade(choicelst, 0.6, colors(id,:));
+%     stdshade(choicelst, 0.6, colors(id,:));
     
     % fitted curve
     xvals = -1:15;
     yvals = mathfuncs.sigmoid(xvals, -pfits(idchoose, 1), pfits(idchoose, 2), pfits(idchoose, 3));
     errors = sqrt(nanmean(choicelst) .* (1 - nanmean(choicelst))); % / size(choicelst, 1));
-    errorbar(1:size(choicelst, 2), nanmean(choicelst), errors, 'k')
+%     errorbar(1:size(choicelst, 2), nanmean(choicelst), errors, 'k')
     hold on
     plot(xvals+1, yvals, 'b', 'LineWidth', 2)
     xlim([0, 15])

@@ -32,10 +32,10 @@ Adjust the cell in this notebook which says
 
 #### Notable parameters:
 ```
-- N_iters = 50
+- N_iters = 50 
 - num_states = 2
 - obs_dim = 1
-- nblocks = 1000
+- nblocks = 1000 #important! sometimes set to 20
 - sigmoid_window = 30
 - ntrials_per_block = [10, 40]
 ```
@@ -65,6 +65,8 @@ opts.kernelsize = 3
 ```
 
 Important notes:
+* Remember to specify the rotations (permutations required to get the correct order of the regimes) in the parameter `opts.rotations`. Here, the permutations are in the form of lists, so [4, 2, 1] specifies a (421) permutation. If multiple permutations are needed, add them to the cell array.
+  
 * The notebook will save the opts config in the folder `processed_data/svm/configs/{expdate}`
 There are option files with the form like `opts_prob0.0-2021-09-25 16.05.mat` which store the parameters of the segmentation, as well as .pdf figures that show the behavioral regime segmentation (this is *not* the final version seen in Fig. 3 in the paper), the MDS space (points in the PC space, fig. 4 in the paper)
   
@@ -81,6 +83,8 @@ Run `switching_world_classifier.ipynb` notebook to run this simulation
 This notebook calls the functions in `decoding.py`. Remember to change the value of `rlow` to the right probability of reward (for e.g. `rlow = 0.1` corresponds to a 90-10 world)
 
 Important notes:
+* Remember to specify the 
+
 * The notebook will call the opts config stored in the folder `decodeFigs/opts`
 
 * Note that there is a mild filtering taking place in `PaperFigures/code/load_data.m` where offset values below -20 are clipped (disabled this feature on 12.11.2021)

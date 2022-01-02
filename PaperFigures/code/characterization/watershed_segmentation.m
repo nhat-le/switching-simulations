@@ -1,20 +1,20 @@
 %% Build the options for the run
 
-clear all
+% clear all
 paths = pathsetup('matchingsim');
 % where the Python simulation results are stored (model-free/inf-based
 % simulations)
-opts = struct;
-opts.rootdir = paths.simdatapath;
-opts.expfolder = '121721';
-opts.nbinhist = 30;
-opts.imhmin = 3;
-opts.kernelsize = 3;
-opts.prob = 1;
-opts.save = 1;
-opts.seed = 3;
-opts.rotations = {[3, 5], [2, 4]};
-opts.plotfeatures = 0;
+% opts = struct;
+% opts.rootdir = paths.simdatapath;
+% opts.expfolder = '122821';
+% opts.nbinhist = 40;
+% opts.imhmin = 2;
+% opts.kernelsize = 4;
+% opts.prob = 0.7;
+% opts.save = 0;
+% opts.seed = 1;
+% opts.rotations = {[4, 2, 1], [5, 3]};
+% opts.plotfeatures = 0;
 rng(opts.seed);
 
 

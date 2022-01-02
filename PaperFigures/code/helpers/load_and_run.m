@@ -59,8 +59,10 @@ else
 end
 
 % Rotation for idx
-for i = 1:numel(opts.rotations)
-    idx = myrotate(idx, opts.rotations{i});
+if isfield(opts, 'rotations')
+    for i = 1:numel(opts.rotations)
+        idx = myrotate(idx, opts.rotations{i});
+    end
 end
 
 % if opts.usepca
