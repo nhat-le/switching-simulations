@@ -52,14 +52,16 @@ if strcmp(version, '092521')
     opts.filestem{2} = 'EGreedyinf-basedAgent-withCorr-doublesigmoid-prob%.2fto%.2f-%s.mat';
 end
 % changed 9.30.21 from run_watershed to run_watershed_pca
-if usepca
+if usepca == 1
     [idx, out] = run_watershed_pca(opts);
-else
+elseif usepca == 0
     [idx, out] = run_watershed(opts);
+else
+    idx = out.idx;
 end
 
 % Rotation for idx
-if isfield(opts, 'rotations')
+if usepca < 2 && isfield(opts, 'rotations')
     for i = 1:numel(opts.rotations)
         idx = myrotate(idx, opts.rotations{i});
     end

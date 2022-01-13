@@ -22,9 +22,6 @@ if strcmp(method, 'nearest')
         if L(ordersX(i), ordersY(i)) ~= 0
             labels(i) = L(ordersX(i), ordersY(i));
         else
-            if i == 151
-                disp('here')
-            end
             % 0 <= xedge, yedge < 1 is the normalized edge of each point
             xedge = (Y(i,1) - binX(ordersX(i))) / (binX(2) - binX(1));
             yedge = (Y(i,2) - binY(ordersY(i))) / (binY(2) - binY(1));

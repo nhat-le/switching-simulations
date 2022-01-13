@@ -29,8 +29,10 @@ switch project
         out.codepath = '/Users/minhnhatle/Documents/ExternalCode/tca/src/matlab';
         out.rawdatapath = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/raw/extracted';
         out.tcamatpath = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/tca-factors';
+        out.surfaceimgpath = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/session_surface_imgs';
         
-        
+    case 'wftoolbox'
+        out.locanmfpath = '/Users/minhnhatle/Documents/ExternalCode/locaNMF-preprocess';
     otherwise
         error('Unrecognized project. Must be tca or matchingsim')
 end
