@@ -8,22 +8,27 @@ opts = struct;
 opts.rootdir = paths.simdatapath;
 opts.expfolder = '092321';
 opts.prob = 1;
-opts.seed = 2; %for p = 0.8, seed 10
+
+% -- key params --
 opts.nbinhist = 50;
-opts.kernelsize = 4;
-opts.imhmin = 3;
+opts.imhmin = 4;
+opts.kernelsize = 3;
+opts.seed = 2; 
+% ----------------
+
 opts.rotations = {[1]};
+opts.groups = {[1,3,4]};
 opts.clipmode = 2;
 
 % script operations
 opts.save = 0;
 opts.plotfeatures = 0;
 opts.show_trans_functions = 0;
-opts.method = 'kmeansraw'; %'multidim-watershed or 'watershed', 'watershed-tsne', or 'dbscan', or 'gmm'
+opts.method = 'watershed_orig'; %'multidim-watershed or 'watershed', 'watershed-tsne', or 'dbscan', or 'gmm'
 
 
 colors = brewermap(12, 'Paired');
-opts.cmap = colors([1,5,7,11,9,3],:); %permute to align with MATLAB default..
+opts.cmap = colors([1,5,7,11,9,3,2,4,6,8,10],:); %permute to align with MATLAB default..
 
 
 %% form the feature vectors
@@ -39,6 +44,8 @@ h = histogram2(Y(:,1), Y(:,2), opts.nbinhist);
 vals = h.Values;
 binX = h.XBinEdges;
 binY = h.YBinEdges;
+close(gcf);
+
 
 % Lowpass filter
 vals = conv2(double(vals), double(ones(opts.kernelsize, opts.kernelsize)), 'same');
@@ -72,14 +79,16 @@ axis xy
 %%
 % perform dbscan segmentation
 idx = assign_labels(Y, L, binX, binY, 'nearest');
+
+
+% post-processing
+
+
+
 fprintf('unique class labels: %d\n', numel(unique(idx)));
 labels_name = unique(idx)';
 
-% since we have a -1 label, shift it to the max label instead
-idxcopy = idx;
-idx(idxcopy == -1) = max(labels_name) + 1;
-labels_name = unique(idx)';
-
+idx = group_idx(idx, opts.groups);
 idx = rotate_idx(idx, opts.rotations);
 out.idx = idx;
 
@@ -115,7 +124,7 @@ clustfig = gcf;
 [idxQ, idxIB] = reshapeidx(idx, out);
 opts.N = numel(unique(idx));
 
-cmap = opts.cmap;
+cmap = opts.cmap(1:opts.N,:);
 % cmap = brewermap(opts.N, 'Blues');
 cmap = [cmap; 0.2 0.2 0.2];
 h = produce_heatmap(idxIB, out.prewlst, out.pswitchlst, 'clim', [0.5 opts.N+1.5], 'legendname', 'Performance regime', ...
@@ -133,8 +142,9 @@ qfig = gcf;
 out.V = V;
 out.Y = out.features_norm * V;
 
-colors = brewermap(7, 'Set1');
-colors = colors([2,1,5,6,4,3,7],:);
+colors = opts.cmap;
+% colors = brewermap(7, 'Set1');
+% colors = colors([2,1,5,6,4,3,7],:);
 
 figure()
     

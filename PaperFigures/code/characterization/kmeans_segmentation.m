@@ -8,9 +8,10 @@ opts = struct;
 opts.rootdir = paths.simdatapath;
 opts.expfolder = '010422';
 opts.prob = 0.8;
-opts.seed = 6; %for p = 0.8, seed 10
-opts.kclust = 7;
-opts.rotations = {[4 6]  [5 2 3]};
+opts.seed = 11; %for p = 0.8, seed 10 (seed 4, 1.13.21)
+opts.kclust = 6;
+opts.clipmode = 2;
+opts.rotations = {[1]};
 
 % script operations
 opts.save = 0;
@@ -41,7 +42,7 @@ for i = 1:size(out.features, 1)
     
 end
 
-idx = kmeans(all_transfuncs, opts.kclust, 'Distance', 'cityblock');
+idx = kmeans(all_transfuncs, opts.kclust); %, 'Distance', 'cityblock');
 idx = rotate_idx(idx, opts.rotations);
 out.idx = idx;
 
@@ -77,6 +78,17 @@ produce_heatmap(idxQ, out.epslst, out.gammalst, 'clim', [0.5 opts.N+1.5], 'legen
 qfig = gcf;
 
 
+%% Plot all the transition functions in one plot
+figure;
+currdate = datetime;
+currdate.Format = 'yyyy-MM-dd HH.mm';
+currdate = string(currdate);    
+plot(all_transfuncs', 'k', 'LineWidth', 0.25);
+mymakeaxis('x_label', 'Trials in block', 'y_label', 'P(Correct)', 'xticks', 0:5:15)
+filename = sprintf('%s/all_transfuncs-%s-%s.pdf', opts.figsavepath, ...
+    currdate, opts.method);
+exportgraphics(gcf,filename,'ContentType','vector')
+
 %% PC space projection
 [~,~,V] = svd(out.features_norm);
 out.V = V;
@@ -98,15 +110,16 @@ mymakeaxis('x_label', 'PC1', 'y_label', 'PC2')
 
 
 %% Validation for K selection
-% rng(opts.seed)
-% % rng(8)
-% Kvals = 1:10;
-% eva = evalclusters(all_transfuncs,'kmeans','silhouette','KList',Kvals);
-% figure;
-% plot(Kvals, eva.CriterionValues, 'LineWidth', 2)
-% xlim([1,10])
-% mymakeaxis('x_label', 'K', 'y_label', 'Silhouette metric', 'xticks', Kvals)
-% kvalfig = gcf;
+rng(opts.seed)
+rng(15)
+Kvals = 1:10;
+eva = evalclusters(all_transfuncs,'kmeans','gap','KList',Kvals, ...
+    'Distance', 'sqEuclidean');
+figure;
+plot(Kvals, eva.CriterionValues, 'LineWidth', 2)
+xlim([1,10])
+mymakeaxis('x_label', 'K', 'y_label', 'Silhouette metric', 'xticks', Kvals)
+kvalfig = gcf;
 
 
 %%
@@ -167,10 +180,10 @@ if opts.save
 %     end
     
     % Save IB plot
-    filename = sprintf('%s/kval_prob%.1f-%s-%s.pdf', opts.figsavepath,...
-        1-opts.prob, currdate, opts.method);
-    opts.fig = kvalfig;
-    ioutils.savesafe(filename, opts);
+%     filename = sprintf('%s/kval_prob%.1f-%s-%s.pdf', opts.figsavepath,...
+%         1-opts.prob, currdate, opts.method);
+%     opts.fig = kvalfig;
+%     ioutils.savesafe(filename, opts);
 %     if ~exist(filename, 'file')
 %         saveas(ibfig, filename);
 %     end

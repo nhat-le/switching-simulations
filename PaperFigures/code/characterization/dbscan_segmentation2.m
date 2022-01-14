@@ -6,11 +6,12 @@ paths = pathsetup('matchingsim');
 % simulations)
 opts = struct;
 opts.rootdir = paths.simdatapath;
-opts.expfolder = '010422';
-opts.prob = 0.9;
+opts.expfolder = '121021';
+opts.prob = 1;
 opts.seed = 6; %for p = 0.8, seed 10
-opts.epsilon = 0.4;
-opts.minpts = 6;
+opts.epsilon = 0.5;
+opts.minpts = 15;
+opts.clipmode = 2;
 opts.rotations = {[4 6]  [5 2 3]};
 
 % script operations
@@ -20,8 +21,7 @@ opts.show_trans_functions = 0;
 opts.method = 'kmeansraw'; %'multidim-watershed or 'watershed', 'watershed-tsne', or 'dbscan', or 'gmm'
 
 
-colors = brewermap(12, 'Paired');
-opts.cmap = colors([1,5,7,11,9,3],:); %permute to align with MATLAB default..
+% opts.cmap = colors([1,5,7,11,9,3],:); %permute to align with MATLAB default..
 
 
 %% form the feature vectors
@@ -74,6 +74,8 @@ clustfig = gcf;
 %
 [idxQ, idxIB] = reshapeidx(idx, out);
 opts.N = numel(unique(idx));
+opts.cmap = brewermap(opts.N, 'Paired');
+
 
 cmap = opts.cmap;
 % cmap = brewermap(opts.N, 'Blues');
@@ -93,8 +95,10 @@ qfig = gcf;
 out.V = V;
 out.Y = out.features_norm * V;
 
-colors = brewermap(7, 'Set1');
-colors = colors([2,1,5,6,4,3,7],:);
+% colors = brewermap(opts.N, 'Set1');
+colors = brewermap(opts.N, 'Paired');
+
+% colors = colors([2,1,5,6,4,3,7],:);
 
 figure()
     

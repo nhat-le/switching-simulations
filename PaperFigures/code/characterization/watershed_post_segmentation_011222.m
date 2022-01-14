@@ -42,15 +42,15 @@ end
 
 %% MDS plot without colors
 
-figure()
-    
-hold on
-for i = 1:Nclust
-%     col2use = colors(i,:);
-    plot(res1.Y(:, 1), res1.Y(:, 2), 'o', ...
-        'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'w', 'MarkerSize', 7)             
-end
-mymakeaxis('x_label', 'PC1', 'y_label', 'PC2')
+% figure()
+%     
+% hold on
+% for i = 1:Nclust
+% %     col2use = colors(i,:);
+%     plot(res1.Y(:, 1), res1.Y(:, 2), 'o', ...
+%         'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'w', 'MarkerSize', 7)             
+% end
+% mymakeaxis('x_label', 'PC1', 'y_label', 'PC2')
 
 %% MDS plot colored by cluster
 colors = brewermap(6, 'Set1');
@@ -62,7 +62,7 @@ for probi = 1:4
     hold on
     for i = 1:Nclust
         col2use = colors(i,:);
-        if probi == 2
+        if probi == 2 || probi == 1
             plot(res_all{probi}.Y(res_all{probi}.idx == i, 1), -res_all{probi}.Y(res_all{probi}.idx == i, 2), 'o', ...
                 'MarkerFaceColor', col2use, 'MarkerEdgeColor', 'w', 'MarkerSize', 7)            
         else
