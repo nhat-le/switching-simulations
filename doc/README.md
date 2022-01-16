@@ -30,6 +30,8 @@ Notably, the notebook calls the functions `run_simulations.run_multiple_agents`
 Adjust the cell in this notebook which says 
 ``agent_type = 'qlearning' ``. The type can be `'qlearning'` or `'inf-based'`
 
+* Note on fitting procedure: sigmoidal curves are with reference to t = 0 at the first trial in the block. For example, if offset = 1, this means that at trial 2, P(correct) = 0.5
+
 #### Notable parameters:
 ```
 - N_iters = 50 
@@ -78,13 +80,17 @@ There are option files with the form like `opts_prob0.0-2021-09-25 16.05.mat` wh
 
 * Details of watershed pca provided in the `code/decoding/run_watershed_pca.m` script, but main idea is that the projected values Y are obtained by Y = features_norm * V, and features_norm = (features - mean(features)) / std(features)
 
+
+### For behavioral regime segmentation with the tsne algorithm:
+Common parameters are defined in `makeparams_tsne.m`. This includes parameters such as perplexity (for TSNE), as well as parameters for the density-based segmentation.
+
+Run script `tsne_segmentation.m`. Should specify the data version (such as `092321`), details of save are similar to the original watershed code. Note that the plots saved are: behavioral regime demarcation, tsne visualization, transition function visualization, and options/outputs.
+
 ### For running the decoding analysis which requires simulation on the short data (20-block)
 Run `switching_world_classifier.ipynb` notebook to run this simulation
 This notebook calls the functions in `decoding.py`. Remember to change the value of `rlow` to the right probability of reward (for e.g. `rlow = 0.1` corresponds to a 90-10 world)
 
 Important notes:
-* Remember to specify the 
-
 * The notebook will call the opts config stored in the folder `decodeFigs/opts`
 
 * Note that there is a mild filtering taking place in `PaperFigures/code/load_data.m` where offset values below -20 are clipped (disabled this feature on 12.11.2021)
@@ -105,9 +111,9 @@ Run `PaperFigures/code/decoding/decoding_after_watershed.m`
 ### BlockHMM
 First, run script `/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/compile_behavioral_sessions.m` to produce _all_sessions files
 
-Then, modify the `fitrange` file, located in `processed_data/expdata/fitranges_122221.mat`. This file indicates the ranges of files that are good to analyze. For example, if `fitrange` is [6,7,8,9], the blockhmm protocol only looks at the sessions 6 to 9 (note these are Python zero-indexed) in the saved `_all_sessions` file
+Then, modify the `fitrange` file, located in `processed_data/expdata/102121/fitranges_122221.mat`. This file indicates the ranges of files that are good to analyze. For example, if `fitrange` is [6,7,8,9], the blockhmm protocol only looks at the sessions 6 to 9 (note these are Python zero-indexed) in the saved `_all_sessions` file
 
-* For running the model fitting on simulated data, run `blockHMM_simulations.ipynb`.
+* For running the model fitting on *synthetic* data, run `blockHMM_simulations.ipynb`.
   
 Raw data files will be saved in the folder `simdata/blockhmm`.
 
@@ -118,7 +124,7 @@ For running the exp fitting procedure, run `blockHMM_expfit.ipynb`
 Alternatively, for quickly iterating through all animals, can use the code in the module `src/run_multi_hmm_fits.py`
 * If we run this script, the blockhmm fit results will be saved in the folder `processed_data/blockhmmfit/{expdate}`
 * Parameters to change:
-   * `version` (line 18): version number of the expdata that is loaded
+   * `version` (line 18): version number of the files in `expdata` that is loaded
    * `version_save`  (line 19): version number of the file that is saved (in `blockhmmfit`)
    * `fitrangefile` (line 25): path to the fitrange file which specifies the range of files to fit
     * `savefile` (line 66): whether to save the results
