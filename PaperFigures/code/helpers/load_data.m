@@ -51,10 +51,10 @@ IBslope_flat = reshape(PLslopelist, [], 1);
 IBoffset_flat = reshape(PLoffsetlist, [], 1);
 
 % Filter outliers
-if opts.clipmode == 1
+if isfield(opts, 'clipmode') && opts.clipmode == 1
     IBoffset_flat(IBoffset_flat < -20) = 3; %-20;
     Qoffset_flat(Qoffset_flat < -20) = 3; %-20;
-elseif opts.clipmode == 2
+elseif isfield(opts, 'clipmode') && opts.clipmode == 2
     IBoffset_flat(IBoffset_flat < -20) = -20; %-20;
     Qoffset_flat(Qoffset_flat < -20) = -20; %-20;
 end

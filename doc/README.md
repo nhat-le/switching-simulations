@@ -98,7 +98,7 @@ Important notes:
 Results will be saved in files with the form `svmresults_from_pickle_092221_prob0.00.mat`, etc.
 
 ### For decoding analysis
-Run `PaperFigures/code/decoding/decoding_after_watershed.m`
+Run `PaperFigures/code/decoding/decoding_after_watershed.m` (or `decoding_after_tsne.m` if using the latest segmentation script with tsne)
 
 * Need to change the `opts.svmdir` and `opts.svm_version` to the file with the correct date. This is the file where the processed data (Python simulations) are stored (usually in the `processed_data/svm` folder)
 
@@ -134,7 +134,7 @@ For running the sigmoidal fits of the blockhmm mode (same fitting procedure as t
 
 
 ### Performing the block-HMM state decoding
-For visualizing the transition dynamics of each HMM mode, run `code/blockhmm/hmmblockstate_visualize_122121.m` (these are the plots of switching dynamics of the 4 HMM modes in the official figure 8)
+For visualizing the transition dynamics of each HMM mode, run `code/blockhmm/hmmblockstate_visualize_122121.m` (these are the plots of switching dynamics of the 4 HMM modes in the official figure 8). Note that for results with tsne segmentation, run `hmmblockstate_visualize_011621_tsne.m` instead.
 * This also performs K-means clustering (can specify K) and plots the composition of each HMM mode (for each HMM mode, what fraction is model-free vs inference-based)
 * Saves the data related to the clustering and classification in `processed_data/blockhmmfit/{version}/*classification_info*.mat`
 
