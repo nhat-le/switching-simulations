@@ -1,13 +1,15 @@
 import numpy as np
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 import scipy.io
 from src.utils import find_experiment_metrics
 import matplotlib.pyplot as plt
+from src.utils import pathsetup
 
 
-def fit_animal(animal, datarange=-1):
+
+def fit_animal(animal, params, datarange=-1):
     # Load the behavior
-    filename = 'expdata/' + animal + '_all_sessions.mat'
+    filename = f"{params['filepath']}/{params['version']}/{animal}_all_sessions_{params['version']}.mat"
     data = scipy.io.loadmat(filename)
 
     delaystartcands = np.where(data['maxdelays'] > 0)[1]
@@ -89,4 +91,21 @@ def plot_fitvals(fitparams):
     plt.plot(fitparams[5], '.')
     plt.title('efficiency')
     plt.tight_layout()
+
+
+if __name__ == '__main__':
+    paths = pathsetup('matchingsim')
+    all_animals = ['e35', 'e46', 'e53', 'e54', 'e56', 'e57', 'f01', 'f02',
+                   'f03', 'f04', 'f11', 'f12', 'f16', 'f17', 'f20', 'f21',
+                   'f22', 'f23', 'fh01', 'fh02', 'fh03']
+    params = dict(filepath=paths['expdatapath'],
+                  version='122221b'
+                  )
+    fitparams_all = {}
+    for animal in all_animals:
+        if animal in fitparams_all.keys():
+            continue
+        print('Fitting animal:', animal)
+        fitparams = fit_animal(animal, params)
+        fitparams_all[animal] = fitparams
 

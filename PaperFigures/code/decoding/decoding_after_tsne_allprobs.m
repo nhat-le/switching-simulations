@@ -21,10 +21,64 @@ opts.svmdir = paths.svmdatapath;
 opts.svm_version = '010522';
 opts.save_model = 0;
 
+opts.method = 'knn';
+opts.nNeighbors = 24;
+[confusions10, Mdl10, ~] = do_decoding(1, res1, opts);
+[confusions09, Mdl09, ~] = do_decoding(0.9, res2, opts);
+[confusions08, Mdl08, ~] = do_decoding(0.8, res3, opts);
+[confusions07, Mdl07, ~] = do_decoding(0.7, res4, opts);
 
-% [counts_allprob1, Mdls1, MCCs] = do_decoding(1, res1, opts);
 
-% opts.method = 'svm';
+%% Plot decoding accuracy, grouped by prob
+% load('decoding_common_092821.mat');
+counts_all = {confusions10, confusions09, confusions08, confusions07};
+cols = paperaesthetics;
+colors = cols.colors;
+
+Nprobs = numel(counts_all);
+Nclust = size(counts_all{1}{1}, 1);
+figure;
+hold on
+
+
+for k = 1:Nclust
+    means = [];
+    stds = [];
+    coltouse = colors(k,:);
+    
+    means = [];
+    stds = [];
+    for i = 1:Nprobs
+        perf_clusti = cellfun(@(x) find_sensitivity(x, k), counts_all{i});
+        means(i) = mean(perf_clusti);
+        stds(i) = std(perf_clusti);
+    end
+
+    if k == 4
+        h = errorbar(0.7:0.1:1, means, stds, 'o-', 'LineWidth', 0.75, ...
+            'MarkerEdgeColor', 'k', 'MarkerFaceColor', coltouse, 'Color', 'k');
+    else
+        h = errorbar(0.7:0.1:1, means, stds, 'o-', 'LineWidth', 0.75, ...
+            'MarkerEdgeColor', coltouse, 'MarkerFaceColor', coltouse, 'Color', coltouse);
+    end
+    handles(k) = h;
+%     plot(1:Nclust, means, 'Color', coltouse, 'LineWidth', 0.75);
+%     plot(mapvals{probi}, means, 'LineWidth', 2);
+end
+
+hline(1/6, 'k--');
+
+ylim([0, 1])
+
+mymakeaxis('x_label', 'Probability', 'y_label', 'Decoding accuracy', 'xticks', [0.7 0.8 0.9 1.0],...
+            'xticklabels', {'100-0', '90-10', '80-20', '70-30'}, 'font_size', 20)% l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.46,0.41,0.12,0.19]);
+l = legend(handles, {'Q1', 'Q2', 'Q3', 'Q4', 'IB5', 'IB6'}, 'Position', [0.46,0.41,0.12,0.19]);
+l.FontSize = 12;
+l.Title.String = 'Regime';
+l.Title.FontSize = 12;
+l.Color = 'none';
+
+
 
 %%
 MCCs_means = [];
@@ -73,7 +127,7 @@ for seed = 14
 end
 
 
-%% Plot performance
+%% Plot performance dependence on k (nNeighbors)
 meanperfs = [];
 stdperfs = [];
 for i = 1:numel(confusions_all)
@@ -97,8 +151,7 @@ l2 = errorbar(model_types, MCCs_means , MCCs_stds, 'o', 'MarkerFaceColor', cols.
     'MarkerEdgeColor', cols.redcol);
 % ylim([0.9, 0.95])
 
-mymakeaxis('x_label', 'k Neighbors', 'y_label', 'Decoding performance', 'xticks', model_types,...
-    'font_size', 20);
+mymakeaxis('x_label', 'k Neighbors', 'y_label', 'Decoding performance', 'xticks', model_types);
 leg = legend([l1, l2], {'Accuracy', 'Matthews correlation'}, 'FontSize', 16);
 % leg.String.FontSize
 
@@ -239,4 +292,16 @@ for k = 1:opts.reps
     Mdls{k} = Mdl;
     
 end
+end
+
+
+function res = find_sensitivity(arr, i)
+res = arr(i,i) / sum(arr(:,i));
+
+end
+
+
+function res = find_precision(arr, i)
+res = arr(i,i) / sum(arr(i,:));
+
 end

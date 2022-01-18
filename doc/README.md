@@ -76,7 +76,7 @@ There are option files with the form like `opts_prob0.0-2021-09-25 16.05.mat` wh
 
 * To visualize the segmentation for all probabilities (final version seen in Fig. 3 of the paper figure), run `PaperFigures/code/characterization/watershed_post_segmentation_plots.m`. This will also produce the segmented spaces that are used in the final figure versions.
 
-* The script also plots the average feature characterization (official figure) + performs the decoding analysis on the short data. It calls the helper function `do_decoding`, works on the saved data from `switching_world_classifier.ipynb` (see below), and then save the decoding models to `processed_data/svm/models`
+* (Deprecated, see `Decoding` for new protocols) The script also plots the average feature characterization (official figure) + performs the decoding analysis on the short data. It calls the helper function `do_decoding`, works on the saved data from `switching_world_classifier.ipynb` (see below), and then save the decoding models to `processed_data/svm/models`
 
 * Details of watershed pca provided in the `code/decoding/run_watershed_pca.m` script, but main idea is that the projected values Y are obtained by Y = features_norm * V, and features_norm = (features - mean(features)) / std(features)
 
@@ -105,6 +105,14 @@ Run `PaperFigures/code/decoding/decoding_after_watershed.m` (or `decoding_after_
 * Decoding results and models saved in `processed_data/model` folder
 
 * Note that you will need to change the config file in `processed_data/svm/configs/{expdate}` to the `_final.mat` format so that the file will be recognized. This is because there might be multiple opts files that are saved, and the user should select only one of them to be the final file that will be read for this analysis.
+
+* For plotting the decoding performance (Fig. 5e), run the script `decoding_after_tsne_allprobs.m`
+
+### Single-session fitting
+
+* To generate the session-averaged behavioral parameters of the transition functions for all animals (Fig. 6a), first run the notebook `session_averaged_fitting.ipynb`. This will save the data into `expdata/version/fitparams_session_averaged_{version}.mat`
+
+* Then, run the script `code/expfit/plot_session_averaged_expparams.m`
 
 
 

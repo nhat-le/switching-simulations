@@ -1,31 +1,24 @@
 %% Script for standardizing classification and segmentation for all probabilities
 % Load raw data
+paths = pathsetup('matchingsim');
+% Load raw data
 opts = struct;
-opts.version = '010422';
-opts.usepca = 2;
+opts.version = '092321';
 
-[res1new, opts] = load_and_run(0, opts);
-res2new = load_and_run(0.1, opts);
-res3new = load_and_run(0.2, opts);
-res4new = load_and_run(0.3, opts);
-
-% PCA projections
-res1new.Y = res1new.features_norm * res1new.V;
-res2new.Y = res2new.features_norm * res2new.V;
-res3new.Y = res3new.features_norm * res3new.V;
-res4new.Y = res4new.features_norm * res4new.V;
+[res1, opts_out] = load_and_run_tsne(0, opts);
+res2 = load_and_run_tsne(0.1, opts);
+res3 = load_and_run_tsne(0.2, opts);
+res4 = load_and_run_tsne(0.3, opts);
 
 
 
 %%
-
 % Characterize each cluster for each prob
 meansAll = {};
 stdsAll = {};
-Nclust = numel(unique(res1new.idx));
-Nprobs = 4;
-res_all = {res1new, res2new, res3new, res4new};
-for i = 1:Nprobs
+Nclust = max(res1.idx);
+res_all = {res1, res2, res3, res4};
+for i = 1:numel(res_all)
     means = [];
     stds = [];
     for nclust = 1:Nclust
@@ -171,9 +164,8 @@ probs = [0 0.1 0.2 0.3];
 figure('Position', [626,401,721,353]);
 hold on
 paperaesthetics;
-% colors = brewermap(6, 'BuGn');
-colors = brewermap(6, 'Set1');
-colors = colors([2,1,5,4,3],:); %permute to align with MATLAB default..
+cols = paperaesthetics;
+colors = cols.colors; 
 
 Nprobs = numel(meansAll);
 
@@ -197,31 +189,39 @@ end
 for i = 1:Nclust
     coltouse = colors(i,:);
   
-    h = errorbar(probs + xvals(i)', means(i,:), stds(i,:), 'o-', 'MarkerFaceColor', coltouse,...
-    'LineWidth', 0.75, 'MarkerEdgeColor', coltouse, 'Color', coltouse);
+    if i == 4
+        h = errorbar(probs + xvals(i)', means(i,:), stds(i,:), 'o-', 'MarkerFaceColor', coltouse,...
+        'LineWidth', 0.75, 'MarkerEdgeColor', 'k', 'Color', 'k');
+    else
+        h = errorbar(probs + xvals(i)', means(i,:), stds(i,:), 'o-', 'MarkerFaceColor', coltouse,...
+        'LineWidth', 0.75, 'MarkerEdgeColor', coltouse, 'Color', coltouse);
+    end
     handles(i) = h;
 end
 
 switch k
     case 1
+        plot(probs, [1, 0.9, 0.8, 0.7], 'k--')
+        plot(probs, [0.5 0.5 0.5 0.5], 'k--')
+        
         ylim([0.5 1])
         mymakeaxis('x_label', 'Probability', 'y_label', plottype{k}, 'xticks', probs, 'yticks', 0.5:0.1:1,...
-            'xticklabels', {'100-0', '90-10', '80-20', '70-30'})
+            'xticklabels', {'100-0', '90-10', '80-20', '70-30'}, 'font_size', 22)
 
     case 2
         ylim([0 0.5])
         mymakeaxis('x_label', 'Probability', 'y_label', plottype{k}, 'xticks', probs, 'yticks', 0:0.1:0.5,...
-            'xticklabels', {'100-0', '90-10', '80-20', '70-30'})
+            'xticklabels', {'100-0', '90-10', '80-20', '70-30'}, 'font_size', 22)
 
     case 3
         ylim([0 3.3])
         mymakeaxis('x_label', 'Probability', 'y_label', plottype{k}, 'xticks', probs, 'yticks', 0:1:3,...
-            'xticklabels', {'100-0', '90-10', '80-20', '70-30'})
+            'xticklabels', {'100-0', '90-10', '80-20', '70-30'}, 'font_size', 22)
     
     case 4
         ylim([0 14])
         mymakeaxis('x_label', 'Probability', 'y_label', plottype{k}, 'xticks', probs,...
-            'xticklabels', {'100-0', '90-10', '80-20', '70-30'})
+            'xticklabels', {'100-0', '90-10', '80-20', '70-30'}, 'font_size', 22)
         
 end
 
