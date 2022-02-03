@@ -17,7 +17,7 @@ for prob = 0:0.1:0.4
 
     savefilename = fullfile(paths.figpath, 'qlearningFigs', version,...
         sprintf('qlearning-eff_%s_prob%.2f.pdf', version, prob));
-    ioutils.savesafe(savefilename, 'pdf'); 
+%     ioutils.savesafe(savefilename, 'pdf'); 
 end
 
 

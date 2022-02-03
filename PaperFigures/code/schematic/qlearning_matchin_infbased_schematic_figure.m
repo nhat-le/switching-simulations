@@ -123,7 +123,7 @@ for id = 1:3
     xvals = -1:15;
     yvals = mathfuncs.sigmoid(xvals, -pfits(idchoose, 1), pfits(idchoose, 2), pfits(idchoose, 3));
     errors = sqrt(nanmean(choicelst) .* (1 - nanmean(choicelst))); % / size(choicelst, 1));
-%     errorbar(1:size(choicelst, 2), nanmean(choicelst), errors, 'k')
+    errorbar(1:size(choicelst, 2), nanmean(choicelst), errors, 'k')
     hold on
     plot(xvals+1, yvals, 'b', 'LineWidth', 2)
     xlim([0, 15])

@@ -19,7 +19,7 @@ opts.method = 'knn';
 opts.nNeighbors = 1;
 opts.svmdir = paths.svmdatapath;
 opts.svm_version = '010522';
-opts.save_model = 0;
+opts.save_model = 1;
 
 opts.method = 'knn';
 opts.nNeighbors = 24;
@@ -30,7 +30,6 @@ opts.nNeighbors = 24;
 
 
 %% Plot decoding accuracy, grouped by prob
-% load('decoding_common_092821.mat');
 counts_all = {confusions10, confusions09, confusions08, confusions07};
 cols = paperaesthetics;
 colors = cols.colors;
@@ -79,109 +78,15 @@ l.Title.FontSize = 12;
 l.Color = 'none';
 
 
-
-%%
-MCCs_means = [];
-MCCs_stds = [];
-MCCs_all = {};
-Models = {};
-confusions_all = {};
-
-
-model_types = 2:2:30; %[1,2,3,4,5,6,7,8,9,10,-1];
-
-for seed = 14
-    rng(seed);
-
-    for i = 1:numel(model_types)
-        fitval = model_types(i);%1:11
-        if fitval == -1
-            opts.method = 'svm';
-        else
-            opts.method = 'knn';
-            opts.nNeighbors = fitval;
-        end
-        [confusions, Mdl, MCCs] = do_decoding(1, res1, opts);
-        confusions_all{i} = confusions;
-        MCCs_means(i) = mean(MCCs);
-        MCCs_stds(i) = std(MCCs);
-        Models{i} = Mdl;
-        MCCs_all{i} = MCCs;
-
-    end
-    
-%     meanperfs = [];
-%     for i = 1:numel(confusions_all)
-%         perfs = [];
-%         for j = 1:numel(confusions_all{1})
-%             confusion_mat = confusions_all{i}{j};
-%             perfs(j) = sum(diag(confusion_mat)) / sum(confusion_mat(:));
-%         end
-% 
-%         meanperfs(i) = mean(perfs);
-% 
-%     end
-    
-%     [x,y] = max(meanperfs);
-%     fprintf('seed = %d, maxid = %d\n', seed, y);
-end
-
-
-%% Plot performance dependence on k (nNeighbors)
-meanperfs = [];
-stdperfs = [];
-for i = 1:numel(confusions_all)
-    perfs = [];
-    for j = 1:numel(confusions_all{1})
-        confusion_mat = confusions_all{i}{j};
-        perfs(j) = sum(diag(confusion_mat)) / sum(confusion_mat(:));
-    end
-    
-    meanperfs(i) = mean(perfs);
-    stdperfs(i) = std(perfs);
-    
-end
-
-figure;
-cols = paperaesthetics;
-l1 = errorbar(model_types, meanperfs, stdperfs, 'o', 'MarkerFaceColor', cols.bluecol,...
-    'MarkerEdgeColor', cols.bluecol);
-hold on
-l2 = errorbar(model_types, MCCs_means , MCCs_stds, 'o', 'MarkerFaceColor', cols.redcol,...
-    'MarkerEdgeColor', cols.redcol);
-% ylim([0.9, 0.95])
-
-mymakeaxis('x_label', 'k Neighbors', 'y_label', 'Decoding performance', 'xticks', model_types);
-leg = legend([l1, l2], {'Accuracy', 'Matthews correlation'}, 'FontSize', 16);
-% leg.String.FontSize
-
-% leg.S
-
-% [counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
-% [counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
-% [counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
-
-
-%% Plot confusion matrix
-idbest = 12;
-cm = confusionchart(confusions_all{idbest}{1}, {'Q1', 'Q2', 'Q3', 'Q4', 'IB5', 'IB6'});
-sortClasses(cm, {'Q1', 'Q2', 'Q3', 'Q4', 'IB5', 'IB6'});
-% cm.RowSummary = 'row-normalized';
-cm.FontSize = 20;
-cm.FontName = 'helvetica';
-cm.Normalization = 'row-normalized';
-
-
 %%
 savedir = paths.svmmodelpath;
-filename = sprintf('decoding_common_%s_with%sMdl_knn_svm_v12_tsne.mat', opts.svm_version, opts.method);
+filename = sprintf('decoding_common_%s_with%sMdl_knn_svm_v10b_tsne.mat', opts.svm_version, opts.method);
 notes = 'knn models with k = 2:2:30';
 savename = fullfile(savedir, filename);
 if opts.save_model
     if ~exist(savename, 'file')
-%         save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
-%             'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
-        save(savename, 'MCCs_means', 'MCCs_stds', 'Models', 'notes', 'MCCs_all', 'model_types', 'seed');
+        save(savename, 'Mdl10', 'Mdl09', 'Mdl08', 'Mdl07', 'confusions10', ...
+            'confusions09', 'confusions08', 'confusions07', 'opts');
         fprintf('File saved!\n');
     else
         error('File exists')

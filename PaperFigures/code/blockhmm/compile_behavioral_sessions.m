@@ -2,8 +2,8 @@
 % animals = {'f01', 'f02', 'f03', 'f04', 'f11', 'f12', 'E35', 'E40',...
 %     'fh01', 'fh02', 'f05', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23'};
 % % animals = {'f25'};
-animals = {'f32'};
-version = '122221';
+animals = {'f26', 'f27', 'f29', 'f32'};
+version = '012122_Murat';
 paths = pathsetup('matchingsim');
 opts.savefile = 1;
 

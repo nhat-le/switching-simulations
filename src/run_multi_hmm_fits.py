@@ -117,12 +117,12 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6):
 
 if __name__ == '__main__':
     seeds = [121] #[121, 122, 123, 124, 125]
-    # animals = ['e46']
+    animals = ['f26', 'f27', 'f29']
     # animals = ['f02', 'f03', 'f04', 'f11', 'f12', 'e35', 'e40',
     #     'fh01', 'fh02', 'f05', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23']
     # animals = ['e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23']
-    version = '122221'
-    version_save = '011522'
+    version = '012122_Murat'
+    version_save = '012122_Murat'
     paths = pathsetup('matchingsim')
     files = glob.glob(f"{paths['expdatapath']}/{version}/*_all_sessions_{version}.mat")
     num_states = 6
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     # animals = ['f01']
     # animals = [file.split('_')[1].split('/')[-1] for file in files]
     # animals = ['e35', 'e54', 'e57', 'e56']
-    animals = ['f32']
+    # animals = ['f32']
     for animal in animals:
         print(f"Running animal: {animal}")
         try:

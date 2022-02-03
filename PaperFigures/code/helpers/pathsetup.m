@@ -33,6 +33,10 @@ switch project
         
     case 'wftoolbox'
         out.locanmfpath = '/Users/minhnhatle/Documents/ExternalCode/locaNMF-preprocess';
+        out.codepath = '/Users/minhnhatle/Documents/ExternalCode/wftoolbox';
+        out.optoImg_path = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/Dec21/Opto Image Extraction';
+        out.templates_path = '/Users/minhnhatle/Documents/ExternalCode/wftoolbox/templates';
+        
     otherwise
         error('Unrecognized project. Must be tca or matchingsim')
 end
