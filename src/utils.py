@@ -2,6 +2,7 @@ from src.worldModels import *
 import scipy.optimize
 import ssm
 
+
 def pathsetup(project):
     out = {}
     if project == 'matchingsim':
@@ -264,17 +265,19 @@ def get_num_errors_leading_block(world, agent):
     if np.ndim(np.array(world.side_history)) == 1:
         first_side = world.side_history[0]
     else:
-        first_side = world.side_history[0][0]
+        first_side = 1 - world.side_history[0][0]
 
     switchlst = []
     for i in range(len(world.ntrialblocks) - 1):
         blockchoice = choicelst[i]
         target = (first_side + i) % 2
-        if blockchoice[0] == target:
+        if blockchoice[0] == target: #already switched on the first trial
             switch = -1
+        elif np.sum(blockchoice == target) == 0: #no switch happened in the block
+            switch = len(blockchoice)
         else:
             switch = np.where(blockchoice == target)[0][0]
-
+        # print(switch)
         switchlst.append(switch)
 
     return np.array(switchlst)
@@ -290,26 +293,21 @@ def get_num_rewards_trailing_block(world, agent):
     if np.ndim(np.array(world.side_history)) == 1:
         first_side = world.side_history[0]
     else:
-        first_side = world.side_history[0][0]
+        first_side = 1 - world.side_history[0][0]
 
     nrewlst = []
     for i in range(len(world.ntrialblocks) - 1):
         blockchoice = choicelst[i]
         blockchoiceflip = np.flip(blockchoice)
         target = (first_side + i) % 2
-        #         print('array is ', blockchoice)
         if blockchoiceflip[0] != target:
             nrew = -1
-        #             print('skipping')
         else:
             nrew = np.where(blockchoiceflip != target)[0]
-            #             print(nrew)
             if len(nrew) == 0:
                 nrew = len(blockchoiceflip)
             else:
                 nrew = nrew[0]
-        #             print(target)
-        #             print(nrew)
 
         nrewlst.append(nrew)
 
@@ -570,15 +568,4 @@ def pad_to_same_length(arrlst):
 
 
 if __name__ == '__main__':
-    mean_singlez = np.array([0.55555556, 0.73015873, 0.85714286, 0.86507937, 0.92857143,
-       0.98412698, 0.95238095, 0.93650794, 1.        , 0.95238095,
-       0.98412698, 0.95238095, 0.96825397, 0.93650794, 0.96825397])
-
-    L = fit_doublesigmoid_helper(mean_singlez, 1-mean_singlez)
-    print(L)
-
-
-
-
-
-
+    pass

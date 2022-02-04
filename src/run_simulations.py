@@ -1,9 +1,11 @@
-from src.utils import * #fit_expfun2, make_switching_world, find_LR_transition_fit, simulate_rew_error_correlations
+# from src.utils import simulate_rew_error_correlations, make_switching_world #fit_expfun2, make_switching_world, find_LR_transition_fit, simulate_rew_error_correlations
+import src.utils
 from src.worldModels import *
 from src.agents import *
 import numpy as np
 import ssm
 import tqdm
+
 
 
 
@@ -155,7 +157,7 @@ def run_single_agent(idx, idy, params):
     window = params['sigmoid_window']
     # hmm_fit = params['hmm_fit']
 
-    world, _ = make_switching_world(rlow, rhigh, nblocks, ntrials_per_block[0], ntrials_per_block[1])
+    world, _ = src.utils.make_switching_world(rlow, rhigh, nblocks, ntrials_per_block[0], ntrials_per_block[1])
 
     if params['type'] == 'inf-based':
         agent = EGreedyInferenceBasedAgent(prew=params['prewlst'][idy], pswitch=params['pswitchlst'][idx], eps=params['eps'])
@@ -181,7 +183,28 @@ def run_single_agent(idx, idy, params):
     # Sigmoidal fit for choice transitions
     # pR, pL, _ = find_LR_transition_fit(world, agent, window=window, type='sigmoid')
     # print('sigmoid:', pR, pL)
-    pR, pL, _ = find_LR_transition_fit(world, agent, window=window, type='doublesigmoid')
+    pR, pL, _ = src.utils.find_LR_transition_fit(world, agent, window=window, type='doublesigmoid')
     # print('doublesigmoid', pR, pL)
     return agent, world, pR, pL, hmm
 
+if __name__ == '__main__':
+    params = dict(N_iters=50, num_states=2, obs_dim=1, nblocks=100,
+                  eps=0, hmm_fit=False, sigmoid_window=30,
+                  ntrials_per_block=[5, 20], gammalst=[0.02], epslst=[0.1],
+                  rlow=0, rhigh=1, type='qlearning')
+
+    # np.randomuseed(123)
+    # world1 = ForagingWorld(prew=0.9, psw=0.1, pstruct=[5, 40], nblockmax=100)
+
+    world = ForagingWorld(prew=0.9, psw=0.1, pstruct=[5, 15], nblockmax=1000)
+    # agent = ValueAccumulationAgent(gamma=0.1, beta=10)
+    agent = EGreedyQLearningAgent(gamma=0.05, eps=0.01)
+    exp = Experiment(agent, world)
+    exp.run()
+    # agent, world, _, _, _ = run_single_agent(0, 0, params)
+    Nerrors = src.utils.get_num_errors_leading_block(world, agent)
+    Nrews = src.utils.get_num_rewards_trailing_block(world, agent)
+    plt.figure()
+    plt.plot(Nrews[:-1], Nerrors[1:], '.')
+    plt.show()
+    # xvals, means, stds, ysplit = src.utils.simulate_rew_error_correlations(world, agent)

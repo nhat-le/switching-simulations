@@ -257,6 +257,9 @@ class ForagingWorld(World):
         '''
         self.ntrialblocks[-1] += 1
 
+        # if self.ntrialblocks[-1] > 15:
+        #     print('here')
+
         # What is the psw at the moment?
         if self.ntrialblocks[-1] < self.pstruct[0]:
             psw_curr = 0

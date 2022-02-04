@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+import src.utils
 
 class Agent():
     '''
@@ -225,7 +226,7 @@ class ValueAccumulationAgent(Agent):
         '''
         Make a choice using a probabilistic strategy based on current V
         '''
-        prob = utils.logistic(self.V * self.beta)
+        prob = src.utils.logistic(self.V * self.beta)
 
         # Flip a coin to choose behavior based on prob
         choice = int(np.random.rand() < prob)
