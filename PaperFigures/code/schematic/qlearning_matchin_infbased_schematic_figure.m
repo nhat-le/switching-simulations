@@ -1,20 +1,20 @@
 %% Diagram for q-learning agent
 paths = pathsetup('matchingsim');
-paperaesthetics;
+cols = paperaesthetics;
 
 load(fullfile(paths.simdatapath, 'schematic/qlearning-sim-122221.mat'))
 figure('Position', [0 0 450 250]);
 trialid = 1:numel(choices);
 plot(trialid(rewards == 1 & choices == 1), choices(rewards == 1 & choices == 1), ...
-    'o', 'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'Color', bluecol)
+    'o', 'MarkerFaceColor', cols.bluecol, 'MarkerEdgeColor', cols.bluecol, 'Color', cols.bluecol)
 
 hold on
 plot(trialid(rewards == 1 & choices == 0), choices(rewards == 1 & choices == 0), 'o', ...
-    'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'Color', bluecol)
+    'MarkerFaceColor', cols.bluecol, 'MarkerEdgeColor', cols.bluecol, 'Color', cols.bluecol)
 plot(trialid(rewards == 0 & choices == 1), choices(rewards == 0 & choices == 1), 'x', ...
-    'MarkerFaceColor', redcol, 'Color', redcol)
+    'MarkerFaceColor', cols.redcol, 'Color', cols.redcol)
 plot(trialid(rewards == 0 & choices == 0), choices(rewards == 0 & choices == 0), 'x', ...
-    'MarkerFaceColor', redcol, 'Color', redcol)
+    'MarkerFaceColor', cols.redcol, 'Color', cols.redcol)
 
 
 l = vline(17, 'k--');
@@ -62,15 +62,15 @@ prob = prob1;
 figure('Position', [0 0 450 250]);
 trialid = 1:numel(choices);
 plot(trialid(rewards == 1 & choices == 1), choices(rewards == 1 & choices == 1), ...
-    'o', 'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'Color', bluecol)
+    'o', 'MarkerFaceColor', cols.bluecol, 'MarkerEdgeColor', cols.bluecol, 'Color', cols.bluecol)
 
 hold on
 plot(trialid(rewards == 1 & choices == 0), choices(rewards == 1 & choices == 0), 'o', ...
-    'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'Color', bluecol)
+    'MarkerFaceColor', cols.bluecol, 'MarkerEdgeColor', cols.bluecol, 'Color', cols.bluecol)
 plot(trialid(rewards == 0 & choices == 1), choices(rewards == 0 & choices == 1), 'x', ...
-    'MarkerFaceColor', redcol, 'Color', redcol)
+    'MarkerFaceColor', cols.redcol, 'Color', cols.redcol)
 plot(trialid(rewards == 0 & choices == 0), choices(rewards == 0 & choices == 0), 'x', ...
-    'MarkerFaceColor', redcol, 'Color', redcol)
+    'MarkerFaceColor', cols.redcol, 'Color', cols.redcol)
 
 transition = find(diff(prob0 > 0.5));
 l = vline(transition, 'k--');
@@ -88,7 +88,9 @@ set(gca, 'color', 'none')
 
 %% Plot the behavior of the agents over multiple blocks
 paths = pathsetup('matchingsim');
-load(fullfile(paths.simdatapath, 'schematic/qlearning_sim_combinations.mat'));
+% load(fullfile(paths.simdatapath, 'schematic/qlearning_sim_combinations.mat'));
+load(fullfile(paths.simdatapath, 'schematic/infbased_sim_combinations.mat'));
+
 
 figure('Position', [440,368,695,430]);
 hold on

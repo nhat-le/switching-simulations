@@ -115,15 +115,32 @@ for i = 1:max(idx)
     end 
 end
 
+
+%% Visualize the transition functions grouped by strategy
+figure;
+for i = 1:6
+    subplot(2,3,i)
+    mode_funcs = aggmeans_all(statesFlat == i,:)';
+    plot(mode_funcs, 'k', 'LineWidth', 0.25);
+    hold on
+    plot(mean(mode_funcs, 2), 'r', 'Color', 'r', 'LineWidth', 2);
+
+    ylim([0, 1])
+    mymakeaxis('x_label', 'Trials in block', 'y_label', 'P(Correct)', ...
+        'yticks', 0:0.2:1, 'xticks', 0:5:15);
+end
+
+
+
 %%
 statefrac = composition ./ sum(composition, 2);
-paperaesthetics;
+cols = paperaesthetics;
 
 
 figure('Position', [440,423,736,375]);
 h = bar(statefrac,'stacked');
 for i = 1:6
-    h(i).FaceColor = colors(i,:);
+    h(i).FaceColor = cols.colors(i,:);
     h(i).ShowBaseLine = 'off';
 end
 % xlim([0.5 4.5])
