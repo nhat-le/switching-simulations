@@ -53,8 +53,48 @@ for i = 1:numel(folders)
     
     animalinfo(i).animal = animal_name;
     animalinfo(i).zclassified = zclassified_splits;
+    animalinfo(i).classes = sort(statesFlat_extracted);
 
 end
+
+%% Plot identity of HMM modes per animal
+hmmidentities = [];
+namelst = {};
+for i = 1:numel(animalinfo)
+    hmmidentities(end+1,:) = animalinfo(i).classes;
+    namelst{i} = animalinfo(i).animal;
+end
+
+meanmode = mean(hmmidentities, 2);
+[~,idx] = sort(meanmode);
+namelst = namelst(idx);
+hmmidentities = hmmidentities(idx,:);
+
+idx2 = 22 - [1,2,3,4,5,7,9,11,17,19,6,8,12,13,14,15,18,10,16,20,21];
+idx2 = idx2(end:-1:1);
+hmmidentities = hmmidentities(idx2,:);
+namelst = namelst(idx2);
+
+cmap = brewermap(6, 'Set1');
+cmap = cmap([2,1,5,6,4,3],:);
+
+figure;
+imagesc(hmmidentities);
+colormap(cmap);
+hold on
+vline((0:6) + 0.5, 'k');
+hline((0:numel(animalinfo)) + 0.5, 'k');
+
+axis xy
+mymakeaxis('x_label', 'HMM mode', 'y_label', 'Animal', ...
+    'font_size', 22, 'xticks', 1:6, 'yticks', 1:numel(namelst), 'yticklabels', namelst)
+
+
+
+
+
+
+
 
 %% Plot state evolution profile for each animal
 f = waitbar(0);
@@ -150,17 +190,28 @@ for i =1:6
             'o-', 'Color', colors(i,:), 'MarkerFaceColor', colors(i,:));
     end
     lines(i) = h;
-    xlim([1, 36])
+    xlim([1, 40])
     ylim([0, 1])
 end
 
-mymakeaxis('x_label', 'Session', 'y_label', 'Fraction', 'xticks', 0:5:30)
+mymakeaxis('x_label', 'Session', 'y_label', 'Fraction', 'xticks', 0:5:40, 'font_size', 22)
 l = legend(lines, {'Q1', 'Q2', 'Q3', 'Q4', 'IB5', 'IB6'});
 l.Title.String = 'Regime';
 l.Title.FontSize = 12;
 l.FontSize = 12;
 
 
+%%
+sline = pad_to_same_length(extracted_all, 1);
+means1 = nanmean(sline, 1);
 
+sline = pad_to_same_length(extracted_all, 4);
+means4 = nanmean(sline, 1);
+
+sline = pad_to_same_length(extracted_all, 5);
+means5 = nanmean(sline, 1);
+
+sline = pad_to_same_length(extracted_all, 6);
+means6 = nanmean(sline, 1);
 
 

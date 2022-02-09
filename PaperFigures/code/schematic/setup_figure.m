@@ -20,13 +20,13 @@ rates = lapse + (1 - 2 * lapse) * 1 ./ (1 + exp(-slope * (xlst + offset)));
 choices = rand(size(rates)) < rates;
 
 corrtrials = choices == trialside;
-
+cols = paperaesthetics;
 % Plot
 figure('Position', [440,317,695,481]);
-plot(xlst(corrtrials) - nblockstart, choices(corrtrials), 'o', 'Color', bluecol,...
-    'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol, 'MarkerSize', 9)
+plot(xlst(corrtrials) - nblockstart, choices(corrtrials), 'o', 'Color', cols.bluecol,...
+    'MarkerFaceColor', cols.bluecol, 'MarkerEdgeColor', cols.bluecol, 'MarkerSize', 9)
 hold on
-plot(xlst(~corrtrials) - nblockstart, choices(~corrtrials), 'x', 'Color', redcol,...
+plot(xlst(~corrtrials) - nblockstart, choices(~corrtrials), 'x', 'Color', cols.redcol,...
     'MarkerSize', 9, 'LineWidth', 2)
 
 

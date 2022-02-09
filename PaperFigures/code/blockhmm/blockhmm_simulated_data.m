@@ -73,6 +73,7 @@ mymakeaxis('x_label', 'Iteration #', 'y_label', 'Log likelihood ( x 1e4)')
 %% Parameter comparison
 figure('Position', [313,326,654,333]);
 colors = brewermap(3, 'Set1');
+colors = colors([2, 1, 3], :);
 titles = {'Offset s', 'Slope \alpha', 'Lapse \epsilon'};
 for i = 1:3
     subplot(1,3,i)
@@ -129,8 +130,10 @@ colormap(ax1, [229, 75, 34; 171, 209, 255]/255);
 % colormap(ax1, [239, 201, 175;31, 138, 192] / 255); 
 % colormap(ax1, [226, 60, 82; 189, 255, 246] / 255);
 cmap = brewermap(6, 'Paired');
-colormap(ax2, cmap(1:2:end,:))
-colormap(ax3, cmap(1:2:end,:))
+cmap = cmap(1:2:end,:);
+cmap = cmap([3,2,1],:);
+colormap(ax2, cmap)
+colormap(ax3, cmap)
 title('Inferred states')
 xlabel('Block #')
 yticks([])

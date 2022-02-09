@@ -5,6 +5,82 @@ from src.agents import *
 import numpy as np
 import ssm
 import tqdm
+import statsmodels.api as sm
+from tqdm.notebook import tqdm
+
+
+
+def run_rew_error_simulations(params):
+    nblocks = params['nblocks']
+    # seed = params['seed']
+    pstruct = params['pstruct']
+    agenttype = params['agenttype']
+    prew_world = params['world_pr']
+    psw_world = params['world_ps']
+
+    # np.random.seed(seed)
+    world = ForagingWorld(prew=prew_world, psw=psw_world, pstruct=pstruct, nblockmax=nblocks)
+
+    if agenttype == 'inf-based':
+        prew = params['prew']
+        psw = params['psw']
+        agent = EGreedyInferenceBasedAgent(prew=prew, pswitch=psw)
+    elif agenttype == 'qlearning':
+        gamma = params['gamma']
+        eps = params['eps']
+        agent = EGreedyQLearningAgent(gamma=gamma, eps=eps)
+    else:
+        raise ValueError('Invalid agent')
+
+
+    exp = Experiment(agent, world)
+    exp.run()
+
+    Nerrors = src.utils.get_num_errors_leading_block(world, agent)[1:]
+    Nrews = src.utils.get_num_rewards_trailing_block(world, agent)[:-1]
+
+    Nerrors_trim = Nerrors[(Nerrors > 0) & (Nrews > 0) & (Nrews <= 15)]
+    Nrews_trim = Nrews[(Nerrors > 0) & (Nrews > 0) & (Nrews <= 15)]
+
+    return Nerrors_trim, Nrews_trim
+
+
+def rew_err_sweep(params):
+    seed = params['seed']
+    np.random.seed(seed)
+    agenttype = params['agenttype']
+    if agenttype == 'qlearning':
+        xlst = params['gamma']
+        ylst = params['eps']
+        xlabel = 'gamma'
+        ylabel = 'eps'
+    elif agenttype == 'inf-based':
+        xlst = params['psw']
+        ylst = params['prew']
+        xlabel = 'psw'
+        ylabel = 'prew'
+    else:
+        raise ValueError('Invalid agent!')
+
+    corr_arr = np.zeros((len(xlst), len(ylst))) * np.nan
+    for i, xval in enumerate(tqdm(xlst)):
+        for j, yval in enumerate(ylst):
+            print(f"i = {i}, gamma = {xval}, j = {j}, eps = {yval}")
+            params[xlabel] = xval
+            params[ylabel] = yval
+            Ne, Nr = run_rew_error_simulations(params)
+
+            y1 = Ne
+            X1 = Nr[:, np.newaxis]
+            X1 = sm.add_constant(X1)
+            model = sm.OLS(y1, X1)
+            res = model.fit()
+            # corr_arr[i][j] = res.params[1]
+            corr_arr[i][j] = np.corrcoef(Nr, Ne)[0,1]
+
+    return corr_arr
+
+
 
 
 
@@ -188,23 +264,7 @@ def run_single_agent(idx, idy, params):
     return agent, world, pR, pL, hmm
 
 if __name__ == '__main__':
-    params = dict(N_iters=50, num_states=2, obs_dim=1, nblocks=100,
-                  eps=0, hmm_fit=False, sigmoid_window=30,
-                  ntrials_per_block=[5, 20], gammalst=[0.02], epslst=[0.1],
-                  rlow=0, rhigh=1, type='qlearning')
-
-    # np.randomuseed(123)
-    # world1 = ForagingWorld(prew=0.9, psw=0.1, pstruct=[5, 40], nblockmax=100)
-
-    world = ForagingWorld(prew=0.9, psw=0.1, pstruct=[5, 15], nblockmax=1000)
-    # agent = ValueAccumulationAgent(gamma=0.1, beta=10)
-    agent = EGreedyQLearningAgent(gamma=0.05, eps=0.01)
-    exp = Experiment(agent, world)
-    exp.run()
-    # agent, world, _, _, _ = run_single_agent(0, 0, params)
-    Nerrors = src.utils.get_num_errors_leading_block(world, agent)
-    Nrews = src.utils.get_num_rewards_trailing_block(world, agent)
-    plt.figure()
-    plt.plot(Nrews[:-1], Nerrors[1:], '.')
-    plt.show()
-    # xvals, means, stds, ysplit = src.utils.simulate_rew_error_correlations(world, agent)
+    # A systematic simulation of the whole space
+    params = dict(nblocks=1000, seed=123, pstruct=[5, 40], agenttype='qlearning', world_pr=0.9, world_ps=0.1,
+                  gamma=np.linspace(0.01, 0.3, 5), eps=np.linspace(0.01, 0.3, 5))
+    corr_arr = rew_err_sweep(params)

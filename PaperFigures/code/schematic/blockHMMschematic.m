@@ -1,9 +1,14 @@
 %%
 rng(123)
 % Make three transition functions
-params = [0.5, 2.5, 0.02; %inf-based (fast)
-    5, 1, 0.1; %slow switch
-    4, 0.1, 0.4]; %random
+%old params (Jan 2022)
+% params = [0.5, 2.5, 0.02; %inf-based (fast)
+%     5, 1, 0.1; %slow switch
+%     4, 0.1, 0.4]; %random
+
+params = [1, 0.8, 0.05;
+    9, 1.5, 0.05;
+    4, 0.2, 0.3];
 
 % Make the functions
 N = 15; %number of trials in block
@@ -44,14 +49,14 @@ hold on
 plot(tvals(yflat == 0), choicesflat(yflat == 0), 'rx', 'LineWidth', 1.5)
 vline(blockstarts, 'k--')
 colors = brewermap(3, 'Set1');
-colors = colors([3, 1, 2],:);
+colors = colors([1, 3, 2],:);
 for i = 1:numel(zstates)  
     opts={'EdgeColor', 'none',...
       'FaceColor', colors(zstates(i),:), 'FaceAlpha', 0.2};
     fill_between([blockstarts(i), blockstarts(i+1)], [-1 -1], 1, [], opts{:})
 end
 ylim([-1.5, 1.5])
-mymakeaxis('x_label', 'Trials', 'y_label', 'Choice', 'yticks', [-1, 1])
+mymakeaxis('x_label', 'Trials', 'y_label', 'Choice, y_t', 'yticks', [-1, 1])
 
 
 %%
