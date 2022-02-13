@@ -11,22 +11,24 @@ produce_heatmap(corr_arr_Q, eps, gamma, 'clim', [0,0.5], 'legendname', '\rho', .
     'x_label', '$\epsilon$', 'y_label', '$\gamma$', 'ytickvalues', 0:0.2:0.8,...
     'font_size', 22);
 hold on
-plot([0.1], [0.6], 'kx', 'LineWidth', 2, 'MarkerSize', 30)
-plot([0.05], [0.05], 'k*', 'LineWidth', 2, 'MarkerSize', 30)
+plot([0.1], [0.6], 'k*', 'LineWidth', 1, 'MarkerSize', 30)
+plot([0.01], [0.1], 'kx', 'LineWidth', 1, 'MarkerSize', 30)
 
 
 produce_heatmap(corr_arr_ib(1:end-1,:), prew, psw, 'clim', [0,0.5], 'legendname', '\rho', ...
     'x_label', '$P_{reward}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.5,...
     'font_size', 22);
 hold on
-plot([0.7], [0.1],  'kx', 'LineWidth', 2, 'MarkerSize', 30)
-plot([0.55], [0.02],  'k*', 'LineWidth', 2, 'MarkerSize', 30)
+plot([0.7], [0.1],  'kx', 'LineWidth', 1, 'MarkerSize', 30)
+plot([0.55], [0.02],  'k*', 'LineWidth', 1, 'MarkerSize', 30)
 
 
 
 %% Plot the exemplar agents
-load('Qlearning_agent3_rew_err_correlations.mat')
-% load('infbased_agent1_rew_err_correlations.mat')
+% load('Qlearning_agent3_rew_err_correlations.mat')
+% load('Qlearning_agent4_rew_err_correlations.mat')
+
+load('infbased_agent1_rew_err_correlations.mat')
 
 % scatter(Nr, Ne, 'o', 'MarkerFaceAlpha', 0.2, 'MarkerFaceColor', 'b')
 figure;
@@ -105,13 +107,13 @@ mymakeaxis('x_label', 'Trials', 'y_label', 'Choice or Value', 'xticks', 0:20:60)
 
 
 %% Plot longer-range blocks to illustrate correlation
-load rew_err_correlations_schematic.mat
+load rew_err_correlations_schematic_qlearning.mat
 
 % figure('Position', [440,487,679,311]);
 targets = mod(0:size(choicelst, 1)-1, 2);
 targetlst = repmat(targets', [1 size(choicelst, 2)]);
 
-blockrange = 3:10;
+blockrange = 3:15;
 
 q1narrow = q1lst(blockrange,:);
 q1flat = reshape(q1narrow', [], 1);
@@ -124,12 +126,16 @@ q0flat = q0flat(~isnan(q0flat));
 subtargets = targetlst(blockrange, :);
 subtargets = reshape(subtargets', [], 1);
 
+outcomes_narrow = outcomelst(blockrange,:);
+outcomes_flat = reshape(outcomes_narrow', [], 1);
+outcomes_flat = outcomes_flat(~isnan(outcomes_flat));
+
 choices_narrow = choicelst(blockrange,:);
 choices_flat = reshape(choices_narrow', [], 1);
 subtargets = subtargets(~isnan(choices_flat));
 choices_flat = choices_flat(~isnan(choices_flat));
 
-outcomes = subtargets == choices_flat;
+outcomes = outcomes_flat;
 idx = 1:numel(outcomes);
 
 cols = paperaesthetics;
@@ -148,9 +154,9 @@ plot(idx(outcomes == 0), choices_flat(outcomes == 0), 'x', ...
 %plot vertical transition lines
 transitions = find(diff(subtargets));
 vline(transitions + 0.5);
-xlim([0 150])
+xlim([0 170])
 
-mymakeaxis('x_label', 'Trials', 'y_label', 'Choice or Value', 'xticks', 0:50:250)
+mymakeaxis('x_label', 'Trials', 'y_label', 'Choice or Value', 'xticks', 0:50:150)
 legend([l1, l2], {'q_R', 'q_L'}, 'FontSize', 16);
 
 %% Same plot for inf-based agent

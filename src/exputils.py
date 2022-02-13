@@ -4,7 +4,7 @@ from ssm.util import split_by_trials
 import ssm
 import os.path
 import smartload.smartload as smart
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 def sigmoid(x, mu, sigma, lapse=0):
     return lapse + (1-2*lapse) / (1 + np.exp(-(x - mu) * sigma))

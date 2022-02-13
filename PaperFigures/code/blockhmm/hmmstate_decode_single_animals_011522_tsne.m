@@ -27,7 +27,7 @@ counter = 1; %keeps track of current position in statesFlat
 animalinfo = struct;
 
 for i = 1:numel(folders)
-    load(fullfile(folders(i).folder, folders(i).name), 'zstates', 'params', 'lengths');
+    load(fullfile(folders(i).folder, folders(i).name), 'zstates', 'params', 'lengths', 'transmat');
     parts = strsplit(folders(i).name, '_');
     animal_name = parts{1};
     zclassified = zstates;
@@ -43,6 +43,26 @@ for i = 1:numel(folders)
         zclassified(zstates == istate - 1) = statesFlat_extracted(istate);
     end
     
+    [identityPermuted, stateSortIdx] = sort(statesFlat_extracted);
+    transmatPermuted = transmat(stateSortIdx,stateSortIdx);
+    
+    labels = {};
+    for i = 1:numel(identityPermuted)
+        if identityPermuted(i) <= 4
+            labels{i} = ['Q', num2str(identityPermuted(i))];    
+        else
+            labels{i} = ['IB', num2str(identityPermuted(i))];
+        end
+    end
+    
+    figure;
+    imagesc(transmatPermuted)
+    colormap gray
+    caxis([0 1])
+%     colorbar;
+    axis xy
+    mymakeaxis('x_label', 'State i', 'y_label', 'State i + 1', 'xticks', 1:6,...
+        'xticklabels', labels, 'yticks', 1:6, 'yticklabels', labels, 'xytitle', animal_name);
     
     counter = counter + n_zstates;    
     
@@ -54,6 +74,12 @@ for i = 1:numel(folders)
     animalinfo(i).animal = animal_name;
     animalinfo(i).zclassified = zclassified_splits;
     animalinfo(i).classes = sort(statesFlat_extracted);
+    
+    filename = fullfile(paths.figpath, 'hmmblockFigs/transmat_animals/',...
+        sprintf('%s_transmat_tsne_011622.pdf', animal_name));
+    if ~exist(filename, 'file')
+        saveas(gcf, filename);
+    end
 
 end
 
@@ -132,7 +158,9 @@ for id = 1:numel(animalinfo)
 %             'FontSize', 14);
         filename = fullfile(paths.figpath, 'hmmblockFigs/compositions_animals/',...
             sprintf('%s_training_evolution_tsne_011622.pdf', animalinfo(id).animal));
-        saveas(gcf, filename);
+        if ~exist(filename, 'file')
+            saveas(gcf, filename);
+        end
     end
 end
 % close all

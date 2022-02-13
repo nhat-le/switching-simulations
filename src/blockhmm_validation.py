@@ -7,16 +7,18 @@ npr.seed(0)
 
 import ssm
 import smartload.smartload as smart
-from ssm.exputils import load_multiple_sessions, make_savedict
+from src.exputils import load_multiple_sessions, make_savedict
 npr.seed(0)
 
 def run_and_validate(animal, seed, params):
     print(f'Starting run and save for {animal}, seed {seed}')
     # Load data
-    version = '_113021'
-    version_save = '_113021'
-    filepath = f'/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/{animal}_all_sessions{version}.mat'
-    fitrangefile = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/expdata/fitranges_102121.mat'
+    # version = '_113021'
+    # version_save = '_113021'
+    version = params['version']
+    filepath = f'/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/expdata/{version}/{animal}_all_sessions_{version}.mat'
+    fitrangefile = params['fitrangefile']
+    # fitrangefile = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/expdata/102121/fitranges_102121.mat'
     datarange = smart.loadmat(fitrangefile)
     fitrange = datarange['ranges'][datarange['animals'] == animal][0]
     obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
@@ -165,33 +167,61 @@ def run_animal(animal, seeds):
 #             continue
 
 if __name__ == '__main__':
-    #Create the dataset
-    # Set the parameters of the HMM
-    time_bins = 5000  # number of time bins
-    num_states = 3  # number of discrete states
-    obs_dim = 30  # dimensionality of observation
-
-    # Make an HMM
-    gen_seed = 125
-    np.random.seed(gen_seed)
-    true_hmm = ssm.HMM(num_states, obs_dim, observations="blocklapse")
-
-    true_hmm.observations.mus = np.array([1, 9, 4]).T
-    true_hmm.observations.sigmas = np.array([0.8, 1.5, 0.2]).T
-    true_hmm.observations.lapses = np.array([0.15, 0.05, 0.3]).T
-
-    # true_hmm.transitions.transition_matrix = np.array([[0.98692759, 0.01307241],
-    #                                        [0.00685383, 0.99314617]])
-
-    # Sample some data from the HMM
-    true_states, obs = true_hmm.sample(time_bins)
-
-    print(obs.shape)
-
+    ### CODE FOR EXP FIT EVALUATIONS
     # Setup evaluation parameters
-    nstates_lst = np.arange(1, 8)
+    nstates_lst = np.arange(1, 9)
     N_iters = 3000
     frac_train = 0.8
 
-    ll_lst, nstates_lst, obs_train, obs_test = run_and_validate_synthetic(obs, seed=123, params=dict(nstates_lst=nstates_lst,
-                                                                                                     N_iters=N_iters, frac_train=frac_train))
+    params = dict(nstates_lst=np.arange(1, 9),
+                  N_iters=3000,
+                  frac_train=0.8,
+                  version='122221b',
+                  fitrangefile='/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/expdata/102121/fitranges_102121.mat')
+
+    # params = dict(nstates_lst=[1], N_iters=10, frac_train=0.8)
+
+    animal_lst = ['f01']  # , 'f02', 'f03', 'f04', 'f11', 'f12', 'e35', 'e40',
+    #         'fh01', 'fh02', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23']
+
+    ll_lst_all = []
+    test_lens = []
+    for animal in animal_lst:
+        print(f'Analyzing animal {animal}')
+        ll_lst, nstates_lst, obs_train, obs_test = run_and_validate(animal, 123, params)
+        test_lens.append(obs_test.shape[0])
+        ll_lst_all.append(ll_lst)
+
+
+
+    ### CODE FOR SYNTHETIC SIMULATIONS
+    #Create the dataset
+    # Set the parameters of the HMM
+    # time_bins = 5000  # number of time bins
+    # num_states = 3  # number of discrete states
+    # obs_dim = 30  # dimensionality of observation
+    #
+    # # Make an HMM
+    # gen_seed = 125
+    # np.random.seed(gen_seed)
+    # true_hmm = ssm.HMM(num_states, obs_dim, observations="blocklapse")
+    #
+    # true_hmm.observations.mus = np.array([1, 9, 4]).T
+    # true_hmm.observations.sigmas = np.array([0.8, 1.5, 0.2]).T
+    # true_hmm.observations.lapses = np.array([0.15, 0.05, 0.3]).T
+    #
+    # # true_hmm.transitions.transition_matrix = np.array([[0.98692759, 0.01307241],
+    # #                                        [0.00685383, 0.99314617]])
+    #
+    # # Sample some data from the HMM
+    # true_states, obs = true_hmm.sample(time_bins)
+    #
+    # print(obs.shape)
+    #
+    # # Setup evaluation parameters
+    # nstates_lst = np.arange(1, 8)
+    # N_iters = 3000
+    # frac_train = 0.8
+    #
+    # ll_lst, nstates_lst, obs_train, obs_test = run_and_validate_synthetic(obs, seed=123, params=dict(nstates_lst=nstates_lst,
+    #                                                                                                  N_iters=N_iters, frac_train=frac_train))
