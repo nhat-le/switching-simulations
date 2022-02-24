@@ -129,13 +129,13 @@ Then run the code in `code/blockhmm/blockhmm_simulated_data.m`
 * For selecting K by cross-validation: Run `blockHMM_K_selection.ipynb`. Results are saved as a pkl file, for e.g. `blockhmm_validation_120221.pkl`
 
 For running the exp fitting procedure, run `blockHMM_expfit.ipynb`
-Alternatively, for quickly iterating through all animals, can use the code in the module `src/run_multi_hmm_fits.py`
+Alternatively, for quickly iterating through all animals, can use the code in the module `src/run_multi_hmm_fits.py`. Remember to change `save` option on line 50 if you want the fitted results to be saved.
 * If we run this script, the blockhmm fit results will be saved in the folder `processed_data/blockhmmfit/{expdate}`
 * Parameters to change:
    * `version` (line 18): version number of the files in `expdata` that is loaded
    * `version_save`  (line 19): version number of the file that is saved (in `blockhmmfit`)
    * `fitrangefile` (line 25): path to the fitrange file which specifies the range of files to fit
-    * `savefile` (line 66): whether to save the results
+   * `savefile` (line 66): whether to save the results
 
 For running the sigmoidal fits of the blockhmm mode (same fitting procedure as the characterization simulations), we run the notebook `blockhmm_classifier.ipynb`, results will be saved in the `processed_data/blockhmmfit/{expdate}` folder.
 * To run this notebook, you need to specify the `version` (the exp date folder that the hmmblockfit data is stored), and the number of states. The script checks that the format of the fit data agrees with this number. Results will be saved as `sigmoid_fit_all_{version}.mat`

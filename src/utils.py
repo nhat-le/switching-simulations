@@ -22,6 +22,8 @@ def pathsetup(project):
         out['decoding_codepath'] = out['codepath']+ 'decoding'
         out['expfit_codepath'] = out['codepath']+ 'expfit'
         out['schematic_codepath'] = out['codepath']+ 'schematic'
+        out['Kselection_path'] = out['datapath'] + 'blockhmmfit/K_selection'
+
     elif project == 'tca':
         out['datapath'] = '/Users/minhnhatle/Documents/ExternalCode/tca/data'
         out['codepath'] = '/Users/minhnhatle/Documents/ExternalCode/tca/src/matlab'
