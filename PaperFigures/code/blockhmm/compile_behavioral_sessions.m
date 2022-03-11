@@ -2,8 +2,8 @@
 % animals = {'f01', 'f02', 'f03', 'f04', 'f11', 'f12', 'E35', 'E40',...
 %     'fh01', 'fh02', 'f05', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23'};
 % % animals = {'f25'};
-animals = {'f26', 'f27', 'f29', 'f32'};
-version = '012122_Murat';
+animals = {'e54', 'e57', 'f01', 'f02', 'f03', 'f04', 'f25'};
+version = '022822_wf';
 paths = pathsetup('matchingsim');
 opts.savefile = 1;
 
@@ -12,7 +12,7 @@ f = waitbar(0);
 for i = 1:numel(animals)
     waitbar(i/numel(animals), f, sprintf('Processing animal %s', animals{i}));
     opts.root = fullfile(paths.rigboxpath, animals{i});
-    opts.savepath = fullfile(paths.expdatapath, version, sprintf('%s_all_sessions_%s.mat', animals{i}, version));
+    opts.savepath = fullfile(paths.expdatapath, version, sprintf('%s_all_sessions_%s_2.mat', animals{i}, version));
     process_animal(animals{i}, opts); 
 end
 close(f);
@@ -26,6 +26,8 @@ folders = dir(fullfile(root, '202*'));
 choices_cell = {};
 targets_cell = {};
 feedbacks_cell = {};
+sesscounts_cell = {};
+opto_cell = {};
 maxdelays = [];
 probflags = [];
 session_names = {};
@@ -33,11 +35,13 @@ session_names = {};
 %TODO: add file names to know experiment type
 for id = 1:numel(folders)
 %     disp(id)
-    [allchoices, alltargets, ~, probflag, allfeedbacks] = rbox.get_choice_sequence(id, root, folders);
+    [allchoices, alltargets, ~, probflag, allfeedbacks, allopto, allsesscounts] = rbox.get_choice_sequence_opto(id, root, folders);
     probflags(id) = probflag;
     choices_cell{end+1} = allchoices;
     targets_cell{end+1} = alltargets;
     feedbacks_cell{end+1} = allfeedbacks;
+    sesscounts_cell{end+1} = allsesscounts;
+    opto_cell{end+1} = allopto;
     
     
     files = dir(fullfile(root, ...
@@ -66,7 +70,8 @@ end
 
 %%
 if opts.savefile && ~exist(opts.savepath, 'file')
-    save(opts.savepath, 'session_names', 'choices_cell', 'targets_cell', 'maxdelays', 'probflags', 'feedbacks_cell');
+    save(opts.savepath, 'session_names', 'choices_cell', 'targets_cell', 'maxdelays', 'probflags', 'feedbacks_cell',...
+        'opto_cell', 'sesscounts_cell');
     fprintf('File saved!\n');
 else
     fprintf('Skipping save, file exists...\n');

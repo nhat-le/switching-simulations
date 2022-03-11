@@ -1,54 +1,17 @@
-% For official paper figures sent on 2.21.2022
+% For analyzing of Murat's opto animals (f26, 27, 29, 32) sent on 2.24.2022
 
 %% classify and visualize state distributions
 paths = pathsetup('matchingsim');
 
 
-% Animal and mode information
-% animalModeInfo = struct;
-% animalModeInfo.animals = {'e53', 'f17', 'f20', 'f23',... %K = 2
-%     'e35',... %K = 3
-%     'e46', 'f16', 'f04',... %K = 4
-%     'e57', 'fh01', 'fh02',... %K = 5
-%     'e54', 'e56', 'f11', 'f21', 'f01', 'f02', 'f03', 'f12', 'f22', 'fh03'}; %K = 6
-% 
-% animalModeInfo.K = [2 2 2 2 3 4 4 4 5 5 5 6 6 6 6 6 6 6 6 6 6];
-
-% without gcamp6f animals
-% animalModeInfo.animals = {'e53', 'f17', 'f20',... %K = 2
-%     'e35',... %K = 3
-%     'e46', 'f16',... %K = 4
-%     'e57', 'fh01', 'fh02',... %K = 5
-%     'e54', 'e56', 'f11', 'f21', 'f01', 'f02', 'f12', 'fh03'}; %K = 6
-% 
-% animalModeInfo.K = [2 2 2 3 4 4 5 5 5 6 6 6 6 6 6 6 6];
-
-
 % averaging two seeds
 animalModeInfo = struct;
-animalModeInfo.animals = {'fh03',...
-    'f16',...
-    'f21',...
-    'f12',...
-    'f04',...
-    'e56',...
-    'e35',...
-    'f01',...
-    'e57',...
-    'e53',...
-    'fh02',...
-    'f17',...
-    'f20',...
-    'f03',...
-    'f22',...
-    'f11',...
-    'e46',...
-    'f23',...
-    'fh01',...
-    'f02',...
-    'e54'}; %K = 6
+animalModeInfo.animals = {'f26',...
+    'f27',...
+    'f29',...
+    'f32'};
 
-animalModeInfo.K = [6 5 3 6 4 6 3 6 5 2 5 2 6 6 6 6 4 3 4 3 6];
+animalModeInfo.K = [6 6 6 6];
 
 
 
@@ -62,14 +25,12 @@ allregimes = [];
 for i = 1:numel(animalModeInfo.K)
     % load file
     K = animalModeInfo.K(i);
-    version = sprintf('121821bK%d', K);
+    version = '022322_Murat';
     opts.rootdir = fullfile(paths.blockhmmfitpath, version);
 
-    if animalModeInfo.K(i) == 6
-        classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v4.mat'));
-    else
-        classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v1.mat'));
-    end
+    
+    classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v1.mat'));
+    
     assert(numel(classification_info_files) == 1);
     load(fullfile(classification_info_files(1).folder, classification_info_files(1).name),...
         'blockhmm_idx', 'statesFlat', 'folders', 'aggparams_native');
@@ -139,11 +100,11 @@ for i = 1:numel(animalModeInfo.K)
     animalinfo(i).zclassified = zclassified_splits;
     animalinfo(i).classes = sort(statesFlat_extracted);
     
-    filename = fullfile(paths.figpath, 'hmmblockFigs/transmat_animals/',...
-        sprintf('%s_transmat_tsne_021322b_Nmodes.pdf', animal_name));
-    if ~exist(filename, 'file')
-        saveas(gcf, filename);
-    end
+%     filename = fullfile(paths.figpath, 'hmmblockFigs/transmat_animals/',...
+%         sprintf('%s_transmat_tsne_021322b_Nmodes.pdf', animal_name));
+%     if ~exist(filename, 'file')
+%         saveas(gcf, filename);
+%     end
     
 end
 
@@ -209,7 +170,7 @@ mymakeaxis('x_label', 'HMM mode', 'y_label', 'Animal', ...
 
 
 %% Plot state evolution profile for each animal
-opts.plotting = 0;
+opts.plotting = 1;
 f = waitbar(0);
 for id = 1:numel(animalinfo)
     waitbar(id / numel(animalinfo), f);
@@ -239,9 +200,9 @@ for id = 1:numel(animalinfo)
             h(i).FaceColor = colors(i,:);
             h(i).ShowBaseLine = 'off';
         end
-        xlim([0.5 xlimmax + 0.5])
+%         xlim([0.5 xlimmax + 0.5])
         ylim([0 1])
-        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction', 'xticks', 0:5:xlimmax)
+        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction')
 %         legend(h(1:5), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Inference-based 4', 'Inference-based 5'}, 'Position', [0.4,0.42,0.1,0.1], ...
 %             'FontSize', 14);
         filename = fullfile(paths.figpath, 'hmmblockFigs/compositions_animals/',...

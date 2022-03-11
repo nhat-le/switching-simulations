@@ -36,6 +36,11 @@ switch project
         out.codepath = '/Users/minhnhatle/Documents/ExternalCode/wftoolbox';
         out.optoImg_path = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/Dec21/Opto Image Extraction';
         out.templates_path = '/Users/minhnhatle/Documents/ExternalCode/wftoolbox/templates';
+        out.keji_path = '/Volumes/KEJI_DATA_1/nhat/processed-WF';
+        out.processed_path = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/';
+        out.surface_path = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/surface_imgs';
+        
+        
         
     otherwise
         error('Unrecognized project. Must be tca or matchingsim')

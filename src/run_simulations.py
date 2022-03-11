@@ -265,6 +265,10 @@ def run_single_agent(idx, idy, params):
 
 if __name__ == '__main__':
     # A systematic simulation of the whole space
+    # params = dict(nblocks=1000, seed=123, pstruct=[5, 40], agenttype='qlearning', world_pr=0.9, world_ps=0.1,
+    #               gamma=np.linspace(0.01, 0.3, 5), eps=np.linspace(0.01, 0.3, 5))
+    # corr_arr = rew_err_sweep(params)
     params = dict(nblocks=1000, seed=123, pstruct=[5, 40], agenttype='qlearning', world_pr=0.9, world_ps=0.1,
-                  gamma=np.linspace(0.01, 0.3, 5), eps=np.linspace(0.01, 0.3, 5))
-    corr_arr = rew_err_sweep(params)
+                  gamma=0.1, eps=0.01)
+
+    Ne, Nr = run_rew_error_simulations(params)

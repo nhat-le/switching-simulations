@@ -20,14 +20,18 @@ def run_and_save(animal, seed, version, version_save, N_iters=3000, num_states=6
     # Load data
     paths = pathsetup('matchingsim')
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
-    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_122221.mat"
+    # fitrangefile = f"{paths['expdatapath']}/102121/fitranges_122221.mat"
+    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_022822_wf.mat"
     if os.path.exists(fitrangefile):
         datarange = smart.loadmat(fitrangefile)
         fitrange = datarange['ranges'][datarange['animals'] == animal][0]
     else:
         raise IOError('File does not exist')
         # fitrange = [6, 10]
-    obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
+    obs, lengths, dirs, fnames, rawchoices, opto = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
+    data = scipy.io.loadmat(filepath)
+    sessnames = [item[0] for item in data['session_names'][0]]
+    sessnames = np.array(sessnames)[fitrange]
 
     # Find the foraging efficiencies of all blocks
     block_lens = []
@@ -64,7 +68,7 @@ def run_and_save(animal, seed, version, version_save, N_iters=3000, num_states=6
     savepath = f"{paths['blockhmmfitpath']}/{version_save}/{animal}_hmmblockfit_{version}_saved_{version_save}.mat"
 
     vars = ['zstates', 'dirs', 'lengths', 'transmat', 'params',
-            'fitrange', 'filepath', 'obs', 'seed', 'hmm_lls', 'effs', 'block_lens', 'block_corrs']
+            'fitrange', 'filepath', 'obs', 'seed', 'hmm_lls', 'effs', 'block_lens', 'block_corrs', 'opto', 'sessnames']
     savedict = make_savedict(vars, locals())
 
     savefile = 1
@@ -85,7 +89,7 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6):
     paths = pathsetup('matchingsim')
     # Load data
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
-    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_122221.mat"
+    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_022822_wf.mat"
 
     if os.path.exists(fitrangefile):
         datarange = smart.loadmat(fitrangefile)
@@ -93,7 +97,7 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6):
     else:
         raise IOError('File does not exist')
         # fitrange = [1,2,3]
-    obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
+    obs, lengths, dirs, fnames, rawchoices,_ = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
 
     # Run the fitting procedure
     obs_dim = obs.shape[1]
@@ -117,17 +121,17 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6):
 
 if __name__ == '__main__':
     seeds = [121, 122, 123, 124, 125]
-    # animals = ['f26', 'f27', 'f29']
+    animals = ['f02']
     # animals = ['e35', 'e46', 'e53', 'e54', 'e56', 'e57', 'f01', 'f02', 'f03', 'f04', 'f11', 'f12',
     #     'fh01', 'fh02', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23']
-    animals = ['f23', 'f02']
-    # version = '012122_Murat'
-    # version_save = '012122_Murat'
-    version = '122221b'
-    version_save = '121821bK3'
+    # animals = ['f23', 'f02']
+    version = '022822_wf'
+    version_save = '022822_wf'
+    # version = '122221b'
+    # version_save = '121821bK3'
     paths = pathsetup('matchingsim')
     files = glob.glob(f"{paths['expdatapath']}/{version}/*_all_sessions_{version}.mat")
-    num_states = 3
+    num_states = 6
     N_iters = 3000
     # animals = ['f01']
     # animals = [file.split('_')[1].split('/')[-1] for file in files]

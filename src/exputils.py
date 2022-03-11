@@ -28,11 +28,15 @@ def get_id_range(filepath):
 def load_session(filepath, id, trialsperblock=15):
     data = scipy.io.loadmat(filepath)
 
+    # print(id)
+
     if len(data['choices_cell'][0][id]) == 0:
         print('empty file:', id)
         return None
     choices = data['choices_cell'][0][id][0].astype('float')
     targets = data['targets_cell'][0][id][0].astype('float')
+    opto = data['opto_cell'][0][id][0].astype('float')
+
 
     # flip choices for targets = 0
     signedtargets = 1 - 2 * targets
@@ -44,6 +48,7 @@ def load_session(filepath, id, trialsperblock=15):
 
     choicearr = split_by_trials(signedchoices, blens, chop='max')[:, :trialsperblock]
     rawchoice = split_by_trials(signedchoices, blens, chop='max')
+    opto = split_by_trials(opto, blens, chop='max')
 
     blocktargets = targets[bpos[1:]]
     # print(f'id = {id}, shape: {choicearr.shape}')
@@ -56,7 +61,7 @@ def load_session(filepath, id, trialsperblock=15):
     # TODO: Decide what to do with nan's that are returned from split_by_trials
     # print(np.sum(np.isnan(choicearr)))
 
-    return choicearr, blocktargets, rawchoice
+    return choicearr, blocktargets, rawchoice, opto
 
 
 def load_multiple_sessions(filepath, idlst, trialsperblock=15):
@@ -68,13 +73,14 @@ def load_multiple_sessions(filepath, idlst, trialsperblock=15):
     choicearrs = [load_session(filepath, id, trialsperblock)[0] for id in tqdm(idlst)]
     blocktargets = [load_session(filepath, id, trialsperblock)[1] for id in tqdm(idlst)]
     rawchoices = [load_session(filepath, id, trialsperblock)[2] for id in tqdm(idlst)]
+    opto = [load_session(filepath, id, trialsperblock)[3] for id in tqdm(idlst)]
     blocktargets = np.hstack(blocktargets)
 
     # return session names
     datasmart = smart.loadmat(filepath)
     filenames = datasmart['session_names'][idlst]
 
-    return np.vstack(choicearrs), [arr.shape[0] for arr in choicearrs], blocktargets, filenames, rawchoices
+    return np.vstack(choicearrs), [arr.shape[0] for arr in choicearrs], blocktargets, filenames, rawchoices, opto
 
 
 def make_savedict(vars, builtin_names):

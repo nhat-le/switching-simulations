@@ -1,3 +1,5 @@
+% script for official paper figures sent on 2.21.2022
+
 paths = pathsetup('matchingsim');
 expfitdate = '121821bK3';
 opts.rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
