@@ -1,4 +1,15 @@
 function [Xmat, y] = make_Xy(choices, outcomes, N, resample)
+% Inputs: choices: array of size Nblocks x T, -1 or 1
+% outcomes: array of size Nblocks x T, -1 or 1
+% N: how many trials back to go for logistic regression
+% resample: if True, will resample from the arrays
+
+assert(max(choices(:)) == 1);
+assert(min(choices(:)) == -1);
+assert(max(outcomes(:)) == 1);
+assert(min(outcomes(:)) == -1);
+
+
 if isempty(N)
     N = 1;
 end

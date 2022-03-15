@@ -25,6 +25,45 @@ def get_id_range(filepath):
 
     return np.arange(id, idend)
 
+
+def load_raw_info_multiple(filepath, idlst):
+    '''
+    Inputs: filepath: a path to the raw data file of a single animal
+    Returns choices, outcomes: two lists containing the choices and
+    outcomes of all the session in the fitrange file
+    '''
+    choices_all = [load_raw_info_single(filepath, id)[0] for id in idlst]
+    outcomes_all = [load_raw_info_single(filepath, id)[1] for id in idlst]
+    return choices_all, outcomes_all
+
+
+def load_raw_info_single(filepath, id):
+    '''
+    Inputs: filepath: a path to the raw data file of a single animal
+    id: id of file to read in the list from the choice structure
+    returns: choices, outcomes: the raw choices and outcomes of the session
+    '''
+    data = scipy.io.loadmat(filepath)
+
+    if len(data['choices_cell'][0][id]) == 0:
+        print('empty file:', id)
+        return None
+
+    choices = data['choices_cell'][0][id][0].astype('float')
+    outcomes = data['feedbacks_cell'][0][id][0].astype('float')
+    targets = data['targets_cell'][0][id][0].astype('float')
+
+    bpos = np.where(np.diff(targets))
+    bpos = np.hstack([-1, bpos[0], len(targets) - 1])
+    blens = np.diff((bpos))
+
+    choicearr = split_by_trials(choices, blens, chop='max')
+    outcomesarr = split_by_trials(outcomes, blens, chop='max')
+
+    return choicearr, outcomesarr
+
+
+
 def load_session(filepath, id, trialsperblock=15):
     data = scipy.io.loadmat(filepath)
 

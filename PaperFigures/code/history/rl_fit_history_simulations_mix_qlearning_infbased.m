@@ -2,7 +2,7 @@
 seed = 124;
 rng(seed);
 Niter = 10;
-Nlogistic = 10;
+Nlogistic = 5;
 Nsubblock = 50;
 
 h = waitbar(0);
@@ -13,30 +13,26 @@ Ball_arr = [];
 Ball_arr1 = [];
 Ball_arr2 = [];
 
-for i = 1:Niter
+for i = 1 :Niter
     % Load the data
     waitbar(i/Niter, h)
     % Qlearning data
     load(sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/pitfalls/qlearning_gamma_0.1_eps0.1_iter%d.mat', ...
         i-1));
-    choiceslst1 = choices;
-    outcomeslst1 = outcomes;
-    choicearr1 = choicearr;
-    outcomearr1 = outcomearr;
+    choicearr1 = choicearr; %0 or 1
+    outcomearr1 = outcomearr; %0 or 1
     
       
     % Inf-based data
-    load(sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/pitfalls/inf-based_psw_0.45_pr0.99_iter%d.mat',...
+    load(sprintf('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/pitfalls/inf-based_psw_0.2_pr0.7_iter%d.mat',...
         i-1));
-    choiceslst2 = choices;
-    outcomeslst2 = outcomes;
-    choicearr2 = choicearr;
-    outcomearr2 = outcomearr;
+    choicearr2 = choicearr; %0 or 1
+    outcomearr2 = outcomearr; %0 or 1
 
     
     % Mixed data
-    choicearrM = mix_arrays(choicearr1, choicearr2, Nsubblock);
-    outcomearrM = mix_arrays(outcomearr1, outcomearr2, Nsubblock);
+    choicearrM = mix_arrays(choicearr1, choicearr2, Nsubblock); %0 or 1
+    outcomearrM = mix_arrays(outcomearr1, outcomearr2, Nsubblock); %0 or 1
     
 
     %RL fitting
@@ -48,13 +44,13 @@ for i = 1:Niter
     biaslst(end+1,:) = [res1(3), res2(3), res(3)];
     
     % Logistic regression
-%     B_all = do_logistic_regression(block, Nlogistic);
-%     B_all1 = do_logistic_regression(block1, Nlogistic);
-%     B_all2 = do_logistic_regression(block2, Nlogistic);
-%     
-%     Ball_arr(end+1,:) = B_all;
-%     Ball_arr1(end+1,:) = B_all1;
-%     Ball_arr2(end+1,:) = B_all2;
+    B_all = do_logistic_regression_flat(choicearrM, outcomearrM, Nlogistic);
+    B_all1 = do_logistic_regression_flat(choicearr1, outcomearr1, Nlogistic);
+    B_all2 = do_logistic_regression_flat(choicearr2, outcomearr2, Nlogistic);
+    
+    Ball_arr(end+1,:) = B_all;
+    Ball_arr1(end+1,:) = B_all1;
+    Ball_arr2(end+1,:) = B_all2;
 
 end
 close(h)
@@ -69,23 +65,30 @@ l = violin(gammalst, ...
 %     'mc','','medc','k' , 'facecolor', statecols(3,:), 'x', [2,4]);
 % ylim([-0.05, 0.1])
 xlim([0 5])
+ylim([0 1])
 mymakeaxis('x_label', '', 'y_label', ...
-    'Inferred learning rate', 'yticks', -0.05:0.05:0.1, 'xticks', [1,2,3], ...
-    'xticklabels', {'Agent 1', 'Agent 2', 'Agent M'}, 'font_size', 20);
+    'Inferred learning rate', 'yticks', 0:0.2:1, 'xticks', [1,2,3], ...
+    'xticklabels', {'Q Agent', 'IB Agent', 'Agent M'}, 'font_size', 20);
 legend('off')
 
 %% Aggregate and plot
 statecols = brewermap(4, 'Set1');
 
-mean1 = -mean(Ball_arr1, 1);
-std1 = std(Ball_arr1, [], 1);
-mean2 = -mean(Ball_arr2, 1);
-std2 = std(Ball_arr2, [], 1);
-meanall = -mean(Ball_arr, 1);
-stdall = std(Ball_arr, [], 1);
+% Normalize the B arrays since their magnitudes are on different scales
+Ball_arr1_norm = Ball_arr1 ./ max(Ball_arr1(:));
+Ball_arr2_norm = Ball_arr2 ./ max(Ball_arr2(:));
+Ball_arr_norm = Ball_arr ./ max(Ball_arr(:));
 
-ymin = -0.2;
-ymax = 0.6;
+
+mean1 = -mean(Ball_arr1_norm, 1);
+std1 = std(Ball_arr1_norm, [], 1);
+mean2 = -mean(Ball_arr2_norm, 1);
+std2 = std(Ball_arr2_norm, [], 1);
+meanall = -mean(Ball_arr_norm, 1);
+stdall = std(Ball_arr_norm, [], 1);
+
+ymin = -5;
+ymax = 15;
 figure;
 subplot(131)
 errorbar(1:Nlogistic, mean1(Nlogistic:-1:1), std1(Nlogistic:-1:1), 'Color', statecols(1,:), 'LineWidth', 1);
@@ -95,7 +98,8 @@ errorbar(1:Nlogistic, meanall(Nlogistic:-1:1), stdall(Nlogistic:-1:1), 'Color', 
 
 ylim([ymin ymax])
 mymakeaxis('x_label', 'Trials', 'y_label', 'Coefficient', 'xytitle', 'Prev. choice',...
-    'xticks', 0:5:10, 'xticklabels', {'0', '-5', '-10'}, 'font_size', 18)
+    'xticks', 0:5:10, 'xticklabels', {'0', '-5', '-10'},...,
+    'yticks', -5:5:15, 'yticklabels', {'-5', '0', '-5', '10', '15'}, 'font_size', 18)
 
 
 
@@ -107,7 +111,9 @@ errorbar(1:Nlogistic, meanall(Nlogistic*2:-1:Nlogistic+1), stdall(Nlogistic*2:-1
 
 ylim([ymin ymax])
 mymakeaxis('x_label', 'Trials', 'y_label', 'Coefficient', 'xytitle', 'Prev. reward',...
-    'xticks', 0:5:10, 'xticklabels', {'0', '-5', '-10'}, 'font_size', 18)
+    'xticks', 0:5:10, 'xticklabels', {'0', '-5', '-10'}, ...
+    'yticks', -5:5:15, 'yticklabels', {'-5', '0', '-5', '10', '15'}, 'font_size', 18)
+
 
 
 
@@ -116,37 +122,38 @@ l1 = errorbar(1:Nlogistic, mean1(end:-1:Nlogistic*2+1), std1(end:-1:Nlogistic*2+
 hold on
 l2 = errorbar(1:Nlogistic, mean2(end:-1:Nlogistic*2+1), std2(end:-1:Nlogistic*2+1), 'Color', statecols(2,:), 'LineWidth', 1);
 l3 = errorbar(1:Nlogistic, meanall(end:-1:Nlogistic*2+1), stdall(end:-1:Nlogistic*2+1), 'Color', statecols(4,:), 'LineWidth', 1);
-
+hline(0, 'k--')
 ylim([ymin ymax])
 mymakeaxis('x_label', 'Trials', 'y_label', 'Coefficient', 'xytitle', 'Prev. choice x reward',...
-    'xticks', 0:5:10, 'xticklabels', {'0', '-5', '-10'}, 'font_size', 18)
-legend([l1, l2, l3], {'Agent 1', 'Agent 2', 'Agent M'}, 'FontSize', 12);
+    'xticks', 0:5:10, 'xticklabels', {'0', '-5', '-10'}, ...
+    'yticks', -5:5:15, 'yticklabels', {'-5', '0', '-5', '10', '15'}, 'font_size', 18);
+legend([l1, l2, l3], {'Q agent', 'IB agent', 'Agent M'}, 'FontSize', 12);
 
 
 %% Figure: heatmap of behavior
 cols = paperaesthetics;
 figure('Position', [440,411,749,387]);
 subplot(131)
-imagesc(1-block1)
+imagesc(outcomearr1(:,1:15))
 colormap(cols.redbluecolormap2);
 ylim([0 1000])
 axis xy
-mymakeaxis('x_label', 'Trials in block', 'y_label', 'Block #', 'xytitle', 'Agent 1',...
+mymakeaxis('x_label', 'Trials in block', 'y_label', 'Block #', 'xytitle', 'Q Agent',...
     'xticks', 0:5:15, 'font_size', 18)
 
 
 subplot(132)
-imagesc(1-block2)
+imagesc(outcomearr2(:,1:15))
 colormap(cols.redbluecolormap2);
 ylim([0 1000])
 axis xy
 
-mymakeaxis('x_label', 'Trials in block', 'y_label', 'Block #', 'xytitle', 'Agent 2',...
+mymakeaxis('x_label', 'Trials in block', 'y_label', 'Block #', 'xytitle', 'IB Agent',...
     'xticks', 0:5:15, 'font_size', 18)
 
 
 subplot(133)
-imagesc(1-block)
+imagesc(outcomearrM(:,1:15))
 colormap(cols.redbluecolormap2);
 ylim([0 1000])
 axis xy
@@ -209,7 +216,7 @@ end
 function mixedarr = mix_arrays(arr1, arr2, Nsubblock)
 % arr1 and arr2 should have the same size
 % Nblocks x T
-% Create another array with Nblocks x T by mixing arr1 and arr2
+% Returns another array with Nblocks x T by mixing arr1 and arr2
 % in sub-blocks of lengths given by Nsubblock
 
 [Nblocks1, T1] = size(arr1);
