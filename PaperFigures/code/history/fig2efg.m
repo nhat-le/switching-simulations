@@ -2,7 +2,7 @@
 seed = 124;
 rng(seed);
 Niter = 10;
-Nlogistic = 5;
+Nlogistic = 15;
 Nsubblock = 50;
 
 h = waitbar(0);

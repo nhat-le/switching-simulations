@@ -81,20 +81,21 @@ for i = 1:4
     % figure;
     % subplot(121)
     cmap = brewermap(6, 'Set1');
+    cmap = cmap([2,1,5,6,4,3],:);
 %     cmap = brewermap(12, 'Paired');
 %     cmap = cmap(1:2:end,:);
 %     cmap = cmap([1, 3, 4, 5, 2, 6],:); %permute to align with MATLAB default..
     % cmap = [cmap; 0.2 0.2 0.2];
-    h = produce_heatmap(idxIB, prewlst, pswitchlst, 'clim', [0.5 Nclust+1.5], 'legendname', 'Performance regime', ...
+    h = produce_heatmap(idxIB, prewlst, pswitchlst, 'clim', [0.5 Nclust+0.5], 'legendname', 'Performance regime', ...
         'x_label', '$P_{rew}$', 'y_label', '$P_{switch}$', 'ytickvalues', 0:0.1:0.4, 'cmap', cmap, 'limits', [0.5, Nclust + 0.5]);
-    filename = sprintf('%s/perfRegimeIB_common_prob%.1f-%s.pdf', opts.savepath, 1-probs(i), currdate);
+%     filename = sprintf('%s/perfRegimeIB_common_prob%.1f-%s.pdf', opts.savepath, 1-probs(i), currdate);
 %     if ~exist(filename, 'file')
 %         saveas(gcf, filename);
 %     end
 
-    produce_heatmap(idxQ, epslst, gammalst, 'clim', [0.5 Nclust+1.5], 'legendname', 'Performance regime', ...
+    produce_heatmap(idxQ, epslst, gammalst, 'clim', [0.5 Nclust+0.5], 'legendname', 'Performance regime', ...
         'x_label', '$\epsilon$', 'y_label', '$\gamma$', 'cmap', cmap, 'limits', [0.5, Nclust + 0.5]);
-    filename = sprintf('%s/perfRegimeQ_common_prob%.1f-%s.pdf', opts.savepath, 1-probs(i), currdate);
+%     filename = sprintf('%s/perfRegimeQ_common_prob%.1f-%s.pdf', opts.savepath, 1-probs(i), currdate);
 %     if ~exist(filename, 'file')
 %         saveas(gcf, filename);
 %     end
@@ -103,63 +104,7 @@ end
 
 
 
-%% Feature characterization
-figure('Position', [626,401,721,353]);
-hold on
-paperaesthetics;
-% colors = brewermap(6, 'BuGn');
-colors = brewermap(6, 'Set1');
-xvals = linspace(-0.15, 0.15, Nclust);
-
-plottype = {'Efficiency', 'Lapse', 'Slope', 'Offset'};
-k = 4;
-
-handles = [];
-for i = 1:numel(meansAll)
-    coltouse = colors(i,:);
-    
-    means = meansAll{i};
-    if k == 4
-        means = -means;
-    end
-    stds = stdsAll{i};
-    h = errorbar((1:Nclust) + xvals(i)', means(:,k), stds(:,k), 'o-', 'MarkerFaceColor', coltouse,...
-    'LineWidth', 0.75, 'MarkerEdgeColor', coltouse, 'Color', coltouse);
-    handles(i) = h;
-end
-
-switch k
-    case 1
-        ylim([0.5 1])
-        mymakeaxis('x_label', 'Class', 'y_label', plottype{k}, 'xticks', 1:Nclust, 'yticks', 0.5:0.1:1)
-
-    case 2
-        ylim([0 0.5])
-        mymakeaxis('x_label', 'Class', 'y_label', plottype{k}, 'xticks', 1:Nclust, 'yticks', 0:0.1:0.5)
-
-    case 3
-        ylim([0 3.3])
-        mymakeaxis('x_label', 'Class', 'y_label', plottype{k}, 'xticks', 1:Nclust, 'yticks', 0:1:3)
-    
-    case 4
-        ylim([0 14])
-        mymakeaxis('x_label', 'Class', 'y_label', plottype{k}, 'xticks', 1:Nclust)
-    
-        
-end
-        
-if k < 4
-    l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.3766 0.7337 0.0749 0.1827]);
-    l.Title.String = 'Probability';
-    l.Color = 'none';
-else
-    l = legend(handles, {'1', '0.9', '0.8', '0.7'});
-    l.Title.String = 'Probability';
-    l.Color = 'none';
-    
-end
-
-%% Feature characterization v2 (grouped by clusters)
+%% Feature characterization (Fig. 6a)
 probs = [0 0.1 0.2 0.3];
 figure('Position', [626,401,721,353]);
 hold on
@@ -172,7 +117,7 @@ Nprobs = numel(meansAll);
 xvals = linspace(-0.015, 0.015, Nclust);
 
 plottype = {'Efficiency', 'Lapse', 'Slope', 'Offset'};
-k = 4;
+k = 4; % Change this to k = 1,2,3,4 for different panels in Fig. 6a
 
 handles = [];
 
@@ -227,99 +172,99 @@ end
 
 
 %% Decoding analysis (all probabilities)
-opts.reps = 20;
-opts.method = 'knn';
-opts.nNeighbors = 5;
-[counts_allprob1, Mdls1] = do_decoding(1, res1new, opts);
-[counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
-[counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
-[counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
-
-savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
-filename = 'decoding_common_101421_withknnMdl.mat';
-savename = fullfile(savedir, filename);
-% if ~exist(savename, 'file')
-%     save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
-%         'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
-% end
-%% Plot decoding accuracy, grouped by class
-% load('decoding_common_092821.mat');
-counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
-% colors = brewermap(6, 'BuGn');
-colors = brewermap(6, 'Set1');
-figure;
-hold on
-for probi = 1:numel(counts_all)
-    allprob = counts_all{probi};
-    means = [];
-    stds = [];
-    coltouse = colors(probi,:);
-    Nclust = size(allprob{1}, 1);
-    for i = 1:Nclust
-        perf_clusti = cellfun(@(x) find_sensitivity(x, i), allprob);
-        means(i) = mean(perf_clusti);
-        stds(i) = std(perf_clusti);
-    end
-
-
-    h = errorbar(1:Nclust, means, stds, 'o', 'LineWidth', 0.75, ...
-        'MarkerEdgeColor', coltouse, 'Color', coltouse);
-    handles(probi) = h;
-    plot(1:Nclust, means, 'Color', coltouse, 'LineWidth', 0.75);
-%     plot(mapvals{probi}, means, 'LineWidth', 2);
-end
-
-mymakeaxis('x_label', 'Class', 'y_label', 'Decoding accuracy')
-l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.46,0.41,0.12,0.19]);
-l.FontSize = 12;
-l.Title.String = 'Probability';
-l.Title.FontSize = 12;
-l.Color = 'none';
-
-%% Plot decoding accuracy, grouped by prob
-% load('decoding_common_092821.mat');
-counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
-% colors = brewermap(6, 'BuGn');
-colors = brewermap(6, 'Set1');
-colors = colors([2,1,5,4,3],:); %permute to align with MATLAB default..
-
-
-Nprobs = numel(counts_all);
-Nclust = size(counts_all{1}{1}, 1);
-figure;
-hold on
-
-
-for k = 1:Nclust
+% opts.reps = 20;
+% opts.method = 'knn';
+% opts.nNeighbors = 5;
+% [counts_allprob1, Mdls1] = do_decoding(1, res1new, opts);
+% [counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
+% [counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
+% [counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
+% 
+% savedir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/simdata';
+% filename = 'decoding_common_101421_withknnMdl.mat';
+% savename = fullfile(savedir, filename);
+% % if ~exist(savename, 'file')
+% %     save(savename, 'counts_allprob1', 'counts_allprob09', 'counts_allprob08',...
+% %         'counts_allprob07', 'Mdls1', 'Mdls09', 'Mdls08', 'Mdls07')
+% % end
+% %% Plot decoding accuracy, grouped by class
+% % load('decoding_common_092821.mat');
+% counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
+% % colors = brewermap(6, 'BuGn');
+% colors = brewermap(6, 'Set1');
+% figure;
+% hold on
+% for probi = 1:numel(counts_all)
 %     allprob = counts_all{probi};
-    means = [];
-    stds = [];
-    coltouse = colors(k,:);
-    
-    means = [];
-    stds = [];
-    for i = 1:Nprobs
-        perf_clusti = cellfun(@(x) find_sensitivity(x, k), counts_all{i});
-        means(i) = mean(perf_clusti);
-        stds(i) = std(perf_clusti);
-    end
-
-
-    h = errorbar(0.7:0.1:1, means, stds, 'o-', 'LineWidth', 0.75, ...
-        'MarkerEdgeColor', coltouse, 'Color', coltouse);
-    handles(k) = h;
+%     means = [];
+%     stds = [];
+%     coltouse = colors(probi,:);
+%     Nclust = size(allprob{1}, 1);
+%     for i = 1:Nclust
+%         perf_clusti = cellfun(@(x) find_sensitivity(x, i), allprob);
+%         means(i) = mean(perf_clusti);
+%         stds(i) = std(perf_clusti);
+%     end
+% 
+% 
+%     h = errorbar(1:Nclust, means, stds, 'o', 'LineWidth', 0.75, ...
+%         'MarkerEdgeColor', coltouse, 'Color', coltouse);
+%     handles(probi) = h;
 %     plot(1:Nclust, means, 'Color', coltouse, 'LineWidth', 0.75);
-%     plot(mapvals{probi}, means, 'LineWidth', 2);
-end
-ylim([0.5, 1])
-
-mymakeaxis('x_label', 'Probability', 'y_label', 'Precision', 'xticks', [0.7 0.8 0.9 1.0],...
-            'xticklabels', {'100-0', '90-10', '80-20', '70-30'})% l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.46,0.41,0.12,0.19]);
-l = legend(handles, {'1', '2', '3', '4', '5'}, 'Position', [0.46,0.41,0.12,0.19]);
-l.FontSize = 12;
-l.Title.String = 'Class';
-l.Title.FontSize = 12;
-l.Color = 'none';
+% %     plot(mapvals{probi}, means, 'LineWidth', 2);
+% end
+% 
+% mymakeaxis('x_label', 'Class', 'y_label', 'Decoding accuracy')
+% l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.46,0.41,0.12,0.19]);
+% l.FontSize = 12;
+% l.Title.String = 'Probability';
+% l.Title.FontSize = 12;
+% l.Color = 'none';
+% 
+% %% Plot decoding accuracy, grouped by prob
+% % load('decoding_common_092821.mat');
+% counts_all = {counts_allprob1, counts_allprob09, counts_allprob08, counts_allprob07};
+% % colors = brewermap(6, 'BuGn');
+% colors = brewermap(6, 'Set1');
+% colors = colors([2,1,5,4,3],:); %permute to align with MATLAB default..
+% 
+% 
+% Nprobs = numel(counts_all);
+% Nclust = size(counts_all{1}{1}, 1);
+% figure;
+% hold on
+% 
+% 
+% for k = 1:Nclust
+% %     allprob = counts_all{probi};
+%     means = [];
+%     stds = [];
+%     coltouse = colors(k,:);
+%     
+%     means = [];
+%     stds = [];
+%     for i = 1:Nprobs
+%         perf_clusti = cellfun(@(x) find_sensitivity(x, k), counts_all{i});
+%         means(i) = mean(perf_clusti);
+%         stds(i) = std(perf_clusti);
+%     end
+% 
+% 
+%     h = errorbar(0.7:0.1:1, means, stds, 'o-', 'LineWidth', 0.75, ...
+%         'MarkerEdgeColor', coltouse, 'Color', coltouse);
+%     handles(k) = h;
+% %     plot(1:Nclust, means, 'Color', coltouse, 'LineWidth', 0.75);
+% %     plot(mapvals{probi}, means, 'LineWidth', 2);
+% end
+% ylim([0.5, 1])
+% 
+% mymakeaxis('x_label', 'Probability', 'y_label', 'Precision', 'xticks', [0.7 0.8 0.9 1.0],...
+%             'xticklabels', {'100-0', '90-10', '80-20', '70-30'})% l = legend(handles, {'1', '0.9', '0.8', '0.7'}, 'Position', [0.46,0.41,0.12,0.19]);
+% l = legend(handles, {'1', '2', '3', '4', '5'}, 'Position', [0.46,0.41,0.12,0.19]);
+% l.FontSize = 12;
+% l.Title.String = 'Class';
+% l.Title.FontSize = 12;
+% l.Color = 'none';
 
 
 

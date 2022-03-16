@@ -1,9 +1,9 @@
 %% Plotting the performance
 addpath('/Users/minhnhatle/Dropbox (MIT)/Jazayeri/NoisyMutualInhibition/PlotTools')
-prob = 0.1;
+prob = 0;
 type = 'infbased';
 
-expdate = '092321';
+expdate = '121021';
 rootdir = fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/simdata/', expdate);
 
 if strcmp(type, 'qlearning')
@@ -110,30 +110,30 @@ end
 
 
 %% Plot correlation fits
-pAarr = ParamsA(:,12);
-pBarr = ParamsB(:,12);
-xarr = 1:20;
-colors = linspace(0.3, 1, 5);
-
-figure;
-lines = [];
-labels = {};
-for id = 1:5
-%     subplot(2,4,id)
-    i = 1 + (id - 1) * 4;
-    A = pAarr(i);
-    B = pBarr(i);
-    yarr = B - B*exp(-A*xarr);
-    lines(id) = plot(xarr, yarr, 'Color', [0 0 colors(id)]);
-    labels{id} = sprintf('%.2f', gammalst(i));
-    hold on
-    ylim([0, 10])
-%     title(sprintf('gamma = %.2f', gammalst(i)));
-end
-
-mymakeaxis('x_label', 'Number of rewards', 'y_label', 'Number of errors');
-c = legend(lines, labels);
-c.Title.String = '\gamma';
+% pAarr = ParamsA(:,12);
+% pBarr = ParamsB(:,12);
+% xarr = 1:20;
+% colors = linspace(0.3, 1, 5);
+% 
+% figure;
+% lines = [];
+% labels = {};
+% for id = 1:5
+% %     subplot(2,4,id)
+%     i = 1 + (id - 1) * 4;
+%     A = pAarr(i);
+%     B = pBarr(i);
+%     yarr = B - B*exp(-A*xarr);
+%     lines(id) = plot(xarr, yarr, 'Color', [0 0 colors(id)]);
+%     labels{id} = sprintf('%.2f', gammalst(i));
+%     hold on
+%     ylim([0, 10])
+% %     title(sprintf('gamma = %.2f', gammalst(i)));
+% end
+% 
+% mymakeaxis('x_label', 'Number of rewards', 'y_label', 'Number of errors');
+% c = legend(lines, labels);
+% c.Title.String = '\gamma';
 
 
 % close all

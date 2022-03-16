@@ -32,27 +32,6 @@ set(gca, 'box', 'off')
 set(gca, 'color', 'none')
 
 
-%% Matching agent
-load(fullfile(paths.simdatapath, 'schematic/matching-sim.mat'));
-figure('Position', [0 0 450 250]);
-trialid = 1:numel(choices);
-plot(trialid(rewards == 1), choices(rewards == 1), 'o', 'MarkerFaceColor', 'b')
-
-hold on
-plot(trialid(rewards == 0), choices(rewards == 0), 'o', 'MarkerFaceColor', 'r')
-
-l = vline(31, 'k--');
-set(l, 'LineWidth', 1.5);
-l1 = plot(r0/7, 'b', 'LineWidth', 1.5);
-l2 = plot(r1/7, 'k', 'LineWidth', 1.5);
-legend([l1 l2], {'r_0', 'r_1'})
-title('Local matching, \tau = 5')
-
-xlabel('Trials')
-ylabel('Choice or Probability')
-set(gca, 'FontSize', 16)
-
-
 %% Inference agent
 paths = pathsetup('matchingsim');
 

@@ -1,7 +1,7 @@
-load corr_arr_simulations_020322.mat
+%% rho variations on Q-learning and inference-based spaces (Fig. 2d)
 
-%smooth the Q map
-% imsmooth = imfilter(corr_arr_Q);
+load('data/corr_arr_simulations.mat')
+
 kernel = ones(8) / 64;
 imsmoothQ = conv2(corr_arr_Q, kernel, 'same');
 imsmoothIB = conv2(corr_arr_ib, kernel, 'same');
@@ -24,11 +24,8 @@ plot([0.55], [0.02],  'k*', 'LineWidth', 1, 'MarkerSize', 30)
 
 
 
-%% Plot the exemplar agents
-% load('Qlearning_agent3_rew_err_correlations.mat')
-% load('Qlearning_agent4_rew_err_correlations.mat')
-
-load('infbased_agent1_rew_err_correlations.mat')
+%% Plot the correlations (Fig. 2a,b right panels + Fig. 2c)
+load('data/infbased_agent1_rew_err_correlations.mat')
 
 % scatter(Nr, Ne, 'o', 'MarkerFaceAlpha', 0.2, 'MarkerFaceColor', 'b')
 figure;
@@ -46,68 +43,9 @@ plot(xvals, preds, 'LineWidth', 2, 'Color', cols.bluecol);
 mymakeaxis('x_label', 'Num. rewards', 'y_label', 'Num. errors',...
     'xticks', 0:5:15, 'font_size', 22)
 
-%% Schematic figure
-load rew_err_correlations_schematic.mat
 
-figure('Position', [440,487,679,311]);
-subplot(121)
-q1toplot_b1 = [q1lst(4,:) q1lst(5,:)];
-q1toplot_b1 = q1toplot_b1(~isnan(q1toplot_b1));
-
-choicestoplot_b1 = [choicelst(4,:), choicelst(5,:)];
-choicestoplot_b1 = choicestoplot_b1(~isnan(choicestoplot_b1));
-
-N1a = sum(~isnan(choicelst(4,:)));
-N1b = sum(~isnan(choicelst(5,:)));
-targetside = [ones(1, N1a) zeros(1, N1b)];
-outcomes = targetside == choicestoplot_b1;
-idx = 1:numel(outcomes);
-
-cols = paperaesthetics;
-plot(q1toplot_b1)
-hold on
-plot(idx(outcomes == 1), choicestoplot_b1(outcomes == 1), 'o', ...
-    'MarkerFaceColor', cols.bluecol, 'MarkerEdgeColor', cols.bluecol)
-plot(idx(outcomes == 0), choicestoplot_b1(outcomes == 0), 'x', ...
-    'Color', cols.redcol)
-
-vline(N1a)
-xlim([0, 60])
-ylim([0, 1])
-
-mymakeaxis('x_label', 'Trials', 'y_label', 'Choice or Value', 'xticks', 0:20:60)
-
-% example block 2
-subplot(122)
-q1toplot_b2 = [q1lst(8,:) q1lst(9,:)];
-q1toplot_b2 = q1toplot_b2(~isnan(q1toplot_b2));
-
-choicestoplot_b2 = [choicelst(8,:), choicelst(9,:)];
-choicestoplot_b2 = choicestoplot_b2(~isnan(choicestoplot_b2));
-
-N2a = sum(~isnan(choicelst(8,:)));
-N2b = sum(~isnan(choicelst(9,:)));
-targetside = [ones(1, N2a) zeros(1, N2b)];
-outcomes = targetside == choicestoplot_b2;
-idx = 1:numel(outcomes);
-
-cols = paperaesthetics;
-plot(q1toplot_b2)
-hold on
-plot(idx(outcomes == 1), choicestoplot_b2(outcomes == 1), 'o', ...
-    'MarkerFaceColor', cols.bluecol, 'MarkerEdgeColor', cols.bluecol)
-plot(idx(outcomes == 0), choicestoplot_b2(outcomes == 0), 'x', ...
-    'Color', cols.redcol)
-
-vline(N2a)
-xlim([0, 60])
-ylim([0, 1])
-
-mymakeaxis('x_label', 'Trials', 'y_label', 'Choice or Value', 'xticks', 0:20:60)
-
-
-%% Plot longer-range blocks to illustrate correlation
-load rew_err_correlations_schematic_qlearning.mat
+%% Plot the exemplar agent Q-learning (Fig. 2a left panel)
+load data/rew_err_correlations_schematic_qlearning.mat
 
 % figure('Position', [440,487,679,311]);
 targets = mod(0:size(choicelst, 1)-1, 2);
@@ -159,8 +97,8 @@ xlim([0 170])
 mymakeaxis('x_label', 'Trials', 'y_label', 'Choice or Value', 'xticks', 0:50:150)
 legend([l1, l2], {'q_R', 'q_L'}, 'FontSize', 16);
 
-%% Same plot for inf-based agent
-load rew_err_correlations_schematic_infbased.mat
+%% Plot the exemplar agent inf-based (Fig. 2b left panel)
+load data/rew_err_correlations_schematic_infbased.mat
 
 % figure('Position', [440,487,679,311]);
 targets = mod(0:size(choicelst, 1)-1, 2);

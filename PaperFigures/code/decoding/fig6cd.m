@@ -3,7 +3,7 @@
 paths = pathsetup('matchingsim');
 % Load raw data
 opts = struct;
-opts.version = '092321';
+opts.version = '092321'; %version used to do the segmentation
 
 [res1, opts_out] = load_and_run_tsne(0, opts);
 res2 = load_and_run_tsne(0.1, opts);
@@ -100,16 +100,11 @@ l2 = errorbar(model_types, MCCs_means , MCCs_stds, 'o', 'MarkerFaceColor', cols.
 mymakeaxis('x_label', 'k Neighbors', 'y_label', 'Decoding performance', 'xticks', model_types,...
     'font_size', 20);
 leg = legend([l1, l2], {'Accuracy', 'Matthews correlation'}, 'FontSize', 16);
-% leg.String.FontSize
 
-% leg.S
-
-% [counts_allprob09, Mdls09] = do_decoding(0.9, res2new, opts);
-% [counts_allprob08, Mdls08] = do_decoding(0.8, res3new, opts);
-% [counts_allprob07, Mdls07] = do_decoding(0.7, res4new, opts);
 
 
 %% Plot confusion matrix
+figure;
 idbest = 12;
 cm = confusionchart(confusions_all{idbest}{1}, {'Q1', 'Q2', 'Q3', 'Q4', 'IB5', 'IB6'});
 sortClasses(cm, {'Q1', 'Q2', 'Q3', 'Q4', 'IB5', 'IB6'});
@@ -120,6 +115,7 @@ cm.Normalization = 'row-normalized';
 
 
 %%
+opts.save_model = 1;
 savedir = paths.svmmodelpath;
 filename = sprintf('decoding_common_%s_with%sMdl_knn_svm_v12_tsne.mat', opts.svm_version, opts.method);
 notes = 'knn models with k = 2:2:30';
@@ -131,7 +127,7 @@ if opts.save_model
         save(savename, 'MCCs_means', 'MCCs_stds', 'Models', 'notes', 'MCCs_all', 'model_types', 'seed');
         fprintf('File saved!\n');
     else
-        error('File exists')
+        fprintf('File exists, skipping save...\n')
     end
 end
 

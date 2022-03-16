@@ -1,6 +1,6 @@
 paths = pathsetup('matchingsim');
 
-opts.filedir = fullfile(paths.simdatapath, '07232021/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat');
+opts.filedir = fullfile(paths.simdatapath, 'deprecated/07232021/EGreedyQLearningAgent-withCorr-prob0.00to1.00-072321.mat');
 load(opts.filedir);
 rng(124);
 

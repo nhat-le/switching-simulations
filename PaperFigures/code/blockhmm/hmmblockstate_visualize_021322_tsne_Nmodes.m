@@ -12,6 +12,7 @@ opts.weighted = 1;
 opts.python_assist = 0;
 opts.effmethod = 'sim';
 opts.savefile = 0;
+opts.showplot = 0;
 % opts.model_name = 'decoding_common_010522_withsvmMdl_knn_svm_v10_tsne.mat';
 opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10_tsne.mat';
 opts.svmmodelpath = paths.svmmodelpath;
@@ -137,18 +138,19 @@ end
 statefrac = composition ./ sum(composition, 2);
 cols = paperaesthetics;
 
-
-figure('Position', [440,423,736,375]);
-h = bar(statefrac,'stacked');
-for i = 1:6
-    h(i).FaceColor = cols.colors(i,:);
-    h(i).ShowBaseLine = 'off';
+if opts.showplot
+    figure('Position', [440,423,736,375]);
+    h = bar(statefrac,'stacked');
+    for i = 1:6
+        h(i).FaceColor = cols.colors(i,:);
+        h(i).ShowBaseLine = 'off';
+    end
+    % xlim([0.5 4.5])
+    mymakeaxis('x_label', 'HMM mode', 'y_label', 'Fraction', 'xticks', 1:6)
+    l = legend(h(1:6), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Q-learning 4', 'Inference-based 5',...
+        'Inference-based 6'}, 'Position', [0.4,0.42,0.1,0.1], ...
+        'FontSize', 14);
 end
-% xlim([0.5 4.5])
-mymakeaxis('x_label', 'HMM mode', 'y_label', 'Fraction', 'xticks', 1:6)
-l = legend(h(1:6), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Q-learning 4', 'Inference-based 5',...
-    'Inference-based 6'}, 'Position', [0.4,0.42,0.1,0.1], ...
-    'FontSize', 14);
 
 
 %% Save if requested

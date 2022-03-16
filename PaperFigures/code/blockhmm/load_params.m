@@ -1,4 +1,5 @@
 function [params, aggmeans, aggparams] = load_params(folders, opts)
+    assert(numel(folders) > 0);
     effmethod = opts.effmethod;
     filter_blocks_by_lengths = opts.filter_blocks_by_lengths;
     weighted = opts.weighted;

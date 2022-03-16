@@ -34,6 +34,9 @@ choice3 = [0 rand(1, numel(xvals)) < prob3];
 
 %% Show
 xvals = 0:Nsteps;
+cols = paperaesthetics;
+bluecol = cols.bluecol;
+redcol = cols.redcol;
 if plottype
     plot(xvals(choice1 == 1), 1, 'o', 'MarkerFaceColor', bluecol, 'MarkerEdgeColor', bluecol,...
         'MarkerSize', 10);

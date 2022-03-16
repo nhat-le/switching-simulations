@@ -1,3 +1,4 @@
+% Averaging results from two runs
 folder = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/blockhmmfit/K_selection';
 load(fullfile(folder, 'blockhmm_validation_021222.mat'));
 

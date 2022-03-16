@@ -3,27 +3,6 @@
 %% classify and visualize state distributions
 paths = pathsetup('matchingsim');
 
-
-% Animal and mode information
-% animalModeInfo = struct;
-% animalModeInfo.animals = {'e53', 'f17', 'f20', 'f23',... %K = 2
-%     'e35',... %K = 3
-%     'e46', 'f16', 'f04',... %K = 4
-%     'e57', 'fh01', 'fh02',... %K = 5
-%     'e54', 'e56', 'f11', 'f21', 'f01', 'f02', 'f03', 'f12', 'f22', 'fh03'}; %K = 6
-% 
-% animalModeInfo.K = [2 2 2 2 3 4 4 4 5 5 5 6 6 6 6 6 6 6 6 6 6];
-
-% without gcamp6f animals
-% animalModeInfo.animals = {'e53', 'f17', 'f20',... %K = 2
-%     'e35',... %K = 3
-%     'e46', 'f16',... %K = 4
-%     'e57', 'fh01', 'fh02',... %K = 5
-%     'e54', 'e56', 'f11', 'f21', 'f01', 'f02', 'f12', 'fh03'}; %K = 6
-% 
-% animalModeInfo.K = [2 2 2 3 4 4 5 5 5 6 6 6 6 6 6 6 6];
-
-
 % averaging two seeds
 animalModeInfo = struct;
 animalModeInfo.animals = {'fh03',...

@@ -14,7 +14,7 @@ opts.clipmode = 2;
 opts = makeparams_tsne(opts);
 
 % script operations
-opts.save = 0;
+opts.save = 1;
 opts.plotfeatures = 0;
 opts.show_trans_functions = 0;
 opts.show_refs = 0; %whether to show ref markers
