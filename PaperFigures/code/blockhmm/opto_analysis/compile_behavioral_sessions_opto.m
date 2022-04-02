@@ -1,23 +1,23 @@
-
-% animals = {'f01', 'f02', 'f03', 'f04', 'f11', 'f12', 'E35', 'E40',...
-%     'fh01', 'fh02', 'f05', 'e53', 'fh03', 'f16', 'f17', 'f20', 'f21', 'f22', 'f23'};
-% % animals = {'f25'};
-% animals = {'e54', 'e57', 'f01', 'f02', 'f03', 'f04', 'f25'};
-animals = {'f26'};
-
-
-% version = '022822_wf';
-% For paper
-version = '040122';
-paths = pathsetup('matchingsim');
-opts.savefile = 0;
-
+animals = {'f26', 'f27', 'f29', 'f32'};
+opts.version = '040122';
+paths = pathsetup('opto');
+opts.savefile = 1;
 
 f = waitbar(0);
+
+% copy the fitrange file if not exists
+savefolder = fullfile(paths.opto_expdatapath, opts.version);
+fitrangepath = sprintf('%s/fitranges_%s.mat', savefolder, opts.version);
+if ~exist(fitrangepath, 'file')
+    % copy default fitrange file
+    fprintf('Failed to find fitrange.mat file, copying default file...\n')
+    copyfile(paths.default_fitrange, fitrangepath); 
+end
+
 for i = 1:numel(animals)
     waitbar(i/numel(animals), f, sprintf('Processing animal %s', animals{i}));
-    opts.root = fullfile(paths.rigboxpath, animals{i});
-    opts.savepath = fullfile(paths.expdatapath, version, sprintf('%s_all_sessions_%s.mat', animals{i}, version));
+    opts.root = fullfile(paths.opto_rigboxpath, animals{i});
+    opts.savepath = fullfile(paths.opto_expdatapath, opts.version, sprintf('%s_all_sessions_%s.mat', animals{i}, opts.version));
     process_animal(animals{i}, opts); 
 end
 close(f);
@@ -25,7 +25,15 @@ close(f);
 
 function process_animal(animal, opts)
 fprintf('****** Processing animal %s...*******\n', animal);
-paths = pathsetup('matchingsim');
+
+% check if there is a fitrange file in the folder
+savefolder = fileparts(opts.savepath);
+fitrangepath = sprintf('%s/fitranges_%s.mat', savefolder, opts.version);
+if ~exist(fitrangepath, 'file')
+    error('Failed to find fitrange.mat file')
+end
+
+
 root = opts.root;
 folders = dir(fullfile(root, '202*'));
 choices_cell = {};
@@ -75,10 +83,31 @@ end
 
 %%
 if opts.savefile && ~exist(opts.savepath, 'file')
+    % Create folder if not exists
+    if ~exist(fileparts(opts.savepath), 'dir')
+        mkdir(fileparts(opts.savepath))
+    end
+    
     save(opts.savepath, 'session_names', 'choices_cell', 'targets_cell', 'maxdelays', 'probflags', 'feedbacks_cell',...
         'opto_cell', 'sesscounts_cell');
     fprintf('File saved!\n');
-else
+    
+    
+    % update the fitranges file
+    load(fitrangepath, 'ranges', 'animals');
+    nsess = numel(choices_cell);
+       
+    idx = find(contains(animals, lower(animal)));
+    assert(numel(idx) == 1);
+    if nsess - 1 > ranges{idx}(end)
+        curr_range = ranges{idx};
+        nextras = nsess - curr_range(end) - 1;
+        ranges{idx}(end + 1 : end + nextras) = curr_range(end) + 1 : nsess - 1;
+        save(fitrangepath, 'ranges', 'animals');
+    end
+
+    
+elseif opts.savefile
     fprintf('Skipping save, file exists...\n');
 end
 

@@ -30,6 +30,10 @@ def pathsetup(project):
         out['rawdatapath'] = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/raw/extracted'
         out['tcamatpath'] = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/processed/tca-factors'
 
+    elif project == 'opto':
+        out['opto_rigboxpath'] = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/LocalExpData/'
+        out['opto_expdatapath'] = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/optodata'
+
     else:
         raise ValueError('invalid project, must be tca or matchingsim')
 

@@ -1,4 +1,4 @@
-# from src.utils import simulate_rew_error_correlations, make_switching_world #fit_expfun2, make_switching_world, find_LR_transition_fit, simulate_rew_error_correlations
+from src.utils import simulate_rew_error_correlations, fit_expfun2, simulate_rew_error_correlations
 import src.utils
 from src.worldModels import *
 from src.agents import *
@@ -6,7 +6,7 @@ import numpy as np
 import ssm
 import tqdm
 import statsmodels.api as sm
-from tqdm.notebook import tqdm
+# from tqdm.notebook import tqdm
 
 
 

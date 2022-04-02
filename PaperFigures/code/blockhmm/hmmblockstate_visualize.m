@@ -1,7 +1,7 @@
 % script for official paper figures sent on 2.21.2022
 
 paths = pathsetup('matchingsim');
-expfitdate = '121821bK3';
+expfitdate = '121821bK6';
 opts.rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));

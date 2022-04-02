@@ -21,7 +21,7 @@ def run_and_validate(animal, seed, params):
     # fitrangefile = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/expdata/102121/fitranges_102121.mat'
     datarange = smart.loadmat(fitrangefile)
     fitrange = datarange['ranges'][datarange['animals'] == animal][0]
-    obs, lengths, dirs, fnames, rawchoices = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
+    obs, lengths, dirs, fnames, rawchoices, _ = load_multiple_sessions(filepath, fitrange, trialsperblock=15)
 
 
     # Run the fitting procedure

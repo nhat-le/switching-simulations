@@ -1,17 +1,33 @@
-% For analyzing of Murat's opto animals (f26, 27, 29, 32) sent on 2.24.2022
+% For official paper figures sent on 2.21.2022
 
 %% classify and visualize state distributions
 paths = pathsetup('matchingsim');
 
-
 % averaging two seeds
 animalModeInfo = struct;
-animalModeInfo.animals = {'f26',...
-    'f27',...
-    'f29',...
-    'f32'};
+animalModeInfo.animals = {'fh03',...
+    'f16',...
+    'f21',...
+    'f12',...
+    'f04',...
+    'e56',...
+    'e35',...
+    'f01',...
+    'e57',...
+    'e53',...
+    'fh02',...
+    'f17',...
+    'f20',...
+    'f03',...
+    'f22',...
+    'f11',...
+    'e46',...
+    'f23',...
+    'fh01',...
+    'f02',...
+    'e54'}; %K = 6
 
-animalModeInfo.K = [6 6 6 6];
+animalModeInfo.K = [6 5 3 6 4 6 3 6 5 2 5 2 6 6 6 6 4 3 4 3 6];
 
 
 
@@ -25,12 +41,14 @@ allregimes = [];
 for i = 1:numel(animalModeInfo.K)
     % load file
     K = animalModeInfo.K(i);
-    version = '022322_Murat';
+    version = sprintf('121821bK%d', K);
     opts.rootdir = fullfile(paths.blockhmmfitpath, version);
 
-    
-    classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v1.mat'));
-    
+    if animalModeInfo.K(i) == 6
+        classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v4.mat'));
+    else
+        classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v1.mat'));
+    end
     assert(numel(classification_info_files) == 1);
     load(fullfile(classification_info_files(1).folder, classification_info_files(1).name),...
         'blockhmm_idx', 'statesFlat', 'folders', 'aggparams_native');
@@ -100,11 +118,11 @@ for i = 1:numel(animalModeInfo.K)
     animalinfo(i).zclassified = zclassified_splits;
     animalinfo(i).classes = sort(statesFlat_extracted);
     
-%     filename = fullfile(paths.figpath, 'hmmblockFigs/transmat_animals/',...
-%         sprintf('%s_transmat_tsne_021322b_Nmodes.pdf', animal_name));
-%     if ~exist(filename, 'file')
-%         saveas(gcf, filename);
-%     end
+    filename = fullfile(paths.figpath, 'hmmblockFigs/transmat_animals/',...
+        sprintf('%s_transmat_tsne_021322b_Nmodes.pdf', animal_name));
+    if ~exist(filename, 'file')
+        saveas(gcf, filename);
+    end
     
 end
 
@@ -200,9 +218,9 @@ for id = 1:numel(animalinfo)
             h(i).FaceColor = colors(i,:);
             h(i).ShowBaseLine = 'off';
         end
-%         xlim([0.5 xlimmax + 0.5])
+        xlim([0.5 xlimmax + 0.5])
         ylim([0 1])
-        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction')
+        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction', 'xticks', 0:5:xlimmax)
 %         legend(h(1:5), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Inference-based 4', 'Inference-based 5'}, 'Position', [0.4,0.42,0.1,0.1], ...
 %             'FontSize', 14);
         filename = fullfile(paths.figpath, 'hmmblockFigs/compositions_animals/',...
@@ -279,19 +297,5 @@ l = legend(lines, {'Q1', 'Q2', 'Q3', 'Q4', 'IB5', 'IB6'});
 l.Title.String = 'Regime';
 l.Title.FontSize = 12;
 l.FontSize = 12;
-
-
-%%
-sline = pad_to_same_length(extracted_all, 1);
-means1 = nanmean(sline, 1);
-
-sline = pad_to_same_length(extracted_all, 4);
-means4 = nanmean(sline, 1);
-
-sline = pad_to_same_length(extracted_all, 5);
-means5 = nanmean(sline, 1);
-
-sline = pad_to_same_length(extracted_all, 6);
-means6 = nanmean(sline, 1);
 
 

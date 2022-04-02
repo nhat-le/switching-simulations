@@ -23,7 +23,7 @@ if ~isfield(opts, 'outliermode'); opts.outliermode = 1; end
 
 if ~isfield(opts, 'datasavepath')
 %     opts.savepath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/decodeFigs';
-    opts.datasavepath = sprintf('%s/%s', paths.svmconfigpath, opts.expfolder);
+    opts.datasavepath = sprintf('%s/%s', paths.decodingconfigpath, opts.expfolder);
 end
 
 if ~isfield(opts, 'figsavepath')

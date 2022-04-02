@@ -1,8 +1,10 @@
-% script for Murat opto animals (f26, 27, 29, 32) made on 2.24.2021
+% script for analysis of opto animals (f26, 27, 29, 32) 
+% modified on 4.2.2022
 
-paths = pathsetup('matchingsim');
-expfitdate = '022322_Murat';
+paths = pathsetup('opto');
+expfitdate = '040122';
 opts.rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
+opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/blockhmmfit/deprecated/022322_Murat';
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
 mdltypes = 1:2;
@@ -14,7 +16,7 @@ opts.effmethod = 'sim';
 opts.savefile = 0;
 % opts.model_name = 'decoding_common_010522_withsvmMdl_knn_svm_v10_tsne.mat';
 opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10_tsne.mat';
-opts.svmmodelpath = paths.svmmodelpath;
+opts.svmmodelpath = paths.decodingmodelpath;
 
 
 [~, aggmeans_native, aggparams_native] = load_params(folders, opts);
@@ -60,7 +62,7 @@ for i = 1:numel(animalModeInfo.K)
     assert(sum(selection) == 1) %make sure one and only one animal blockfit file found
     
     load(fullfile(folders(selection).folder, folders(selection).name), 'zstates', 'params', 'lengths', 'transmat', ...
-        'opto', 'sessnames', 'block_lens');
+        'opto', 'sessnames', 'block_lens', 'obs');
     parts = strsplit(folders(selection).name, '_');
     animal_name = parts{1};
     
@@ -92,6 +94,7 @@ for i = 1:numel(animalModeInfo.K)
     assert(sum(lengths) == numel(zclassified));
     zclassified_splits = mat2cell(zclassified, 1, lengths);
     blocklen_splits = mat2cell(block_lens, 1, lengths);
+    obs_splits = mat2cell(obs, lengths);
     
     
     animalinfo(i).animal = animal_name;
@@ -100,6 +103,7 @@ for i = 1:numel(animalModeInfo.K)
     animalinfo(i).sessnames = sessnames;
     animalinfo(i).opto = cellfun(@(x) find_opto_blocks(x), opto, 'UniformOutput', false);
     animalinfo(i).block_lens = blocklen_splits;
+    animalinfo(i).obs_splits = obs_splits;
 end
 
 
@@ -141,9 +145,9 @@ for id = 1:numel(animalinfo)
 
         filename = fullfile(paths.figpath, 'hmmblockFigs/compositions_animals/',...
             sprintf('%s_training_evolution_tsne_021322b_Nmodes.pdf', animalinfo(id).animal));
-        if ~exist(filename, 'file')
-            saveas(gcf, filename);
-        end
+%         if ~exist(filename, 'file')
+%             saveas(gcf, filename);
+%         end
     end
 end
 % close all
@@ -191,7 +195,7 @@ for animalID = 1:4
     animalinfo(animalID).period = period_all;
 end
 
-savefilename = 'opto_hmm_info_030422b.mat';
+savefilename = 'opto_hmm_info_033022.mat';
 if ~exist(savefilename, 'file')
     save(savefilename, 'opts', 'animalModeInfo', 'folders', 'animalinfo')
     fprintf('File saved!\n');

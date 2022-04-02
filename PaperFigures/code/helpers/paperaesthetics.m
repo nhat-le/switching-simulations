@@ -11,6 +11,10 @@ cols.redbluecolormap2 = [178,24,43; 209,229,240]/ 255;
 
 cols.colors = brewermap(9, 'Set1');
 cols.colors = cols.colors([2,1,5,6,4,3,7,8,9],:);
+
+
+cols.colorsLight = brewermap(6, 'Pastel1');
+cols.colorsLight = cols.colorsLight([2,1,5,6,4,3],:);
 % colors(4,:) = [0,0,0];
 
 end

@@ -1,35 +1,17 @@
-% For official paper figures sent on 2.21.2022
+% For analyzing of Murat's opto animals (f26, 27, 29, 32) sent on 2.24.2022
 
 %% classify and visualize state distributions
 paths = pathsetup('matchingsim');
 
+
 % averaging two seeds
 animalModeInfo = struct;
-animalModeInfo.animals = {'fh03',...
-    'f16',...
-    'f21',...
-    'f12',...
-    'f04',...
-    'e56',...
-    'e35',...
-    'f01',...
-    'e57',...
-    'e53',...
-    'fh02',...
-    'f17',...
-    'f20',...
-    'f03',...
-    'f22',...
-    'f11',...
-    'e46',...
-    'f23',...
-    'fh01',...
-    'f02',...
-    'e54'}; %K = 6
+animalModeInfo.animals = {'f26',...
+    'f27',...
+    'f29',...
+    'f32'};
 
-animalModeInfo.K = [6 5 3 6 4 6 3 6 5 2 5 2 6 6 6 6 4 3 4 3 6];
-
-
+animalModeInfo.K = [6 6 6 6];
 
 % Parse the animal mode files
 folders = struct;
@@ -38,17 +20,17 @@ animalinfo = struct;
 alltransfuncs = [];
 allregimes = [];
 
+
+
 for i = 1:numel(animalModeInfo.K)
     % load file
     K = animalModeInfo.K(i);
-    version = sprintf('121821bK%d', K);
-    opts.rootdir = fullfile(paths.blockhmmfitpath, version);
-
-    if animalModeInfo.K(i) == 6
-        classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v4.mat'));
-    else
-        classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v1.mat'));
-    end
+    version = '022322_Murat';
+    %opts.rootdir = %fullfile(paths.blockhmmfitpath, version);
+    opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/blockhmmfit/deprecated/022322_Murat';
+    
+    classification_info_files = dir(fullfile(opts.rootdir, '*classification_info*_v1.mat'));
+    
     assert(numel(classification_info_files) == 1);
     load(fullfile(classification_info_files(1).folder, classification_info_files(1).name),...
         'blockhmm_idx', 'statesFlat', 'folders', 'aggparams_native');
@@ -59,7 +41,7 @@ for i = 1:numel(animalModeInfo.K)
     
     assert(sum(selection) == 1) %make sure one and only one animal blockfit file found
     
-    load(fullfile(folders(selection).folder, folders(selection).name), 'zstates', 'params', 'lengths', 'transmat');
+    load(fullfile(opts.rootdir, folders(selection).name), 'zstates', 'params', 'lengths', 'transmat');
     parts = strsplit(folders(selection).name, '_');
     animal_name = parts{1};
     
@@ -118,11 +100,11 @@ for i = 1:numel(animalModeInfo.K)
     animalinfo(i).zclassified = zclassified_splits;
     animalinfo(i).classes = sort(statesFlat_extracted);
     
-    filename = fullfile(paths.figpath, 'hmmblockFigs/transmat_animals/',...
-        sprintf('%s_transmat_tsne_021322b_Nmodes.pdf', animal_name));
-    if ~exist(filename, 'file')
-        saveas(gcf, filename);
-    end
+%     filename = fullfile(paths.figpath, 'hmmblockFigs/transmat_animals/',...
+%         sprintf('%s_transmat_tsne_021322b_Nmodes.pdf', animal_name));
+%     if ~exist(filename, 'file')
+%         saveas(gcf, filename);
+%     end
     
 end
 
@@ -188,7 +170,7 @@ mymakeaxis('x_label', 'HMM mode', 'y_label', 'Animal', ...
 
 
 %% Plot state evolution profile for each animal
-opts.plotting = 0;
+opts.plotting = 1;
 f = waitbar(0);
 for id = 1:numel(animalinfo)
     waitbar(id / numel(animalinfo), f);
@@ -218,16 +200,16 @@ for id = 1:numel(animalinfo)
             h(i).FaceColor = colors(i,:);
             h(i).ShowBaseLine = 'off';
         end
-        xlim([0.5 xlimmax + 0.5])
+%         xlim([0.5 xlimmax + 0.5])
         ylim([0 1])
-        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction', 'xticks', 0:5:xlimmax)
+        mymakeaxis('x_label', 'Session #', 'y_label', 'Fraction')
 %         legend(h(1:5), {'Q-learning 1', 'Q-learning 2', 'Q-learning 3', 'Inference-based 4', 'Inference-based 5'}, 'Position', [0.4,0.42,0.1,0.1], ...
 %             'FontSize', 14);
         filename = fullfile(paths.figpath, 'hmmblockFigs/compositions_animals/',...
             sprintf('%s_training_evolution_tsne_021322b_Nmodes.pdf', animalinfo(id).animal));
-        if ~exist(filename, 'file')
-            saveas(gcf, filename);
-        end
+%         if ~exist(filename, 'file')
+%             saveas(gcf, filename);
+%         end
     end
 end
 % close all
@@ -235,7 +217,7 @@ close(f)
 
 
 %% Save if requested
-opts.save = 1;
+opts.save = 0;
 savefilename = fullfile(opts.rootdir, sprintf('hmmblock_composition_info_%s_v4_021322.mat', version));
 
 if opts.save && ~exist(savefilename, 'file')
@@ -254,7 +236,7 @@ colors = cols.colors;
 for i = 1:numel(animalinfo)
     animalname = animalinfo(i).animal;
     filename = sprintf('%s_hmmblockfit_*%s.mat', animalname, version);
-    blockfitfile = dir(fullfile(paths.blockhmmfitpath, version, filename));
+    blockfitfile = dir(fullfile(opts.rootdir, filename));
     assert(numel(blockfitfile) == 1);
     load(fullfile(blockfitfile(1).folder, blockfitfile(1).name), 'fitrange');
     

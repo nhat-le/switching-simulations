@@ -23,8 +23,10 @@ def load_raw_choices_outcomes(animal, version):
     # Load data
     paths = pathsetup('matchingsim')
     filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
-    # fitrangefile = f"{paths['expdatapath']}/102121/fitranges_122221.mat"
-    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_022822_wf.mat"
+    fitrangefile = f"{paths['expdatapath']}/102121/fitranges_122221.mat"
+
+    # changed 3.15.22
+    #fitrangefile = f"{paths['expdatapath']}/102121/fitranges_022822_wf.mat"
 
     if os.path.exists(fitrangefile):
         datarange = smart.loadmat(fitrangefile)
