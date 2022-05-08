@@ -1,5 +1,5 @@
 animals = {'f26', 'f27', 'f29', 'f32'};
-opts.version = '040122';
+opts.version = '050822';
 paths = pathsetup('opto');
 opts.savefile = 1;
 
@@ -8,6 +8,11 @@ f = waitbar(0);
 % copy the fitrange file if not exists
 savefolder = fullfile(paths.opto_expdatapath, opts.version);
 fitrangepath = sprintf('%s/fitranges_%s.mat', savefolder, opts.version);
+
+if ~exist(savefolder, 'dir')
+    mkdir(savefolder)
+end
+
 if ~exist(fitrangepath, 'file')
     % copy default fitrange file
     fprintf('Failed to find fitrange.mat file, copying default file...\n')

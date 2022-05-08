@@ -1,29 +1,169 @@
+cd('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/custom_scripts')
 % File for processing the animal info
 % that was parsed by `hmmblockstate_visualize_022422_tsne_Nmodes.m`
 % and `hmmstate_decode_single_animals_022422_tsne_Nmodes.m`
 global NSTATES
 NSTATES = 6;
-expfitdate = '040122';
+expfitdate = '050422';
 
 % Load the data
-load(fullfile('optodata/', expfitdate, 'opto_hmm_info.mat'));
+load(fullfile('../optodata/', expfitdate, 'opto_hmm_info.mat'));
 
 
-%% 
-% Plot composition over time for F26
-animalID = 1;
-composition = animalinfo(animalID).composition;
 
-%session 42 for f27 and f29 are corrupted (date: 2021-11-14)
+%% Extract fullfield/outcome sessions with high power based on criteria
+animalID = 2; %f27 data
+% sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O'); %179:181;
+sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield120O');
 
-out = helper.get_flags(animalinfo, animalID);
+zclasses = animalinfo(animalID).zclassified(sessid_lst);
+opto = animalinfo(animalID).opto(sessid_lst);
+obs = animalinfo(animalID).obs_splits(sessid_lst);
+animal = animalinfo(animalID).animal;
 
-% Comment out for single animal plot (all sessions with information)
-make_plot_states_and_opto(out.power_flags, out.area_flags, out.period_flags, composition,...
-    animalinfo(animalID).animal);
+count_opto = zeros(1, 6);
+count_no_opto = zeros(1, 6);
+
+% count number of blocks in each state
+for id = 1:numel(opto)
+    opto_sess = opto{id};
+    zclass_sess = zclasses{id};
+
+    for z = 1:6
+        zcount_opto = sum(zclass_sess(opto_sess == 1) == z);
+        zcount_no_opto = sum(zclass_sess(opto_sess == 0) == z);
+
+        count_opto(z) = count_opto(z) + zcount_opto;
+        count_no_opto(z) = count_no_opto(z) + zcount_no_opto;
+
+    end
+end
+
+count_opto_f27 = count_opto;
+count_no_opto_f27 = count_no_opto;
+opto_frac_f27 = count_opto / sum(count_opto);
+noopto_frac_f27 = count_no_opto / sum(count_no_opto);
+opto_err_f27 = sqrt(opto_frac_f27 .* (1 - opto_frac_f27) ./ sum(count_opto));
+noopto_err_f27 = sqrt(noopto_frac_f27 .* (1 - noopto_frac_f27) ./ sum(count_no_opto));
 
 
-%% Extract based on criteria
+% 
+% figure;
+% plot(count_opto ./ sum(count_opto))
+% hold on
+% plot(count_no_opto ./ sum(count_no_opto))
+
+
+%%
+animalID = 3; %f29 data
+% sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O');
+sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield120O');
+
+
+zclasses = animalinfo(animalID).zclassified(sessid_lst);
+opto = animalinfo(animalID).opto(sessid_lst);
+obs = animalinfo(animalID).obs_splits(sessid_lst);
+animal = animalinfo(animalID).animal;
+
+count_opto = zeros(1, 6);
+count_no_opto = zeros(1, 6);
+
+% count number of blocks in each state
+for id = 1:numel(opto)
+    opto_sess = opto{id};
+    zclass_sess = zclasses{id};
+
+    for z = 1:6
+        zcount_opto = sum(zclass_sess(opto_sess == 1) == z);
+        zcount_no_opto = sum(zclass_sess(opto_sess == 0) == z);
+
+        count_opto(z) = count_opto(z) + zcount_opto;
+        count_no_opto(z) = count_no_opto(z) + zcount_no_opto;
+
+    end
+end
+
+count_opto_f29 = count_opto;
+count_no_opto_f29 = count_no_opto;
+opto_frac_f29 = count_opto / sum(count_opto);
+noopto_frac_f29 = count_no_opto / sum(count_no_opto);
+opto_err_f29 = sqrt(opto_frac_f29 .* (1 - opto_frac_f29) ./ sum(count_opto));
+noopto_err_f29 = sqrt(noopto_frac_f29 .* (1 - noopto_frac_f29) ./ sum(count_no_opto));
+
+
+
+%% Plot summary for f27/ f29
+figure('Position', [440,485,782,313]);
+msize = 10;
+xvals_opto = (1:6) + 0.1;
+xvals_no_opto = (1:6) - 0.1;
+l3 = errorbar(xvals_opto, opto_frac_f27, opto_err_f27, 'bs',...
+    'MarkerSize', msize, 'MarkerFaceColor', 'b');
+hold on
+l3b = errorbar(xvals_no_opto, noopto_frac_f27, noopto_err_f27, 'ks',...
+    'MarkerSize', msize, 'MarkerFaceColor', 'k');
+
+l4 = errorbar(xvals_opto, opto_frac_f29, opto_err_f29, 'bd',...
+    'MarkerSize', msize, 'MarkerFaceColor', 'b');
+hold on
+l4b = errorbar(xvals_no_opto, noopto_frac_f29, noopto_err_f29, 'kd',...
+    'MarkerSize', msize, 'MarkerFaceColor', 'k');
+
+for i = 1:6
+    plot([xvals_no_opto(i) xvals_opto(i)], [noopto_frac_f27(i), ...
+            opto_frac_f27(i)], 'k');
+    hold on
+    plot([xvals_no_opto(i) xvals_opto(i)], [noopto_frac_f29(i), ...
+            opto_frac_f29(i)], 'k');   
+end
+mymakeaxis('x_label', 'HMM States', 'y_label', 'Fraction', 'xticks', 1:6)
+legend([l3, l3b, l4, l4b], {'f27 ON', 'f27 OFF', 'f29 ON', 'f29 OFF'}, ...
+    'FontSize', 15)
+
+
+
+%% Parse the transition functions
+global NSTATES
+NSTATES = 6;
+expfitdate = '050422';
+% animalID = 3; %f29 data
+% sessid_lst = 176:178;
+animalID = 2; %f27 data
+% sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O');
+sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield120O');
+
+
+% Load the data
+load(fullfile('../optodata/', expfitdate, 'opto_hmm_info.mat'));
+zclasses = animalinfo(animalID).zclassified(sessid_lst);
+opto = animalinfo(animalID).opto(sessid_lst);
+obs = animalinfo(animalID).obs_splits(sessid_lst);
+animal = animalinfo(animalID).animal;
+
+% Mean transition function
+perf_opto = [];
+perf_noopto = [];
+for i = 1:numel(obs)
+    opto_extract = obs{i}(opto{i} == 1, :);
+    noopto_extract = obs{i}(opto{i} == 0, :);
+    perf_opto = [perf_opto; opto_extract];
+    perf_noopto = [perf_noopto; noopto_extract]; 
+end
+
+figure;
+l1 = errorbar(1:size(perf_opto, 2), mean(perf_opto, 1), ...
+    std(perf_opto, [], 1) / sqrt(size(perf_opto, 1)), 'b', 'LineWidth', 2);
+hold on
+l2 = errorbar(1:size(perf_noopto, 2), mean(perf_noopto, 1), ...
+    std(perf_noopto, [], 1) / sqrt(size(perf_noopto, 1)), 'k', 'LineWidth', 2);
+mymakeaxis('x_label', 'Trials in block', 'y_label', 'P(Correct)', ...
+    'font_size', 25, 'xytitle', animal, 'xticks', 0:5:25)
+legend([l1, l2], {'ON', 'OFF'}, 'FontSize', 15)
+
+
+
+%%
+
 power_criteria = {'low', 'high'};
 area_criteria = {'frontal', 'visual', 'rsc', 'motor'};
 period_criteria = {'outcome', 'choice'};
@@ -431,60 +571,4 @@ if numel(opto_extracted) > 0
 end
 
 end
-
-
-
-% function out = get_flags(animalinfo, animalID)
-% % Inputs: animalinfo: the struct obtained by running opto_hmmblockstate_analysis.m
-% % animalID: int, id of animal to analyze
-% % Returns a struct containing the flags for the animal
-% 
-% % Parse information for the animal for each session
-% opto_flag = cellfun(@(x) sum(x) > 0, animalinfo(animalID).opto);
-% low_power_flag = cellfun(@(x) strcmp(x, 'Low'), animalinfo(animalID).power);
-% high_power_flag = cellfun(@(x) strcmp(x, 'High'), animalinfo(animalID).power);
-% frontal_flag = cellfun(@(x) contains(x, 'Frontal') & ~contains(x, 'Motor'), ...
-%     animalinfo(animalID).areas);
-% motor_flag = cellfun(@(x) contains(x, 'Motor') & ~contains(x, 'Visual'), ...
-%     animalinfo(animalID).areas);
-% rsc_flag = cellfun(@(x) contains(x, 'Rsc') & ~contains(x, 'Motor'), ...
-%     animalinfo(animalID).areas);
-% visual_flag = cellfun(@(x) contains(x, 'Visual') & ~contains(x, 'Motor'), ...
-%     animalinfo(animalID).areas);
-% choice_flag = cellfun(@(x) contains(x, 'Choice'), ...
-%     animalinfo(animalID).period);
-% outcome_flag = cellfun(@(x) contains(x, 'Outcome'), ...
-%     animalinfo(animalID).period);
-% 
-% % make sure all flags are of the same size
-% assert(max([numel(opto_flag), numel(low_power_flag), numel(frontal_flag),...
-%     numel(motor_flag), numel(rsc_flag), numel(visual_flag)]) == numel(rsc_flag));
-% assert(min([numel(opto_flag), numel(low_power_flag), numel(frontal_flag),...
-%     numel(motor_flag), numel(rsc_flag), numel(visual_flag)]) == numel(rsc_flag));
-% % assert(sum(low_power_flag + high_power_flag ~= opto_flag) == 0);
-% % Now we will gather all blocks with the right opto information
-% 
-% out.power_flags = {low_power_flag, high_power_flag};
-% out.area_flags = {frontal_flag, motor_flag, visual_flag, rsc_flag};
-% out.period_flags = {choice_flag, outcome_flag};
-% 
-% end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

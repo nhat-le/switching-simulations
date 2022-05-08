@@ -2,9 +2,8 @@
 % modified on 4.2.2022
 
 paths = pathsetup('opto');
-expfitdate = '040122';
-opts.rootdir = fullfile(paths.blockhmmfitpath, expfitdate);
-opts.rootdir = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/blockhmmfit/deprecated/022322_Murat';
+expfitdate = '050822';
+opts.rootdir = fullfile(paths.opto_expdatapath, expfitdate);
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
 mdltypes = 1:2;
@@ -155,7 +154,8 @@ close(f)
 
 %% Parse the session info
 fprintf('Parsing the log table...\n');
-logtbl = readtable('opto_data2.xlsx', 'Sheet', 'Experiments (opto)');
+logtbl = readtable(fullfile('optodata/', expfitdate, 'exprecord.xlsx'), ...
+    'Sheet', 'Experiments (opto)');
 
 for animalID = 1:4
     sessnames = animalinfo(animalID).sessnames;
@@ -195,8 +195,21 @@ for animalID = 1:4
     animalinfo(animalID).period = period_all;
 end
 
-savefilename = 'opto_hmm_info_033022.mat';
-if ~exist(savefilename, 'file')
+savefilename = fullfile('optodata/', expfitdate, 'opto_hmm_info.mat');
+
+if exist(savefilename, 'file')
+    response = questdlg(sprintf('File exists: %s, overwrite?', savefilename));
+    switch response
+        case 'Yes'
+            save(savefilename, 'opts', 'animalModeInfo', 'folders', 'animalinfo');
+            fprintf('File overwritten\n');
+        case 'No'
+            fprintf('Skipped saving...\n');          
+        case 'Cancel'
+            error('Operation cancelled')
+    end 
+    
+else
     save(savefilename, 'opts', 'animalModeInfo', 'folders', 'animalinfo')
     fprintf('File saved!\n');
 end

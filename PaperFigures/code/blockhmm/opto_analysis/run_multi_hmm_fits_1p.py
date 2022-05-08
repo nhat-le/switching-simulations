@@ -18,9 +18,9 @@ def run_and_save(animal, seed, version, N_iters=3000, num_states=6, savefile=0):
     # run_animal function
     print(f'Starting run and save for {animal}, seed {seed}')
     # Load data
-    paths = pathsetup('opto')
-    filepath = f"{paths['opto_expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
-    fitrangefile = f"{paths['opto_expdatapath']}/{version}/fitranges_{version}.mat"
+    paths = pathsetup('hmm1p')
+    filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
+    fitrangefile = f"{paths['expdatapath']}/{version}/fitranges_{version}.mat"
     if os.path.exists(fitrangefile):
         datarange = smart.loadmat(fitrangefile)
         fitrange = datarange['ranges'][datarange['animals'] == animal][0]
@@ -64,7 +64,7 @@ def run_and_save(animal, seed, version, N_iters=3000, num_states=6, savefile=0):
     # Save the result
     transmat = hmm.transitions.transition_matrix
     params = hmm.observations.params
-    savepath = f"{paths['opto_expdatapath']}/{version}/{animal}_hmmblockfit_{version}.mat"
+    savepath = f"{paths['expdatapath']}/{version}/{animal}_hmmblockfit_{version}.mat"
 
     vars = ['zstates', 'dirs', 'lengths', 'transmat', 'params',
             'fitrange', 'filepath', 'obs', 'seed', 'hmm_lls', 'effs', 'block_lens', 'block_corrs', 'opto', 'sessnames']
@@ -84,10 +84,10 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6, savefile=0):
     :param seeds: list[int], seed names
     :return: None
     '''
-    paths = pathsetup('opto')
+    paths = pathsetup('hmm1p')
     # Load data
-    filepath = f"{paths['opto_expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
-    fitrangefile = f"{paths['opto_expdatapath']}/{version}/fitranges_{version}.mat"
+    filepath = f"{paths['expdatapath']}/{version}/{animal}_all_sessions_{version}.mat"
+    fitrangefile = f"{paths['expdatapath']}/{version}/fitranges_{version}.mat"
 
     if os.path.exists(fitrangefile):
         datarange = smart.loadmat(fitrangefile)
@@ -119,11 +119,11 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6, savefile=0):
 
 if __name__ == '__main__':
     seeds = [121, 122, 123, 124, 125]
-    animals = ['f29', 'f27', 'f32', 'f26']
-    version = '050822'
+    animals = ['e54', 'f01', 'f03']
+    version = '050522'
 
-    paths = pathsetup('opto')
-    files = glob.glob(f"{paths['opto_expdatapath']}/{version}/*_all_sessions_{version}.mat")
+    paths = pathsetup('hmm1p')
+    files = glob.glob(f"{paths['expdatapath']}/{version}/*_all_sessions_{version}.mat")
     num_states = 6
     savefile = 1
     N_iters = 3000
