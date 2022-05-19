@@ -4,96 +4,15 @@ cd('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/bl
 % and `hmmstate_decode_single_animals_022422_tsne_Nmodes.m`
 global NSTATES
 NSTATES = 6;
-expfitdate = '050822';
+expfitdate = '051522';
 
 % Load the data
 load(fullfile('../optodata/', expfitdate, 'opto_hmm_info.mat'));
 
-
-
-%% Extract fullfield/outcome sessions with high power based on criteria
-% animalID = 2; %f27 data
-% % sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O'); %179:181;
-% sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield0O');
-% 
-% zclasses = animalinfo(animalID).zclassified(sessid_lst);
-% opto = animalinfo(animalID).opto(sessid_lst);
-% obs = animalinfo(animalID).obs_splits(sessid_lst);
-% animal = animalinfo(animalID).animal;
-% 
-% count_opto = zeros(1, 6);
-% count_no_opto = zeros(1, 6);
-% 
-% % count number of blocks in each state
-% for id = 1:numel(opto)
-%     opto_sess = opto{id};
-%     zclass_sess = zclasses{id};
-% 
-%     for z = 1:6
-%         zcount_opto = sum(zclass_sess(opto_sess == 1) == z);
-%         zcount_no_opto = sum(zclass_sess(opto_sess == 0) == z);
-% 
-%         count_opto(z) = count_opto(z) + zcount_opto;
-%         count_no_opto(z) = count_no_opto(z) + zcount_no_opto;
-% 
-%     end
-% end
-% 
-% count_opto_f27 = count_opto;
-% count_no_opto_f27 = count_no_opto;
-% opto_frac_f27 = count_opto / sum(count_opto);
-% noopto_frac_f27 = count_no_opto / sum(count_no_opto);
-% opto_err_f27 = sqrt(opto_frac_f27 .* (1 - opto_frac_f27) ./ sum(count_opto));
-% noopto_err_f27 = sqrt(noopto_frac_f27 .* (1 - noopto_frac_f27) ./ sum(count_no_opto));
-
-%%
-modetype = 0;
+modetype = '240C';
 out_f27 = get_hmm_opto_frac(animalinfo, 2, modetype);
 out_f29 = get_hmm_opto_frac(animalinfo, 3, modetype);
-
-% 
-% figure;
-% plot(count_opto ./ sum(count_opto))
-% hold on
-% plot(count_no_opto ./ sum(count_no_opto))
-
-
-%%
-animalID = 3; %f29 data
-% sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O');
-sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield0O');
-
-
-zclasses = animalinfo(animalID).zclassified(sessid_lst);
-opto = animalinfo(animalID).opto(sessid_lst);
-obs = animalinfo(animalID).obs_splits(sessid_lst);
-animal = animalinfo(animalID).animal;
-
-count_opto = zeros(1, 6);
-count_no_opto = zeros(1, 6);
-
-% count number of blocks in each state
-for id = 1:numel(opto)
-    opto_sess = opto{id};
-    zclass_sess = zclasses{id};
-
-    for z = 1:6
-        zcount_opto = sum(zclass_sess(opto_sess == 1) == z);
-        zcount_no_opto = sum(zclass_sess(opto_sess == 0) == z);
-
-        count_opto(z) = count_opto(z) + zcount_opto;
-        count_no_opto(z) = count_no_opto(z) + zcount_no_opto;
-
-    end
-end
-
-count_opto_f29 = count_opto;
-count_no_opto_f29 = count_no_opto;
-opto_frac_f29 = count_opto / sum(count_opto);
-noopto_frac_f29 = count_no_opto / sum(count_no_opto);
-opto_err_f29 = sqrt(opto_frac_f29 .* (1 - opto_frac_f29) ./ sum(count_opto));
-noopto_err_f29 = sqrt(noopto_frac_f29 .* (1 - noopto_frac_f29) ./ sum(count_no_opto));
-
+out_f32 = get_hmm_opto_frac(animalinfo, 4, modetype);
 
 
 %% Plot summary for f27/ f29
@@ -101,28 +20,40 @@ figure('Position', [440,485,782,313]);
 msize = 10;
 xvals_opto = (1:6) + 0.1;
 xvals_no_opto = (1:6) - 0.1;
-l3 = errorbar(xvals_opto, out_f27.opto_frac, out_f27.opto_err, 'bs',...
-    'MarkerSize', msize, 'MarkerFaceColor', 'b');
-hold on
-l3b = errorbar(xvals_no_opto, out_f27.noopto_frac, out_f27.noopto_err, 'ks',...
-    'MarkerSize', msize, 'MarkerFaceColor', 'k');
+%f27
+% l3 = errorbar(xvals_opto, out_f27.opto_frac, out_f27.opto_err, 'bs',...
+%     'MarkerSize', msize, 'MarkerFaceColor', 'b');
+% hold on
+% l3b = errorbar(xvals_no_opto, out_f27.noopto_frac, out_f27.noopto_err, 'ks',...
+%     'MarkerSize', msize, 'MarkerFaceColor', 'k');
 
+%f29
 l4 = errorbar(xvals_opto, out_f29.opto_frac, out_f29.opto_err, 'bd',...
     'MarkerSize', msize, 'MarkerFaceColor', 'b');
 hold on
 l4b = errorbar(xvals_no_opto, out_f29.noopto_frac, out_f29.noopto_err, 'kd',...
     'MarkerSize', msize, 'MarkerFaceColor', 'k');
 
+%f32
+% l5 = errorbar(xvals_opto, out_f32.opto_frac, out_f32.opto_err, 'bo',...
+%     'MarkerSize', msize, 'MarkerFaceColor', 'b');
+% hold on
+% l5b = errorbar(xvals_no_opto, out_f32.noopto_frac, out_f32.noopto_err, 'ko',...
+%     'MarkerSize', msize, 'MarkerFaceColor', 'k');
+
 for i = 1:6
-    plot([xvals_no_opto(i) xvals_opto(i)], [out_f27.noopto_frac(i), ...
-            out_f27.opto_frac(i)], 'k');
+%     plot([xvals_no_opto(i) xvals_opto(i)], [out_f27.noopto_frac(i), ...
+%             out_f27.opto_frac(i)], 'k');
     hold on
     plot([xvals_no_opto(i) xvals_opto(i)], [out_f29.noopto_frac(i), ...
             out_f29.opto_frac(i)], 'k');   
+%     plot([xvals_no_opto(i) xvals_opto(i)], [out_f32.noopto_frac(i), ...
+%             out_f32.opto_frac(i)], 'k');   
 end
 mymakeaxis('x_label', 'HMM States', 'y_label', 'Fraction', 'xticks', 1:6)
-legend([l3, l3b, l4, l4b], {'f27 ON', 'f27 OFF', 'f29 ON', 'f29 OFF'}, ...
-    'FontSize', 15)
+legend([l3, l3b, l4, l4b, l5, l5b], {'f27 ON', 'f27 OFF', 'f29 ON', 'f29 OFF', ...
+    'f32 ON', 'f32 OFF'}, ...
+    'FontSize', 15, 'Location','west')
 
 
 
@@ -130,14 +61,14 @@ legend([l3, l3b, l4, l4b], {'f27 ON', 'f27 OFF', 'f29 ON', 'f29 OFF'}, ...
 global NSTATES
 NSTATES = 6;
 clear sessid_lst
-% expfitdate = '050422';
+expfitdate = '051822';
 load(fullfile('../optodata/', expfitdate, 'opto_hmm_info.mat'));
 
 % animalID = 3; %f29 data
 % sessid_lst = 176:178;
-animalID = 2; %f27 data
-sessid_lst1 = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O');
-sessid_lst2 = strcmp(animalinfo(animalID).areas, 'Fullfield0O');
+animalID = 3; %f27 data
+sessid_lst1 = []; %strcmpi(animalinfo(animalID).areas, 'Fullfield0O') | strcmpi(animalinfo(animalID).areas, 'Fullfield0O');
+sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF'); % | strcmpi(animalinfo(animalID).areas, 'Fullfield230OF');
 
 % Load the data
 animal = animalinfo(animalID).animal;
@@ -160,7 +91,8 @@ l4 = errorbar(1:size(perf_noopto2, 2), mean(perf_noopto2, 1), ...
 
 mymakeaxis('x_label', 'Trials in block', 'y_label', 'P(Correct)', ...
     'font_size', 25, 'xytitle', animal, 'xticks', 0:5:25)
-legend([l1, l2, l3, l4], {'ON 240', 'OFF 240', 'ON 0', 'OFF 0'}, 'FontSize', 15)
+% legend([l1, l2, l3, l4], {'ON 240v2', 'OFF 240v2', 'ON 240v3', 'OFF 240v3'}, 'FontSize', 15)
+legend([l3, l4], {'ON 240mW', 'OFF 240mW'}, 'FontSize', 15)
 
 
 
@@ -193,12 +125,20 @@ end
 
 function out = get_hmm_opto_frac(animalinfo, animalID, modetype)
 switch modetype
-    case 240
-        sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O');
-    case 0
-        sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield0O');
-    case 120
-        sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield0O');
+    case '240'
+        sessid_lst = strcmpi(animalinfo(animalID).areas, 'Fullfield240O') | strcmpi(animalinfo(animalID).areas, 'Fullfield230O');
+    case '0'
+        sessid_lst = strcmpi(animalinfo(animalID).areas, 'Fullfield0O');
+    case '0F'
+        sessid_lst = strcmpi(animalinfo(animalID).areas, 'Fullfield0OF');
+    case '120'
+        sessid_lst = strcmpi(animalinfo(animalID).areas, 'Fullfield120O');
+    case '240F'
+        sessid_lst = strcmpi(animalinfo(animalID).areas, 'Fullfield240OF')| strcmpi(animalinfo(animalID).areas, 'Fullfield230OF');
+    case '60F'
+        sessid_lst = strcmpi(animalinfo(animalID).areas, 'Fullfield60OF');
+    case '240C'
+        sessid_lst = strcmpi(animalinfo(animalID).areas, 'FullfieldC240');
     otherwise
         error('Invalid power')
 end
