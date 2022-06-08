@@ -119,8 +119,8 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6, savefile=0):
 
 if __name__ == '__main__':
     seeds = [121, 122, 123, 124, 125]
-    animals = ['f29', 'f27', 'f32', 'f26']
-    version = '050822'
+    animals = ['f27', 'f32']
+    version = '052922'
 
     paths = pathsetup('opto')
     files = glob.glob(f"{paths['opto_expdatapath']}/{version}/*_all_sessions_{version}.mat")

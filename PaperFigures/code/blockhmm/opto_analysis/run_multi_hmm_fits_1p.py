@@ -119,15 +119,15 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6, savefile=0):
 
 if __name__ == '__main__':
     seeds = [121, 122, 123, 124, 125]
-    animals = ['e54', 'f01', 'f03']
+    animals_lst = ['f04']
+    num_states_lst = [4]
     version = '050522'
 
     paths = pathsetup('hmm1p')
     files = glob.glob(f"{paths['expdatapath']}/{version}/*_all_sessions_{version}.mat")
-    num_states = 6
     savefile = 1
     N_iters = 3000
-    for animal in animals:
+    for animal, num_states in zip(animals_lst, num_states_lst):
         print(f"Running animal: {animal}")
         bestseed = run_animal(animal, seeds, version, N_iters, num_states, savefile)
 

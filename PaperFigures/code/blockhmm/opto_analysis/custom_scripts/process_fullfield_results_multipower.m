@@ -4,7 +4,7 @@ cd('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/bl
 % and `hmmstate_decode_single_animals_022422_tsne_Nmodes.m`
 global NSTATES
 NSTATES = 6;
-expfitdate = '051522';
+expfitdate = '052722';
 
 % Load the data
 load(fullfile('../optodata/', expfitdate, 'opto_hmm_info.mat'));
@@ -61,14 +61,14 @@ legend([l3, l3b, l4, l4b, l5, l5b], {'f27 ON', 'f27 OFF', 'f29 ON', 'f29 OFF', .
 global NSTATES
 NSTATES = 6;
 clear sessid_lst
-expfitdate = '051822';
+expfitdate = '052922';
 load(fullfile('../optodata/', expfitdate, 'opto_hmm_info.mat'));
 
 % animalID = 3; %f29 data
 % sessid_lst = 176:178;
-animalID = 3; %f27 data
+animalID = 1; %f27 data
 sessid_lst1 = []; %strcmpi(animalinfo(animalID).areas, 'Fullfield0O') | strcmpi(animalinfo(animalID).areas, 'Fullfield0O');
-sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF'); % | strcmpi(animalinfo(animalID).areas, 'Fullfield230OF');
+sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield15OF'); % | strcmpi(animalinfo(animalID).areas, 'Fullfield230OF');
 
 % Load the data
 animal = animalinfo(animalID).animal;
@@ -92,7 +92,7 @@ l4 = errorbar(1:size(perf_noopto2, 2), mean(perf_noopto2, 1), ...
 mymakeaxis('x_label', 'Trials in block', 'y_label', 'P(Correct)', ...
     'font_size', 25, 'xytitle', animal, 'xticks', 0:5:25)
 % legend([l1, l2, l3, l4], {'ON 240v2', 'OFF 240v2', 'ON 240v3', 'OFF 240v3'}, 'FontSize', 15)
-legend([l3, l4], {'ON 240mW', 'OFF 240mW'}, 'FontSize', 15)
+legend([l3, l4], {'ON', 'OFF'}, 'FontSize', 15)
 
 
 

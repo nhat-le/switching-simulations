@@ -2,7 +2,7 @@
 % modified on 4.2.2022
 
 paths = pathsetup('opto');
-expfitdate = '050822';
+expfitdate = '052922';
 opts.rootdir = fullfile(paths.opto_expdatapath, expfitdate);
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
@@ -12,7 +12,7 @@ opts.filter_blocks_by_lengths = 0;
 opts.weighted = 1;
 opts.python_assist = 0;
 opts.effmethod = 'sim';
-opts.savefile = 0;
+opts.savefile = 1;
 % opts.model_name = 'decoding_common_010522_withsvmMdl_knn_svm_v10_tsne.mat';
 opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10_tsne.mat';
 opts.svmmodelpath = paths.decodingmodelpath;
@@ -40,12 +40,19 @@ paths = pathsetup('matchingsim');
 
 % averaging two seeds
 animalModeInfo = struct;
-animalModeInfo.animals = {'f26',...
-    'f27',...
-    'f29',...
-    'f32'};
+% animal names and K
+animalModeInfo.animals = {};
+animalModeInfo.K = [];
+for i = 1:numel(folders)
+    parts = strsplit(folders(i).name, '_');
+    animalModeInfo.animals{i} = parts{1};
+    blockfitfile = dir(fullfile(sprintf('%s/%s_hmmblockfit*.mat', ...
+        folders(1).folder, parts{1})));
+    assert(numel(blockfitfile) == 1);
+    load(fullfile(blockfitfile(1).folder, blockfitfile(1).name), 'transmat');
+    animalModeInfo.K(i) = size(transmat, 1);
 
-animalModeInfo.K = [6 6 6 6];
+end
 animalinfo = struct;
 
 for i = 1:numel(animalModeInfo.K)
@@ -157,7 +164,7 @@ fprintf('Parsing the log table...\n');
 logtbl = readtable(fullfile('optodata/', expfitdate, 'exprecord.xlsx'), ...
     'Sheet', 'Experiments (opto)');
 
-for animalID = 1:4
+for animalID = 1:numel(animalinfo)
     sessnames = animalinfo(animalID).sessnames;
     name = upper(animalModeInfo.animals{animalID});
 

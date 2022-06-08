@@ -119,12 +119,12 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6, savefile=0):
 
 if __name__ == '__main__':
     seeds = [121, 122, 123, 124, 125]
-    animals = ['e54', 'e56', 'f01', 'fh03']
+    animals = ['e53']
     version = '050522'
 
     paths = pathsetup('hmm3p')
     files = glob.glob(f"{paths['expdatapath']}/{version}/*_all_sessions_{version}.mat")
-    num_states = 6
+    num_states = 2
     savefile = 1
     N_iters = 3000
     for animal in animals:

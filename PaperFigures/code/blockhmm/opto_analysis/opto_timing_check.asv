@@ -1,0 +1,18 @@
+folder = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox/f29/2022-05-07/1';
+matfiles = dir(fullfile(folder, '*Block.mat'));
+load(fullfile(matfiles(1).folder, matfiles(1).name));
+
+stimOnTimes = block.events.stimulusOnTimes;
+feedbackTimes = block.events.feedbackTimes;
+targetVals = block.events.contrastLeftValues;
+N = min([numel(stimOnTimes) numel(feedbackTimes)]);
+stimOnTimes = stimOnTimes(1:N);
+feedbackTimes = feedbackTimes(1:N);
+targetVals = targetVals(1:N);
+
+dt = stimOnTimes(2:end) - feedbackTimes(1:end-1);
+dt_fb = feedbackTimes - stimOnTimes;
+dt_fb2 = feedbackTimes(2:end) - feedbackTimes(1:end-1);
+
+%%
+figure;
