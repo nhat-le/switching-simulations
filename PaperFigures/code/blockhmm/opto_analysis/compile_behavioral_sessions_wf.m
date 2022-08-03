@@ -1,5 +1,5 @@
-animals = {'f27', 'f29', 'f32', 'f35', 'f36'};
-opts.version = '080222';
+animals = {'e57', 'f01', 'f02', 'f03', 'f04', 'f25'};
+opts.version = '061522default';
 paths = pathsetup('opto');
 opts.savefile = 1;
 
@@ -21,7 +21,7 @@ end
 
 for i = 1:numel(animals)
     waitbar(i/numel(animals), f, sprintf('Processing animal %s', animals{i}));
-    opts.root = fullfile(paths.opto_rigboxpath, animals{i});
+    opts.root = fullfile(paths.rigboxpath, animals{i});
     opts.savepath = fullfile(paths.opto_expdatapath, opts.version, sprintf('%s_all_sessions_%s.mat', animals{i}, opts.version));
     process_animal(animals{i}, opts); 
 end

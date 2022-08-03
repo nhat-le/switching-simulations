@@ -22,24 +22,30 @@ end
 
 
 %% plot of opto effect given specific conditions
-period_criterion = 'outcome'; %oucome/choice/none
+period_criterion = 'choice'; %oucome/choice/none
 power_criterion = 'low'; %low/high/none
 msize = 10;
 delta = 0.1; %how far apart opto/non-opto columns are
 
+region_labels = ioutils.capitalize(modecounts(1).area_criteria);
+region_labels{3} = 'RSC';
 
-stateID = 5; %1:NSTATES
+
+stateIDs = [2,3]; %1:NSTATES
 [idxperiod, idxpower] = helper.find_idx_set(modecounts, power_criterion, period_criterion);
 figure('Position', [440,478,682,320]);
 for animalID = 1:4 %numel(modecounts)
     counts_opto = helper.block_counter(modecounts(animalID).count_opto, idxperiod, idxpower);
     [nareas, nstates] = size(counts_opto);
 
-    opto_states_frac = counts_opto ./ sum(counts_opto, 2);
+    opto_states_frac = sum(counts_opto(:, stateIDs), 2) ./ sum(counts_opto, 2);
+
+%     opto_states_frac = counts_opto ./ sum(counts_opto, 2);
     opto_states_frac_error = sqrt(opto_states_frac .* (1 - opto_states_frac) ./ sum(counts_opto, 2));
 
     counts_no_opto = helper.block_counter(modecounts(animalID).count_no_opto, idxperiod, idxpower);
-    no_opto_states_frac = counts_no_opto ./ sum(counts_no_opto, 2);
+%     no_opto_states_frac = counts_no_opto ./ sum(counts_no_opto, 2);
+    no_opto_states_frac = sum(counts_no_opto(:, stateIDs), 2) ./ sum(counts_no_opto, 2);
     no_opto_states_frac_error = sqrt(no_opto_states_frac .* (1 - no_opto_states_frac) ./ sum(counts_no_opto, 2));
 
 
@@ -50,36 +56,36 @@ for animalID = 1:4 %numel(modecounts)
     % plot opto fractions
     switch animalID        
         case 1
-            l1 = errorbar(xvals_opto, opto_states_frac(:,stateID), opto_states_frac_error(:,stateID), 'bo',...
+            l1 = errorbar(xvals_opto, opto_states_frac, opto_states_frac_error, 'bo',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'b');
             hold on
-            errorbar(xvals_no_opto, no_opto_states_frac(:,stateID), no_opto_states_frac_error(:,stateID), 'ko',...
+            errorbar(xvals_no_opto, no_opto_states_frac, no_opto_states_frac_error, 'ko',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'k');
 
 
         case 2
-            l2 = errorbar(xvals_opto, opto_states_frac(:,stateID), opto_states_frac_error(:,stateID), 'bs',...
+            l2 = errorbar(xvals_opto, opto_states_frac, opto_states_frac_error, 'bs',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'b');
             hold on
-            errorbar(xvals_no_opto, no_opto_states_frac(:,stateID), no_opto_states_frac_error(:,stateID), 'ks',...
+            errorbar(xvals_no_opto, no_opto_states_frac, no_opto_states_frac_error, 'ks',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'k');
 
 
 
         case 3
-            l3 = errorbar(xvals_opto, opto_states_frac(:,stateID), opto_states_frac_error(:,stateID), 'bd',...
+            l3 = errorbar(xvals_opto, opto_states_frac, opto_states_frac_error, 'bd',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'b');
             hold on
-            errorbar(xvals_no_opto, no_opto_states_frac(:,stateID), no_opto_states_frac_error(:,stateID), 'kd',...
+            errorbar(xvals_no_opto, no_opto_states_frac, no_opto_states_frac_error, 'kd',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'k');
 
 
 
         case 4
-            l4 = errorbar(xvals_opto, opto_states_frac(:,stateID), opto_states_frac_error(:,stateID), 'b^',...
+            l4 = errorbar(xvals_opto, opto_states_frac, opto_states_frac_error, 'b^',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'b');
             hold on
-            errorbar(xvals_no_opto, no_opto_states_frac(:,stateID), no_opto_states_frac_error(:,stateID), 'k^',...
+            errorbar(xvals_no_opto, no_opto_states_frac, no_opto_states_frac_error, 'k^',...
                 'MarkerSize', msize, 'MarkerFaceColor', 'k');
 
 
@@ -87,8 +93,8 @@ for animalID = 1:4 %numel(modecounts)
     end     
    % connect pairs of opto/no-opto
     for areaID = 1:nareas
-        plot([xvals_no_opto(areaID), xvals_opto(areaID)], [no_opto_states_frac(areaID, stateID), ...
-            opto_states_frac(areaID, stateID)], 'k');   
+        plot([xvals_no_opto(areaID), xvals_opto(areaID)], [no_opto_states_frac(areaID), ...
+            opto_states_frac(areaID)], 'k');   
     end
 
 
@@ -97,7 +103,7 @@ end
 
 ylim([0, 1])
 mymakeaxis('x_label', 'Area', 'y_label', 'Fraction', 'font_size', 20, ...
-    'xticks', 1:4, 'xticklabels', ioutils.capitalize(modecounts(1).area_criteria))
+    'xticks', 1:4, 'xticklabels', region_labels)
 xticks(1:4)
 xticklabels(modecounts(1).area_criteria);
 
@@ -122,22 +128,30 @@ power_criterion = 'low'; %low/high/none
 pOpto_cell = {};
 pNoOpto_cell = {};
 
+plotfig = 0;
+
 for regionID = 1:4
     pOpto_all = [];
     pNoOpto_all = [];
-    for animalID = 1:4 %1:4
+    for animalID = 1:4
         transfunc_opto = modecounts(animalID).transfunc_opto{idxpower, ...
             regionID, idxperiod};
         transfunc_no_opto = modecounts(animalID).transfunc_no_opto{idxpower,...
             regionID, idxperiod};
 
-
         % fit sigmoid to the trans functions
-        pOpto = mathfuncs.fit_sigmoid(transfunc_opto);
-        pNoOpto = mathfuncs.fit_sigmoid(transfunc_no_opto);
+        pOpto = mathfuncs.fit_sigmoid_asym(transfunc_opto);
+        pNoOpto = mathfuncs.fit_sigmoid_asym(transfunc_no_opto);
 
-        pOpto_all(animalID, :) = pOpto;
-        pNoOpto_all(animalID, :) = pNoOpto;
+        % find the foraging efficiency
+        sigmoid_ON = mathfuncs.sigmoid_asym(1:0.1:T, pOpto(1), pOpto(2), pOpto(3), pOpto(4));
+        sigmoid_OFF = mathfuncs.sigmoid_asym(1:0.1:T, pNoOpto(1), pNoOpto(2), pNoOpto(3), pNoOpto(4));
+
+
+        pOpto_all(animalID, :) = [pOpto(1), pOpto(2), ...
+            (pOpto(3) + pOpto(4)) / 2, mean(sigmoid_ON)];
+        pNoOpto_all(animalID, :) = [pNoOpto(1), pNoOpto(2), ...
+            (pNoOpto(3) + pNoOpto(4)) / 2, mean(sigmoid_OFF)];
         
         count_opto = modecounts(animalID).count_opto{idxpower, regionID, ...
             idxperiod};
@@ -151,24 +165,29 @@ for regionID = 1:4
         error_opto = sqrt(transfunc_opto .* (1-transfunc_opto) / N_opto);
         error_no_opto = sqrt(transfunc_no_opto .* (1-transfunc_no_opto) / N_no_opto);
                
-        figure;
-        l1 = errorbar(1:T, transfunc_opto, error_opto, 'bo', 'LineWidth', 0.5,...
-            'MarkerFaceColor', 'b');
-        hold on
-        l2 = errorbar(1:T, transfunc_no_opto, error_no_opto, 'ko', 'LineWidth', 0.5,...
-            'MarkerFaceColor', 'k');
-        titletext = sprintf('%s, %s cluster', modecounts(animalID).animal,...
-            modecounts(animalID).area_criteria{regionID});
 
-        % plot curve fit
-        plot(1:T, mathfuncs.sigmoid(1:T, pOpto(1), pOpto(2), pOpto(3)), 'b');
-        plot(1:T, mathfuncs.sigmoid(1:T, pNoOpto(1), pNoOpto(2), pNoOpto(3)), 'k');
-
-        ylim([0, 1])
-        
-        mymakeaxis('x_label', 'Trials in block', 'y_label', 'P (Correct)',...
-            'xytitle', titletext, 'font_size', 20, 'xticks', 0:5:20);
-        legend([l1, l2], {'Opto', 'No opto'}, 'FontSize', 20, 'Position', [0.698214285714286,0.404761911466205,0.203571428571429,0.125]);
+        if plotfig
+            figure;
+            l1 = errorbar(1:T, transfunc_opto, error_opto, 'bo', 'LineWidth', 0.5,...
+                'MarkerFaceColor', 'b');
+            hold on
+            l2 = errorbar(1:T, transfunc_no_opto, error_no_opto, 'ko', 'LineWidth', 0.5,...
+                'MarkerFaceColor', 'k');
+            titletext = sprintf('%s, %s cluster', modecounts(animalID).animal,...
+                modecounts(animalID).area_criteria{regionID});
+    
+            % plot curve fit
+            plot(1:T, mathfuncs.sigmoid_asym(1:T, pOpto(1), pOpto(2), pOpto(3), pOpto(4)), 'b');
+            plot(1:T, mathfuncs.sigmoid_asym(1:T, pNoOpto(1), pNoOpto(2), pNoOpto(3), pNoOpto(4)), 'k');
+    %         plot(1:T, mathfuncs.sigmoid(1:T, pOpto(1), pOpto(2), pOpto(3)), 'b');
+    %         plot(1:T, mathfuncs.sigmoid(1:T, pNoOpto(1), pNoOpto(2), pNoOpto(3)), 'k');
+    
+            ylim([0, 1])
+            
+            mymakeaxis('x_label', 'Trials in block', 'y_label', 'P (Correct)',...
+                'xytitle', titletext, 'font_size', 20, 'xticks', 0:5:20);
+            legend([l1, l2], {'Opto', 'No opto'}, 'FontSize', 20, 'Position', [0.698214285714286,0.404761911466205,0.203571428571429,0.125]);
+        end
 
         savefilename = sprintf('figs/for-thesis-report-0422/opto-transfunction-%s-%s-withfit-choice.pdf', ...
             modecounts(animalID).animal, modecounts(1).area_criteria{regionID});
@@ -188,8 +207,8 @@ figure;
 hold on
 gap = 0.2;
 cols = paperaesthetics;
-colid = 3;
-paramnames = {'Offset', 'Slope', 'Lapse'};
+colid = 4;
+paramnames = {'Offset', 'Slope', 'Lapse', 'Efficiency'};
 for i = 1:numel(pOpto_cell)
     plot([i-gap i+gap], max([pNoOpto_cell{i}(:,colid) pOpto_cell{i}(:,colid)], 0), 'k')
     plot(ones(1, size(pNoOpto_cell{1}, 1)) * (i-gap), max([pNoOpto_cell{i}(:,colid)], 0), 'ko', ...
@@ -211,12 +230,27 @@ switch colid
         ylim([0 3])
     case 3
         ylim([0 0.3])
+
+    case 4
+        ylim([0.6, 1])
 end
 
 mymakeaxis('x_label', 'Region', 'y_label', paramnames{colid},...
             'font_size', 25, ...
             'xticks', 1:4, 'xticklabels', {'Frontal',  'Visual',  'RSC',  'Motor'});
 % legend([l1, l2], {'Opto', 'No opto'}, 'FontSize', 20);
+
+%% Statistical tests
+colid = 4; %{'Offset', 'Slope', 'Lapse', 'Efficiency'};
+regionid = 4;
+% note region id 1,2,3,4 correspond to {'frontal'  'visual'  'rsc'  'motor'}
+
+opto_params = pOpto_cell{regionid}(:,colid);
+noopto_params = pNoOpto_cell{regionid}(:,colid);
+[result, pval] = ttest(opto_params, noopto_params, 'tail', 'both');
+disp(pval);
+
+
 
 
 %% Plot block compositions

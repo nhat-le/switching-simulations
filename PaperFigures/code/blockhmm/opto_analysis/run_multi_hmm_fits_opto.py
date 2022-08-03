@@ -54,10 +54,16 @@ def run_and_save(animal, seed, version, N_iters=3000, num_states=6, savefile=0):
     zstates = hmm.most_likely_states(obs)
     effs = []
     for i in range(num_states):
+        print(i)
         # Find the average foraging efficiency of that state
         blen_state = np.array(block_lens)[zstates == i]
         bcorr_state = np.array(block_corrs)[zstates == i]
-        eff_state = sum(bcorr_state) / sum(blen_state)
+
+        # Handles the case of empty blens (no z-states == i found)
+        if len(blen_state) == 0:
+            eff_state = np.nan
+        else:
+            eff_state = sum(bcorr_state) / sum(blen_state)
         effs.append(np.mean(bcorr_state / blen_state))
 
     # Save the result
@@ -119,14 +125,14 @@ def run_animal(animal, seeds, version, N_iters=3000, num_states=6, savefile=0):
 
 if __name__ == '__main__':
     seeds = [121, 122, 123, 124, 125]
-    animals = ['f27', 'f32']
-    version = '052922'
+    animals = ['f32', 'f35', 'f36']
+    version = '080222'
 
     paths = pathsetup('opto')
     files = glob.glob(f"{paths['opto_expdatapath']}/{version}/*_all_sessions_{version}.mat")
     num_states = 6
     savefile = 1
-    N_iters = 3000
+    N_iters = 3000 #3000 #000
     for animal in animals:
         print(f"Running animal: {animal}")
         bestseed = run_animal(animal, seeds, version, N_iters, num_states, savefile)

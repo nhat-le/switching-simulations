@@ -1,8 +1,8 @@
-% script for analysis of opto animals (f26, 27, 29, 32) 
+% script for analysis of WF animals (e57, f01, f02, f03, f04, f25) 
 % modified on 4.2.2022
 
 paths = pathsetup('opto');
-expfitdate = '080122';
+expfitdate = '061522defaultK6';
 opts.rootdir = fullfile(paths.opto_expdatapath, expfitdate);
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
@@ -10,18 +10,11 @@ mdltypes = 1:2;
 mdlids = 1:10;
 opts.filter_blocks_by_lengths = 0;
 opts.weighted = 1;
-opts.prob = 1; %80-20 world
 opts.python_assist = 0;
 opts.effmethod = 'sim';
 opts.savefile = 1;
 % opts.model_name = 'decoding_common_010522_withsvmMdl_knn_svm_v10_tsne.mat';
-
-if opts.prob == 1
-    opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10_tsne.mat';
-else
-    opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10b_tsne.mat';
-
-end
+opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10_tsne.mat';
 opts.svmmodelpath = paths.decodingmodelpath;
 
 
@@ -37,13 +30,8 @@ num_state5 = [];
 for i = 24
     opts.mdltype = i;
     opts.mdlid = 5;
+    [~, ~, statesFlat, ~] = apply_model(aggparams_native, aggmeans_native, opts);
 
-    if opts.prob == 1
-        [~, ~, statesFlat, ~] = apply_model(aggparams_native, aggmeans_native, opts);
-    else
-        [~, ~, statesFlat, ~] = apply_model_prob(aggparams_native, aggmeans_native, opts);
-
-    end
     fprintf('i=%d, num states 6 = %d\n', i, sum(statesFlat == 6));
 end
 
@@ -67,6 +55,7 @@ for i = 1:numel(folders)
 end
 animalinfo = struct;
 
+counter = 1;
 for i = 1:numel(animalModeInfo.K)
     % load file
     K = animalModeInfo.K(i);
@@ -97,7 +86,7 @@ for i = 1:numel(animalModeInfo.K)
     % make sure the states are in the right order
     assert(sum(sum(aggparams_native{selection}(1:3,:) ~= params)) == 0);
     
-    counter = K * (find(selection) - 1) + 1;
+%     counter = K * (find(selection) - 1) + 1;
     statesFlat_extracted = statesFlat(counter : counter + n_zstates - 1);
     for istate = 1:n_zstates
         zclassified(zstates == istate - 1) = statesFlat_extracted(istate);
@@ -119,7 +108,7 @@ for i = 1:numel(animalModeInfo.K)
     animalinfo(i).zclassified = zclassified_splits;
     animalinfo(i).classes = sort(statesFlat_extracted);
     animalinfo(i).sessnames = sessnames;
-    animalinfo(i).opto = cellfun(@(x) find_opto_blocks(x), opto, 'UniformOutput', false);
+%     animalinfo(i).opto = cellfun(@(x) find_opto_blocks(x), opto, 'UniformOutput', false);
     animalinfo(i).block_lens = blocklen_splits;
     animalinfo(i).obs_splits = obs_splits;
 end
@@ -171,50 +160,10 @@ end
 % close all
 close(f)
 
-%% Parse the session info
-fprintf('Parsing the log table...\n');
-logtbl = readtable(fullfile('optodata/', expfitdate, 'exprecord.xlsx'), ...
-    'Sheet', 'Experiments (opto)');
 
-for animalID = 1:numel(animalinfo)
-    sessnames = animalinfo(animalID).sessnames;
-    name = upper(animalModeInfo.animals{animalID});
+%%
 
-    subtbl = logtbl(strcmp(logtbl.Animal_formatted, name), :);
-    dates_all = subtbl.Date;
-    dates_all.Format = 'dd-MM-yyyy';
-
-    areas_all = {}; %visual/frontal/rsc/motor
-    power_all = {}; %high/low
-    period_all = {}; %choice/outcome
-
-    for i = 1:size(sessnames, 1)
-        % find the corresponding row in logtbl
-        filename = sessnames(i,:);
-        datename = filename(1:10);
-
-        id = find(dates_all == datename);
-
-        if isempty(id)
-            areas_all{i} = '';
-            power_all{i} = '';
-            period_all{i} = '';
-        else
-            areas_all{i} = subtbl.Area_formatted{id};
-            power_all{i} = subtbl.Power_formatted{id};
-            period_all{i} = subtbl.Choice_outcome_formatted{id};
-        end
-
-
-
-    end
-
-    animalinfo(animalID).areas = areas_all;
-    animalinfo(animalID).power = power_all;
-    animalinfo(animalID).period = period_all;
-end
-
-savefilename = fullfile('optodata/', expfitdate, 'opto_hmm_info.mat');
+savefilename = fullfile('optodata/', expfitdate, 'wf_hmm_info.mat');
 
 if exist(savefilename, 'file')
     response = questdlg(sprintf('File exists: %s, overwrite?', savefilename));

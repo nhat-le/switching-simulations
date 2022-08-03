@@ -1,27 +1,20 @@
 % script for analysis of opto animals (f26, 27, 29, 32) 
 % modified on 4.2.2022
 
-paths = pathsetup('opto');
-expfitdate = '080122';
-opts.rootdir = fullfile(paths.opto_expdatapath, expfitdate);
+paths = pathsetup('hmm1p');
+expfitdate = '050522';
+opts.rootdir = fullfile(paths.expdatapath, expfitdate);
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));
 mdltypes = 1:2;
 mdlids = 1:10;
 opts.filter_blocks_by_lengths = 0;
 opts.weighted = 1;
-opts.prob = 1; %80-20 world
 opts.python_assist = 0;
 opts.effmethod = 'sim';
-opts.savefile = 1;
+opts.savefile = 0;
 % opts.model_name = 'decoding_common_010522_withsvmMdl_knn_svm_v10_tsne.mat';
-
-if opts.prob == 1
-    opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10_tsne.mat';
-else
-    opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10b_tsne.mat';
-
-end
+opts.model_name = 'decoding_common_010522_withknnMdl_knn_svm_v10_tsne.mat';
 opts.svmmodelpath = paths.decodingmodelpath;
 
 
@@ -37,19 +30,15 @@ num_state5 = [];
 for i = 24
     opts.mdltype = i;
     opts.mdlid = 5;
+    [~, ~, statesFlat, ~] = apply_model(aggparams_native, aggmeans_native, opts);
 
-    if opts.prob == 1
-        [~, ~, statesFlat, ~] = apply_model(aggparams_native, aggmeans_native, opts);
-    else
-        [~, ~, statesFlat, ~] = apply_model_prob(aggparams_native, aggmeans_native, opts);
-
-    end
     fprintf('i=%d, num states 6 = %d\n', i, sum(statesFlat == 6));
 end
 
 %% classify and visualize state distributions
 paths = pathsetup('matchingsim');
 
+% averaging two seeds
 % averaging two seeds
 animalModeInfo = struct;
 % animal names and K
@@ -58,14 +47,19 @@ animalModeInfo.K = [];
 for i = 1:numel(folders)
     parts = strsplit(folders(i).name, '_');
     animalModeInfo.animals{i} = parts{1};
-    blockfitfile = dir(fullfile(sprintf('%s/%s_hmmblockfit*.mat', ...
-        folders(1).folder, parts{1})));
+    blockfitfile = dir(fullfile(sprintf('%s/%s_hmmblockfit_*%s.mat', ...
+        folders(1).folder, parts{1}, expfitdate)));
     assert(numel(blockfitfile) == 1);
     load(fullfile(blockfitfile(1).folder, blockfitfile(1).name), 'transmat');
-    animalModeInfo.K(i) = size(transmat, 1);
+    K_from_file = size(transmat, 1);
+    K_from_aggparams = size(aggparams_native{i}, 2);
+    assert(K_from_file == K_from_aggparams);
+
+    animalModeInfo.K(i) = K_from_aggparams;
 
 end
-animalinfo = struct;
+
+counter = 1;
 
 for i = 1:numel(animalModeInfo.K)
     % load file
@@ -90,14 +84,14 @@ for i = 1:numel(animalModeInfo.K)
     
     zclassified = zstates;
     
-    n_zstates = max(zstates) + 1;
+    n_zstates = K;
     assert(n_zstates == K);
     assert(n_zstates == size(params, 2))
     
     % make sure the states are in the right order
     assert(sum(sum(aggparams_native{selection}(1:3,:) ~= params)) == 0);
     
-    counter = K * (find(selection) - 1) + 1;
+%     counter = K * (find(selection) - 1) + 1;
     statesFlat_extracted = statesFlat(counter : counter + n_zstates - 1);
     for istate = 1:n_zstates
         zclassified(zstates == istate - 1) = statesFlat_extracted(istate);
@@ -172,49 +166,43 @@ end
 close(f)
 
 %% Parse the session info
-fprintf('Parsing the log table...\n');
-logtbl = readtable(fullfile('optodata/', expfitdate, 'exprecord.xlsx'), ...
-    'Sheet', 'Experiments (opto)');
+fprintf('Parsing the log files...\n');
+paths = pathsetup('hmm3p');
+load(fullfile(paths.glmpath, 'e53datacombined.mat'));
 
-for animalID = 1:numel(animalinfo)
-    sessnames = animalinfo(animalID).sessnames;
-    name = upper(animalModeInfo.animals{animalID});
+for animal = 1:numel(animalModeInfo.animals)
+    animalname = animalModeInfo.animals{animal};
+    sessnames = animalinfo(animal).sessnames;
+    name = upper(animalModeInfo.animals{animal});
 
-    subtbl = logtbl(strcmp(logtbl.Animal_formatted, name), :);
-    dates_all = subtbl.Date;
-    dates_all.Format = 'dd-MM-yyyy';
-
-    areas_all = {}; %visual/frontal/rsc/motor
-    power_all = {}; %high/low
-    period_all = {}; %choice/outcome
+    depths_lst = [];
+ 
 
     for i = 1:size(sessnames, 1)
-        % find the corresponding row in logtbl
-        filename = sessnames(i,:);
-        datename = filename(1:10);
-
-        id = find(dates_all == datename);
-
-        if isempty(id)
-            areas_all{i} = '';
-            power_all{i} = '';
-            period_all{i} = '';
+        sess_date = sessnames(i,1:10);
+        sess_date = datetime(sess_date);
+        sess_date.Format = 'MMddyyyy';
+%         fprintf('%s\n', sess_date);
+        if sum(strcmp(datestrings, string(sess_date)) & strcmpi(animalname, animalID))
+            depths = depthlst(strcmpi(animalname, animalID) & ...
+                strcmp(datestrings, string(sess_date)));
+            assert(numel(unique(depths)) == 1)
+            depths_lst(i) = depths(1);
+            disp(animalname)
         else
-            areas_all{i} = subtbl.Area_formatted{id};
-            power_all{i} = subtbl.Power_formatted{id};
-            period_all{i} = subtbl.Choice_outcome_formatted{id};
+            depths_lst(i) = nan;
+
         end
-
-
+        
 
     end
 
-    animalinfo(animalID).areas = areas_all;
-    animalinfo(animalID).power = power_all;
-    animalinfo(animalID).period = period_all;
+    animalinfo(animal).depths = depths_lst;
+  
 end
 
-savefilename = fullfile('optodata/', expfitdate, 'opto_hmm_info.mat');
+%%
+savefilename = fullfile(paths.expdatapath, expfitdate, 'opto_hmm_info.mat');
 
 if exist(savefilename, 'file')
     response = questdlg(sprintf('File exists: %s, overwrite?', savefilename));
@@ -232,7 +220,6 @@ else
     save(savefilename, 'opts', 'animalModeInfo', 'folders', 'animalinfo')
     fprintf('File saved!\n');
 end
-
 
 
 

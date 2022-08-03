@@ -50,6 +50,7 @@ switch project
         
     case 'opto'
         out.opto_rigboxpath = '/Volumes/GoogleDrive/Other computers/ImagingDESKTOP-AR620FK/LocalExpData/';
+        out.rigboxpath = '/Users/minhnhatle/Dropbox (MIT)/Nhat/Rigbox';
         out.opto_expdatapath = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/optodata';
         out.default_fitrange = '/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/processed_data/expdata/102121/fitranges_122221.mat';
         out.decodingmodelpath = '/Users/minhnhatle/Dropbox (MIT)/Sur/conferences_and_manuscripts/DynamicForagingPaper/NatureCommunications/Submission 1/code/processed_data/decoding/models';

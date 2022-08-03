@@ -1,12 +1,13 @@
-animals = {'f27', 'f29', 'f32', 'f35', 'f36'};
-opts.version = '080222';
-paths = pathsetup('opto');
+% animals = {'e46', 'e54', 'e56', 'f01', 'f02', 'fh02', 'fh03'};
+animals = {'e53'};
+opts.version = '050522';
+paths = pathsetup('hmm3p');
 opts.savefile = 1;
 
 f = waitbar(0);
 
 % copy the fitrange file if not exists
-savefolder = fullfile(paths.opto_expdatapath, opts.version);
+savefolder = fullfile(paths.expdatapath, opts.version);
 fitrangepath = sprintf('%s/fitranges_%s.mat', savefolder, opts.version);
 
 if ~exist(savefolder, 'dir')
@@ -19,10 +20,11 @@ if ~exist(fitrangepath, 'file')
     copyfile(paths.default_fitrange, fitrangepath); 
 end
 
-for i = 1:numel(animals)
+%%
+for i = 1 :numel(animals)
     waitbar(i/numel(animals), f, sprintf('Processing animal %s', animals{i}));
-    opts.root = fullfile(paths.opto_rigboxpath, animals{i});
-    opts.savepath = fullfile(paths.opto_expdatapath, opts.version, sprintf('%s_all_sessions_%s.mat', animals{i}, opts.version));
+    opts.root = fullfile(paths.rigboxpath, animals{i});
+    opts.savepath = fullfile(paths.expdatapath, opts.version, sprintf('%s_all_sessions_%s.mat', animals{i}, opts.version));
     process_animal(animals{i}, opts); 
 end
 close(f);
@@ -103,33 +105,13 @@ if opts.savefile && ~exist(opts.savepath, 'file')
     nsess = numel(choices_cell);
        
     idx = find(contains(animals, lower(animal)));
-
-    % Handle cases of new animals
-    if isempty(idx)
-        % determine the first non-zero session
-        sesslengths = cellfun(@(x) numel(x), choices_cell);
-        nonzeroID = 1;
-        while sesslengths(nonzeroID) == 0
-            nonzeroID = nonzeroID + 1;
-        end
-
-        % append to the animal cells
-        animals{end+1} = lower(animal);
-        ranges{end+1} = (nonzeroID - 1) : (nsess - 1);
-        save(fitrangepath, 'ranges', 'animals');
-
-    else
-        assert(numel(idx) == 1);
-        if nsess - 1 > ranges{idx}(end)
-            curr_range = ranges{idx};
-            nextras = nsess - curr_range(end) - 1;
-            ranges{idx}(end + 1 : end + nextras) = curr_range(end) + 1 : nsess - 1;
-            save(fitrangepath, 'ranges', 'animals');
-        end
-    end
-
-
-    
+    assert(numel(idx) == 1);
+%     if nsess - 1 > ranges{idx}(end)
+%         curr_range = ranges{idx};
+%         nextras = nsess - curr_range(end) - 1;
+%         ranges{idx}(end + 1 : end + nextras) = curr_range(end) + 1 : nsess - 1;
+%         save(fitrangepath, 'ranges', 'animals');
+%     end
 
     
 elseif opts.savefile

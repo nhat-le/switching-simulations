@@ -9,7 +9,7 @@ NSTATES = numel(modecounts(1).count_opto{1,1,1});
 
 
 %% Count and aggregate
-stateID = 4;
+stateID = [4];
 mastertbl = table;
 for powerID = 1:2
     for periodID = 1:2
@@ -109,7 +109,7 @@ mdl = fitlm(tbl, ['y_trans ~ CVL + CML + CRL + CFL' ...
 
 
 
-pvals = mdl.Coefficients.pValue;
+pvals = mdl.Coefficients.pValue(2:end);
 level = 0.05;
 bhline = (1:numel(pvals)) * level / numel(pvals);
 figure;
@@ -119,6 +119,8 @@ plot(bhline, 'k--', 'LineWidth', 2);
 mymakeaxis('x_label', 'Hypothesis #', 'y_label', 'Sorted p-values', ...
     'font_size', 25, 'xticks', 1:numel(pvals))
 
+%%
+% tbl
 
 
 function tbl = filter_tbl(rawtbl, conditions)

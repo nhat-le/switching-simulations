@@ -2,27 +2,29 @@
 global NSTATES
 NSTATES = 6;
 clear sessid_lst
-expfitdate = '052922';
-load(fullfile('../optodata/', expfitdate, 'opto_hmm_info.mat'));
+% expfitdate = '062322_f39';
+expfitdate = '080122';
+load(fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/optodata/', expfitdate, 'opto_hmm_info.mat'));
 
-animalID = 1; 
+animalID = 5; 
 % outcome inactivation
-sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'Fullfield0OF');
-sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield15OF');
-sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF');
-sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'Fullfield60OF');
-sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'Fullfield120O');
-sessid_lst6 = strcmpi(animalinfo(animalID).areas, 'Fullfield230OF') | strcmpi(animalinfo(animalID).areas, 'Fullfield240OF');
+% sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'Fullfield0OF');
+% sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield15OF');
+% sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF');
+% sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'Fullfield60OF');
+% sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'Fullfield120OF');
+% sessid_lst6 = strcmpi(animalinfo(animalID).areas, 'Fullfield230OF') | strcmpi(animalinfo(animalID).areas, 'Fullfield240OF');
 
 
 % choice inactivation
-% sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'FullfieldC60');
-% sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'FullfieldC120');
-% sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'FullfieldC240');
-% sessid_lst4 = []; %strcmpi(animalinfo(animalID).areas, 'Fullfield230OF') | strcmpi(animalinfo(animalID).areas, 'Fullfield240OF');
+sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'Fullfield0CF');
+sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield30CF');
+sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'Fullfield60CF');
+sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'Fullfield120CF');
+sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'Fullfield240CF');
 
-sesslst_all = {sessid_lst1, sessid_lst2, sessid_lst3, sessid_lst4, sessid_lst5, sessid_lst6};
-powers = [0 15 30 60 120 240];
+sesslst_all = {sessid_lst1, sessid_lst2, sessid_lst3, sessid_lst4, sessid_lst5};
+powers = [0 30 60 120 240];
 
 % Load the data
 animal = animalinfo(animalID).animal;
@@ -62,24 +64,32 @@ end
 %% collect and plot
 
 figure;
+figure;
 subplot(131)
-errorbar(powers, parr_means(:,1), parr_stds(:,1), 'o');
+errorbar(powers, parr_means(:,1), parr_stds(:,1), 'o', 'Color', '#333191', ...
+    'MarkerFaceColor', '#333191', 'MarkerEdgeColor', '#333191', 'LineWidth', 1);
 xlim([0 250])
+ylim([0, 3.5])
 mymakeaxis('x_label', 'Power (mW)', 'xytitle', 'Offset', 'xticks', 0:100:200)
 
 subplot(132)
-errorbar(powers, parr_means(:,2), parr_stds(:,2), 'o');
+errorbar(powers, parr_means(:,2), parr_stds(:,2), 'o', 'Color', '#333191', ...
+    'MarkerFaceColor', '#333191', 'MarkerEdgeColor', '#333191', 'LineWidth', 1);
 xlim([0 250])
+ylim([0, 3.5])
+
 
 mymakeaxis('x_label', 'Power (mW)', 'xytitle', 'Slope', 'xticks', 0:100:200)
 
 
 subplot(133)
-errorbar(powers, parr_means(:,3), parr_stds(:,3), 'o');
+errorbar(powers, parr_means(:,3), parr_stds(:,3), 'o', 'Color', '#333191', ...
+    'MarkerFaceColor', '#333191', 'MarkerEdgeColor', '#333191', 'LineWidth', 1);
 xlim([0 250])
+ylim([0, 0.4])
+
 
 mymakeaxis('x_label', 'Power (mW)', 'xytitle', 'Lapse', 'xticks', 0:100:200)
-
 
 
 function [perf_opto, perf_noopto] = get_perfs(animalinfo, animalID, sessid_lst)

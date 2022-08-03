@@ -1,5 +1,5 @@
-animals = {'f27', 'f29', 'f32', 'f35', 'f36'};
-opts.version = '080222';
+animals = {'f33'};
+opts.version = '061322';
 paths = pathsetup('opto');
 opts.savefile = 1;
 
@@ -103,6 +103,7 @@ if opts.savefile && ~exist(opts.savepath, 'file')
     nsess = numel(choices_cell);
        
     idx = find(contains(animals, lower(animal)));
+    assert(numel(idx) == 1);
 
     % Handle cases of new animals
     if isempty(idx)
@@ -110,26 +111,20 @@ if opts.savefile && ~exist(opts.savepath, 'file')
         sesslengths = cellfun(@(x) numel(x), choices_cell);
         nonzeroID = 1;
         while sesslengths(nonzeroID) == 0
-            nonzeroID = nonzeroID + 1;
-        end
+            no
 
-        % append to the animal cells
-        animals{end+1} = lower(animal);
-        ranges{end+1} = (nonzeroID - 1) : (nsess - 1);
-        save(fitrangepath, 'ranges', 'animals');
 
     else
-        assert(numel(idx) == 1);
-        if nsess - 1 > ranges{idx}(end)
-            curr_range = ranges{idx};
-            nextras = nsess - curr_range(end) - 1;
-            ranges{idx}(end + 1 : end + nextras) = curr_range(end) + 1 : nsess - 1;
-            save(fitrangepath, 'ranges', 'animals');
-        end
+        assert(numel(idx)) == 1;
     end
 
 
-    
+    if nsess - 1 > ranges{idx}(end)
+        curr_range = ranges{idx};
+        nextras = nsess - curr_range(end) - 1;
+        ranges{idx}(end + 1 : end + nextras) = curr_range(end) + 1 : nsess - 1;
+        save(fitrangepath, 'ranges', 'animals');
+    end
 
     
 elseif opts.savefile
