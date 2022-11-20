@@ -1,150 +1,146 @@
-cd('/Users/minhnhatle/Documents/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/custom_scripts')
-% File for processing the animal info
-% that was parsed by `hmmblockstate_visualize_022422_tsne_Nmodes.m`
-% and `hmmstate_decode_single_animals_022422_tsne_Nmodes.m`
+% modified from: process_animal_info.m
+% for processing animal info of f33, 34, f37, 38
 global NSTATES
 NSTATES = 6;
-expfitdate = '062022_100-0';
+expfitdate = '080122';
 
 % Load the data
-load(fullfile('/Users/minhnhatle/Documents/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/optodata/', expfitdate, 'opto_hmm_info.mat'));
+load(fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/optodata', expfitdate, 'opto_hmm_info.mat'));
 
 
+%% 
+% Plot composition over time for F26
+animalID = 1;
+composition = animalinfo(animalID).composition;
 
-%% Extract fullfield/outcome sessions with high power based on criteria
-animal = 'f27';
-out_MO = get_hmm_opto_frac(animalinfo, animal, 'Motor', 'Outcome');
-out_FO = get_hmm_opto_frac(animalinfo, animal, 'Frontal', 'Outcome');
-out_VO = get_hmm_opto_frac(animalinfo, animal, 'Visual', 'Outcome');
-out_RO = get_hmm_opto_frac(animalinfo, animal, 'Rsc', 'Outcome');
+%session 42 for f27 and f29 are corrupted (date: 2021-11-14)
 
-lst_outcome = {out_MO, out_FO, out_VO, out_RO};
-labels = {'Motor', 'Frontal', 'Visual', 'RSC'};
+out = helper.get_flags(animalinfo, animalID);
 
-out_MC = get_hmm_opto_frac(animalinfo, animal, 'Motor', 'Choice');
-out_FC = get_hmm_opto_frac(animalinfo, animal, 'Frontal', 'Choice');
-out_VC = get_hmm_opto_frac(animalinfo, animal, 'Visual', 'Choice');
-out_RC = get_hmm_opto_frac(animalinfo, animal, 'Rsc', 'Choice');
-
-lst_choice = {out_MC, out_FC, out_VC, out_RC};
+% Comment out for single animal plot (all sessions with information)
+make_plot_states_and_opto(out.power_flags, out.area_flags, out.period_flags, composition,...
+    animalinfo(animalID).animal);
 
 
+%% Extract based on criteria
+power_criteria = {'low', 'high'};
+area_criteria = {'frontal', 'visual', 'rsc', 'motor'};
+period_criteria = {'outcome', 'choice'};
 
-%% Plot the fraction for each region
-lst = lst_outcome;
 
-for i = 1:4
-    figure('Position', [440,485,782,313]);
-    msize = 10;
-    xvals_opto = (1:6) + 0.1;
-    xvals_no_opto = (1:6) - 0.1;
+% Perform the parsing for all animals
+modecounts = struct;
+for animalID = 1:4 %numel(animalinfo)
+    fprintf('Processing animal %d of %d...\n', animalID, numel(animalinfo));
+    out = helper.get_flags_300um(animalinfo, animalID);
     
-    l3 = errorbar(xvals_opto, lst{i}.opto_frac, lst{i}.opto_err, 'bs',...
-        'MarkerSize', msize, 'MarkerFaceColor', 'b');
-    hold on
-    l3b = errorbar(xvals_no_opto, lst{i}.noopto_frac, lst{i}.noopto_err, 'ks',...
-        'MarkerSize', msize, 'MarkerFaceColor', 'k');
-
-%     title(labels{i})
-
-    mymakeaxis('x_label', 'HMM States', 'y_label', 'Fraction', 'xticks', 1:6,...
-        'xytitle', labels{i})
-    legend([l3, l3b], {'ON', 'OFF'}, ...
-        'FontSize', 15)
-
-end
-
-
-%% Plot the transition functions
-lst = lst_outcome;
-
-for i = 1:4
-    figure;
-    l1 = errorbar(1:size(lst{i}.perf_opto, 2), mean(lst{i}.perf_opto, 1), ...
-        std(lst{i}.perf_opto, [], 1) / sqrt(size(lst{i}.perf_opto, 1)), 'b', 'LineWidth', 2);
-    hold on
-    l2 = errorbar(1:size(lst{i}.perf_noopto, 2), mean(lst{i}.perf_noopto, 1), ...
-        std(lst{i}.perf_noopto, [], 1) / sqrt(size(lst{i}.perf_noopto, 1)), 'k', 'LineWidth', 2);
-    mymakeaxis('x_label', 'Trials in block', 'y_label', 'P(Correct)', ...
-        'font_size', 25, 'xytitle', animal, 'xticks', 0:5:25, 'xytitle', labels{i})
-    legend([l1, l2], {'ON', 'OFF'}, 'FontSize', 15)
-end
-
-
-
-
-
-
-
-
-
-function out = get_hmm_opto_frac(animalinfo, animal, region, period)
-% animal: animal name
-% sessid_lst: list of session ids to examine
-% animalID: string, ID of animal to investigate
-% returns: out, a structure with the counts of the z-classes and fractions
-% together with the corresponding error bars
-
-animal_cands = strcmp({animalinfo.animal}, animal);
-assert(sum(animal_cands) == 1)
-animalID = find(animal_cands);
-
-sessid_lst = strcmp(animalinfo(animalID).areas, region) & ...
-    strcmp(animalinfo(animalID).period, period);
-
-
-zclasses = animalinfo(animalID).zclassified(sessid_lst);
-
-opto = animalinfo(animalID).opto(sessid_lst);
-obs = animalinfo(animalID).obs_splits(sessid_lst);
-
-out.animal = animalinfo(animalID).animal;
-
-count_opto = zeros(1, 6);
-count_no_opto = zeros(1, 6);
-
-% count number of blocks in each state
-for id = 1:numel(opto)
-    opto_sess = opto{id};
-    zclass_sess = zclasses{id};
-
-    % TODO IMPORTANT: TO INVESTIGATE MODES 5 AND 6 FOR F32, TEMPORARY HACK
-    if strcmp(animal, 'f32')
-        zclass_sess(zclass_sess == 5) = 6;
+    
+    zclasses = animalinfo(animalID).zclassified;
+    opto = animalinfo(animalID).opto;
+    obs = animalinfo(animalID).obs_splits;
+    modecounts(animalID).animal = animalinfo(animalID).animal;
+    
+    count_opto_cell = cell(numel(power_criteria), numel(area_criteria),...
+        numel(period_criteria));
+    count_no_opto_cell = cell(numel(power_criteria), numel(area_criteria),...
+        numel(period_criteria));
+    transfunc_opto_cell = cell(numel(power_criteria), numel(area_criteria),...
+        numel(period_criteria));
+    transfunc_no_opto_cell = cell(numel(power_criteria), numel(area_criteria),...
+        numel(period_criteria));
+    
+    for i = 1:numel(power_criteria)
+        for j = 1:numel(area_criteria)
+            for k = 1:numel(period_criteria)
+                power_criterion = power_criteria{i};
+                areas_criterion = area_criteria{j};
+                period_criterion = period_criteria{k};
+                
+                [count_opto, count_no_opto, transfunc_opto, transfunc_no_opto] = ...
+                    count_block_modes_from_criteria(zclasses, ...
+                    opto, obs, out.power_flags, out.area_flags, ...
+                    out.period_flags, power_criterion, areas_criterion, period_criterion);
+                count_opto_cell{i,j,k} = count_opto;
+                count_no_opto_cell{i,j,k} = count_no_opto;
+                transfunc_opto_cell{i,j,k} = transfunc_opto;
+                transfunc_no_opto_cell{i,j,k} = transfunc_no_opto;
+%                 If we instead want to plot, uncomment this block of code
+%                 plot_block_modes_from_criteria(zclasses, ...
+%                     opto, out.power_flags, out.area_flags, ...
+%                     out.period_flags, power_criterion, areas_criterion, period_criterion)
+            end
+        end
     end
-
-    for z = 1:6
-        zcount_opto = sum(zclass_sess(opto_sess == 1) == z);
-        zcount_no_opto = sum(zclass_sess(opto_sess == 0) == z);
-
-        count_opto(z) = count_opto(z) + zcount_opto;
-        count_no_opto(z) = count_no_opto(z) + zcount_no_opto;
-
-    end
+    
+    modecounts(animalID).count_opto = count_opto_cell;
+    modecounts(animalID).count_no_opto = count_no_opto_cell;
+    modecounts(animalID).power_criteria = power_criteria;
+    modecounts(animalID).area_criteria = area_criteria;
+    modecounts(animalID).period_criteria = period_criteria;
+    modecounts(animalID).transfunc_opto = transfunc_opto_cell;
+    modecounts(animalID).transfunc_no_opto = transfunc_no_opto_cell;
+    modecounts(animalID).notes = 'count_opto(i,j,k) corresponds to power i, area j, period k';
 end
 
-% Mean transition function
-perf_opto = [];
-perf_noopto = [];
-for i = 1:numel(obs)
-    opto_extract = obs{i}(opto{i} == 1, :);
-    noopto_extract = obs{i}(opto{i} == 0, :);
-    perf_opto = [perf_opto; opto_extract];
-    perf_noopto = [perf_noopto; noopto_extract]; 
+% save
+savefilename = fullfile('optodata/', expfitdate, 'modecounts.mat');
+
+
+if exist(savefilename, 'file')
+    response = questdlg(sprintf('File exists: %s, overwrite?', savefilename));
+    switch response
+        case 'Yes'
+            save(savefilename, 'modecounts');
+            fprintf('File overwritten\n');
+        case 'No'
+            fprintf('Skipped saving...\n');          
+        case 'Cancel'
+            error('Saving cancelled')
+    end 
+    
+else
+    save(savefilename, 'modecounts')
+    fprintf('File saved!\n');
 end
 
 
-out.perf_opto = perf_opto;
-out.perf_noopto = perf_noopto;
-out.sessid_lst = sessid_lst;
-out.count_opto = count_opto;
-out.count_no_opto = count_no_opto;
-out.opto_frac = count_opto / sum(count_opto);
-out.noopto_frac = count_no_opto / sum(count_no_opto);
-out.opto_err = sqrt(out.opto_frac .* (1 - out.opto_frac) ./ sum(count_opto));
-out.noopto_err = sqrt(out.noopto_frac .* (1 - out.noopto_frac) ./ sum(count_no_opto));
-
-end
+% 
+% function out = get_flags(animalinfo, animalID)
+% % animalinfo: struct saved by previous analysis
+% % animalid: id from 1 - n of animal of interest
+% % returns: out, structure containing all flags extracted from the animalinfo
+% 
+% % Parse information for the animal for each session
+% opto_flag = cellfun(@(x) sum(x) > 0, animalinfo(animalID).opto);
+% low_power_flag = cellfun(@(x) strcmp(x, 'Low'), animalinfo(animalID).power);
+% high_power_flag = cellfun(@(x) strcmp(x, 'High'), animalinfo(animalID).power);
+% frontal_flag = cellfun(@(x) contains(x, 'Frontal') & ~contains(x, 'Motor'), ...
+%     animalinfo(animalID).areas);
+% motor_flag = cellfun(@(x) contains(x, 'Motor') & ~contains(x, 'Visual'), ...
+%     animalinfo(animalID).areas);
+% rsc_flag = cellfun(@(x) contains(x, 'Rsc') & ~contains(x, 'Motor'), ...
+%     animalinfo(animalID).areas);
+% visual_flag = cellfun(@(x) contains(x, 'Visual') & ~contains(x, 'Motor'), ...
+%     animalinfo(animalID).areas);
+% choice_flag = cellfun(@(x) contains(x, 'Choice'), ...
+%     animalinfo(animalID).period);
+% outcome_flag = cellfun(@(x) contains(x, 'Outcome'), ...
+%     animalinfo(animalID).period);
+% 
+% % make sure all flags are of the same size
+% assert(max([numel(opto_flag), numel(low_power_flag), numel(frontal_flag),...
+%     numel(motor_flag), numel(rsc_flag), numel(visual_flag)]) == numel(rsc_flag));
+% assert(min([numel(opto_flag), numel(low_power_flag), numel(frontal_flag),...
+%     numel(motor_flag), numel(rsc_flag), numel(visual_flag)]) == numel(rsc_flag));
+% % assert(sum(low_power_flag + high_power_flag ~= opto_flag) == 0);
+% % Now we will gather all blocks with the right opto information
+% 
+% out.power_flags = {low_power_flag, high_power_flag};
+% out.area_flags = {frontal_flag, motor_flag, visual_flag, rsc_flag};
+% out.period_flags = {choice_flag, outcome_flag};
+% 
+% 
+% end
 
 
 
@@ -434,4 +430,60 @@ if numel(opto_extracted) > 0
 end
 
 end
+
+
+
+% function out = get_flags(animalinfo, animalID)
+% % Inputs: animalinfo: the struct obtained by running opto_hmmblockstate_analysis.m
+% % animalID: int, id of animal to analyze
+% % Returns a struct containing the flags for the animal
+% 
+% % Parse information for the animal for each session
+% opto_flag = cellfun(@(x) sum(x) > 0, animalinfo(animalID).opto);
+% low_power_flag = cellfun(@(x) strcmp(x, 'Low'), animalinfo(animalID).power);
+% high_power_flag = cellfun(@(x) strcmp(x, 'High'), animalinfo(animalID).power);
+% frontal_flag = cellfun(@(x) contains(x, 'Frontal') & ~contains(x, 'Motor'), ...
+%     animalinfo(animalID).areas);
+% motor_flag = cellfun(@(x) contains(x, 'Motor') & ~contains(x, 'Visual'), ...
+%     animalinfo(animalID).areas);
+% rsc_flag = cellfun(@(x) contains(x, 'Rsc') & ~contains(x, 'Motor'), ...
+%     animalinfo(animalID).areas);
+% visual_flag = cellfun(@(x) contains(x, 'Visual') & ~contains(x, 'Motor'), ...
+%     animalinfo(animalID).areas);
+% choice_flag = cellfun(@(x) contains(x, 'Choice'), ...
+%     animalinfo(animalID).period);
+% outcome_flag = cellfun(@(x) contains(x, 'Outcome'), ...
+%     animalinfo(animalID).period);
+% 
+% % make sure all flags are of the same size
+% assert(max([numel(opto_flag), numel(low_power_flag), numel(frontal_flag),...
+%     numel(motor_flag), numel(rsc_flag), numel(visual_flag)]) == numel(rsc_flag));
+% assert(min([numel(opto_flag), numel(low_power_flag), numel(frontal_flag),...
+%     numel(motor_flag), numel(rsc_flag), numel(visual_flag)]) == numel(rsc_flag));
+% % assert(sum(low_power_flag + high_power_flag ~= opto_flag) == 0);
+% % Now we will gather all blocks with the right opto information
+% 
+% out.power_flags = {low_power_flag, high_power_flag};
+% out.area_flags = {frontal_flag, motor_flag, visual_flag, rsc_flag};
+% out.period_flags = {choice_flag, outcome_flag};
+% 
+% end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

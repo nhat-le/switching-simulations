@@ -1,4 +1,6 @@
-cd('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/custom_scripts')
+addpath('/Users/minhnhatle/Documents/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis')
+
+cd('/Users/minhnhatle/Documents/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/custom_scripts')
 % File for processing the animal info
 % that was parsed by `hmmblockstate_visualize_022422_tsne_Nmodes.m`
 % and `hmmstate_decode_single_animals_022422_tsne_Nmodes.m`
@@ -52,73 +54,6 @@ noopto_err_f27 = sqrt(noopto_frac_f27 .* (1 - noopto_frac_f27) ./ sum(count_no_o
 % plot(count_opto ./ sum(count_opto))
 % hold on
 % plot(count_no_opto ./ sum(count_no_opto))
-
-
-%%
-animalID = 3; %f29 data
-% sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield240O') | strcmp(animalinfo(animalID).areas, 'Fullfield230O');
-sessid_lst = strcmp(animalinfo(animalID).areas, 'Fullfield120O');
-
-
-zclasses = animalinfo(animalID).zclassified(sessid_lst);
-opto = animalinfo(animalID).opto(sessid_lst);
-obs = animalinfo(animalID).obs_splits(sessid_lst);
-animal = animalinfo(animalID).animal;
-
-count_opto = zeros(1, 6);
-count_no_opto = zeros(1, 6);
-
-% count number of blocks in each state
-for id = 1:numel(opto)
-    opto_sess = opto{id};
-    zclass_sess = zclasses{id};
-
-    for z = 1:6
-        zcount_opto = sum(zclass_sess(opto_sess == 1) == z);
-        zcount_no_opto = sum(zclass_sess(opto_sess == 0) == z);
-
-        count_opto(z) = count_opto(z) + zcount_opto;
-        count_no_opto(z) = count_no_opto(z) + zcount_no_opto;
-
-    end
-end
-
-count_opto_f29 = count_opto;
-count_no_opto_f29 = count_no_opto;
-opto_frac_f29 = count_opto / sum(count_opto);
-noopto_frac_f29 = count_no_opto / sum(count_no_opto);
-opto_err_f29 = sqrt(opto_frac_f29 .* (1 - opto_frac_f29) ./ sum(count_opto));
-noopto_err_f29 = sqrt(noopto_frac_f29 .* (1 - noopto_frac_f29) ./ sum(count_no_opto));
-
-
-
-%% Plot summary for f27/ f29
-figure('Position', [440,485,782,313]);
-msize = 10;
-xvals_opto = (1:6) + 0.1;
-xvals_no_opto = (1:6) - 0.1;
-l3 = errorbar(xvals_opto, opto_frac_f27, opto_err_f27, 'bs',...
-    'MarkerSize', msize, 'MarkerFaceColor', 'b');
-hold on
-l3b = errorbar(xvals_no_opto, noopto_frac_f27, noopto_err_f27, 'ks',...
-    'MarkerSize', msize, 'MarkerFaceColor', 'k');
-
-l4 = errorbar(xvals_opto, opto_frac_f29, opto_err_f29, 'bd',...
-    'MarkerSize', msize, 'MarkerFaceColor', 'b');
-hold on
-l4b = errorbar(xvals_no_opto, noopto_frac_f29, noopto_err_f29, 'kd',...
-    'MarkerSize', msize, 'MarkerFaceColor', 'k');
-
-for i = 1:6
-    plot([xvals_no_opto(i) xvals_opto(i)], [noopto_frac_f27(i), ...
-            opto_frac_f27(i)], 'k');
-    hold on
-    plot([xvals_no_opto(i) xvals_opto(i)], [noopto_frac_f29(i), ...
-            opto_frac_f29(i)], 'k');   
-end
-mymakeaxis('x_label', 'HMM States', 'y_label', 'Fraction', 'xticks', 1:6)
-legend([l3, l3b, l4, l4b], {'f27 ON', 'f27 OFF', 'f29 ON', 'f29 OFF'}, ...
-    'FontSize', 15)
 
 
 
@@ -240,7 +175,7 @@ if exist(savefilename, 'file')
     end 
     
 else
-    save(savefilename, 'modecounts')
+%     save(savefilename, 'modecounts')
     fprintf('File saved!\n');
 end
 

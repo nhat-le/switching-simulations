@@ -2,7 +2,8 @@
 % modified on 4.2.2022
 
 paths = pathsetup('opto');
-expfitdate = '080122';
+% expfitdate = '080122';
+expfitdate = '090422';
 opts.rootdir = fullfile(paths.opto_expdatapath, expfitdate);
 folders = dir(fullfile(opts.rootdir, ...
     sprintf('*hmmblockfit_*%s.mat', expfitdate)));

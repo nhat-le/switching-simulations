@@ -8,23 +8,23 @@ load(fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigu
 
 animalID = 2; 
 % outcome inactivation
-% sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'Fullfield0OF');
-% % sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield15OF');
-% sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF');
-% sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'Fullfield60OF');
-% sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'Fullfield120OF');
-% sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'Fullfield230OF') | strcmpi(animalinfo(animalID).areas, 'Fullfield240OF');
+sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'Fullfield0OF');
+% sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield15OF');
+sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF');
+sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'Fullfield60OF');
+sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'Fullfield120OF');
+sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'Fullfield230OF') | strcmpi(animalinfo(animalID).areas, 'Fullfield240OF');
 
 
 % choice inactivation
-sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'FullfieldC15');
-sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'FullfieldC30');
-sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'FullfieldC60');
-sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'FullfieldC120');
-sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'FullfieldC240');
+% sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'FullfieldC15');
+% sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'FullfieldC30');
+% sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'FullfieldC60');
+% sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'FullfieldC120');
+% sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'FullfieldC240');
 
 sesslst_all = {sessid_lst1, sessid_lst2, sessid_lst3, sessid_lst4, sessid_lst5};
-powers = [15 30 60 120 240];
+powers = [5 30 60 120 240];
 
 % Load the data
 animal = animalinfo(animalID).animal;
@@ -108,6 +108,12 @@ ylim([0, 0.4])
 
 mymakeaxis('x_label', 'Power (mW)', 'xytitle', 'Lapse', 'xticks', 0:100:200)
 
+%% stats
+mdl = fitlm(log([5 30 60 120 240]), parr_means(:, 3))
+
+%%
+figure;
+plot(log([1 30 60 120 240]), parr_means(:, 3), 'x');
 
 
 

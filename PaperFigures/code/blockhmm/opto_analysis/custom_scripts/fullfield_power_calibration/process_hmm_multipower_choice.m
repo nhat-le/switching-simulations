@@ -1,10 +1,10 @@
-cd('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/custom_scripts')
+cd('/Users/minhnhatle/Documents/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/custom_scripts')
 % File for processing opto effect on HMM state composition,
 % depending on the laser power
 
 global NSTATES
 NSTATES = 6;
-animalname = 'f39';
+animalname = 'f27';
 
 
 switch animalname

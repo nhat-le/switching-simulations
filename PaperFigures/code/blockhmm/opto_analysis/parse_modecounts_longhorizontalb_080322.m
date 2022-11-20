@@ -23,21 +23,21 @@ end
 %%
 period_criterion = 'choice';
 nareas = 4;
-msize = 4;
+msize = 8;
 stateIDs = [2,3];
-delta = 0.1; %how far apart opto/non-opto columns are
-xvals_OFF = (1:nareas) - delta; %+ (animalID - 3) * delta / 3;
-xvals_ON = (1:nareas) + delta; %+ (animalID - 3) * delta / 3;
+delta = 0.5; %how far apart opto/non-opto columns are
+xvals_OFF = linspace(1, 8, nareas) - delta; %+ (animalID - 3) * delta / 3;
+xvals_ON = linspace(1, 8, nareas) + delta; %+ (animalID - 3) * delta / 3;
 
-figure('Position', [246,566,1114,232]);
+figure('Position', [115,272,1225,239]);
 [on1, off1] = plot_mode_fractions(modecounts, xvals_ON, xvals_OFF, [1], period_criterion, msize);
 
-[on2, off2] = plot_mode_fractions(modecounts, xvals_ON + 5, xvals_OFF + 5, [2,3], period_criterion, msize);
+[on2, off2] = plot_mode_fractions(modecounts, xvals_ON + 12, xvals_OFF + 12, [2,3,4], period_criterion, msize);
 
-[on3, off3] = plot_mode_fractions(modecounts, xvals_ON + 10, xvals_OFF + 10, [4], period_criterion, msize);
+% [on3, off3] = plot_mode_fractions(modecounts, xvals_ON + 10, xvals_OFF + 10, [4], period_criterion, msize);
 
 
-[on4, off4] = plot_mode_fractions(modecounts, xvals_ON + 15, xvals_OFF + 15, [5,6], period_criterion, msize);
+[on3, off3] = plot_mode_fractions(modecounts, xvals_ON + 24, xvals_OFF + 24, [5,6], period_criterion, msize);
 
 
 region_labels = ioutils.capitalize(modecounts(1).area_criteria);
@@ -45,9 +45,29 @@ region_labels{3} = 'RSC';
 region_labels = repmat(region_labels, [1, 4]);
 
 ylim([0, 1])
-mymakeaxis('x_label', 'Area', 'y_label', 'Fraction', 'font_size', 10, ...
-    'xticks', [1:4, 6:9, 11:14, 16:19], 'xticklabels', region_labels, ...
+mymakeaxis('x_label', 'Area', 'y_label', 'Fraction', 'font_size', 25, ...
+    'xticks', [xvals_ON, xvals_ON + 12, xvals_ON + 24], 'xticklabels', region_labels, ...
     'yticks', [0, 0.5, 1])
+
+
+%%
+% transformation and stats
+on1_trans = log((on1 + 1e-10) ./ (1 - on1 - 1e-10));
+on2_trans = log((on2 + 1e-10) ./ (1 - on2 - 1e-10));
+on3_trans = log((on3 + 1e-10) ./ (1 - on3 - 1e-10));
+
+off1_trans = log((off1 + 1e-10) ./ (1 - off1 - 1e-10));
+off2_trans = log((off2 + 1e-10) ./ (1 - off2 - 1e-10));
+off3_trans = log((off3 + 1e-10) ./ (1 - off3 - 1e-10));
+
+
+for regionid = 1:4 %frontal, visual, rsc, motor
+    [x1,p1] = ttest(on1_trans(:,regionid), off1_trans(:, regionid));
+    [x2,p2] = ttest(on2_trans(:,regionid), off2_trans(:, regionid));
+    [x3,p3] = ttest(on3_trans(:,regionid), off3_trans(:, regionid));
+    fprintf('region %d, p1 = %.4f, p2 = %.4f, p3 = %.4f\n', regionid, p1, p2, p3);
+end
+
 
 
 % legend(lines, {'f26', 'f27', 'f29', 'f32'}, 'FontSize', 20);

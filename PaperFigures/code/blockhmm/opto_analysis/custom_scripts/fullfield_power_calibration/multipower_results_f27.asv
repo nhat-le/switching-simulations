@@ -3,7 +3,7 @@ global NSTATES
 NSTATES = 6;
 clear sessid_lst
 expfitdate = '052922';
-load(fullfile('/Users/minhnhatle/Documents/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/optodata/', expfitdate, 'opto_hmm_info.mat'));
+load(fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/optodata/', expfitdate, 'opto_hmm_info.mat'));
 
 animalID = 1; 
 epoch = 'outcome';

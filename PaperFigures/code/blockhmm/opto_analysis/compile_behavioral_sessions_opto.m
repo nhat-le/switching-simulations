@@ -1,5 +1,5 @@
-animals = {'f27', 'f29', 'f32', 'f35', 'f36'};
-opts.version = '080222';
+animals = {'f32', 'f35', 'f36', 'f33', 'f34', 'f37', 'f38'};
+opts.version = '090422';
 paths = pathsetup('opto');
 opts.savefile = 1;
 

@@ -6,25 +6,29 @@ expfitdate = '051822';
 load(fullfile('/Users/minhnhatle/Dropbox (MIT)/Sur/MatchingSimulations/PaperFigures/code/blockhmm/opto_analysis/optodata', expfitdate, 'opto_hmm_info.mat'));
 
 animalID = 2; 
-% outcome inactivation
-sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'Fullfield0OF');
-% sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield15OF');
-sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF');
-sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'Fullfield60OF');
-sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'Fullfield120O');
-sessid_lst6 = strcmpi(animalinfo(animalID).areas, 'Fullfield230OF') | strcmpi(animalinfo(animalID).areas, 'Fullfield240OF');
+epoch = 'outcome';
 
+if strcmp(epoch, 'outcome')
+    % outcome inactivation
+    sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'Fullfield0OF');
+    % sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'Fullfield15OF');
+    sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'Fullfield30OF');
+    sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'Fullfield60OF');
+    sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'Fullfield120O');
+    sessid_lst6 = strcmpi(animalinfo(animalID).areas, 'Fullfield230OF') | strcmpi(animalinfo(animalID).areas, 'Fullfield240OF');
+    sesslst_all = {sessid_lst1, sessid_lst3, sessid_lst4, sessid_lst5, sessid_lst6};
+    powers = [5 30 60 120 240];
+elseif strcmp(epoch, 'choice')
+    % choice inactivation
+    sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'FullfieldC15');
+    sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'FullfieldC30');
+    sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'FullfieldC60');
+    sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'FullfieldC120');
+    sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'FullfieldC240');
 
-% choice inactivation
-% sessid_lst1 = strcmpi(animalinfo(animalID).areas, 'FullfieldC15');
-% sessid_lst2 = strcmpi(animalinfo(animalID).areas, 'FullfieldC30');
-% sessid_lst3 = strcmpi(animalinfo(animalID).areas, 'FullfieldC60');
-% sessid_lst4 = strcmpi(animalinfo(animalID).areas, 'FullfieldC120');
-% sessid_lst5 = strcmpi(animalinfo(animalID).areas, 'FullfieldC240');
-
-sesslst_all = {sessid_lst1, sessid_lst3, sessid_lst4, sessid_lst5, sessid_lst6};
-powers = [0 30 60 120 240];
-
+    sesslst_all = {sessid_lst1, sessid_lst2, sessid_lst3, sessid_lst4, sessid_lst5};
+    powers = [15 30 60 120 240];
+end
 % Load the data
 animal = animalinfo(animalID).animal;
 
@@ -89,6 +93,8 @@ ylim([0, 0.4])
 
 mymakeaxis('x_label', 'Power (mW)', 'xytitle', 'Lapse', 'xticks', 0:100:200)
 
+%% stats
+mdl = fitlm(log(powers), parr_means(:, 3))
 
 
 function [perf_opto, perf_noopto] = get_perfs(animalinfo, animalID, sessid_lst)
